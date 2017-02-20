@@ -4,3 +4,4 @@ firmware/harmony_badge_2017.X/dist/pic32mx_usb_badge_int_dyn/
 firmware/harmony_badge_2017.X/nbproject/private/
 firmware/harmony_badge_2017.X/nbproject/Makefile-*
 firmware/src/system_config/pic32mx_usb_badge_int_dyn/configuration.xml
+/firmware/harmony_badge_2017.X/build/pic32mx_usb_badge_int_dyn/
