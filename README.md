@@ -16,7 +16,7 @@ This repository is for the elctronic badges of the RVASec 2017 cyber security co
 The steps described below, except for the clean & build at the end, should only have to be done once for a fresh copy of the project. *MHC will generate files and alter the projects configuration specifically for your system, don't commit these changes!* Once the project is building - develop your application/changes and request a merge of only these changes. We're still considering the best path forward for the maintenance of some of these configuration files.
 
 ### Start the MPLAB IDE and Open the Project
-* Open the _project_ located at **Harmony-Badge-2017/firmware/harmony_badge_2017.X**
+* Open the _project_ located at **Harmony-Badge-2017/firmware/harmony\_badge\_2017.X**
 
 ### Set the main Project
 * If you forget to do this, Harmony will yell at you until you do. Right-click the project in the projects panel and select **set as main project*
