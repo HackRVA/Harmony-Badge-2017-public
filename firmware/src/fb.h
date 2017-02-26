@@ -52,4 +52,14 @@ void FbLine(unsigned char x0, unsigned char y0, unsigned char x1, unsigned char 
 void FbWriteLine(unsigned char *string);
 void FbRectangle(unsigned char width, unsigned char height);
 
+void FbImage1bit(unsigned char assetId, unsigned char seqNum);
+void FbImage2bit(unsigned char assetId, unsigned char seqNum);
+void FbImage4bit(unsigned char assetId, unsigned char seqNum);
+void FbImage8bit(unsigned char assetId, unsigned char seqNum);
+void FbSwapBuffers();
+void LCDInitPins();
+void LCDReset();
+void LCDBars();
+void FbTransparentIndex(unsigned short color);
+
 #endif

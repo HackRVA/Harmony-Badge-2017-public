@@ -1,5 +1,6 @@
-//#include <stdlib.h>
-//#include "badge16.h"
+#include <stdlib.h>  //abs())
+
+#include "S6B33.h"
 #include "fb.h"
 #include "assetList.h"
 #include "colors.h"
@@ -325,8 +326,7 @@ void FbImage2bit(unsigned char assetId, unsigned char seqNum)
 void FbImage1bit(unsigned char assetId, unsigned char seqNum)
 {
     unsigned char y, yEnd, x;
-    unsigned char *pixdata, pixbyte, ci, *cmap, r, g, b;
-    unsigned short pixel;
+    unsigned char *pixdata, pixbyte, ci;
 
     yEnd = G_Fb.pos.y + assetList[assetId].y;
     /* clip to end of LCD buffer */
