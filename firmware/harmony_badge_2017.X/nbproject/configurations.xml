@@ -22,12 +22,12 @@
           </logicalFolder>
         </logicalFolder>
         <itemPath>../src/app.h</itemPath>
-        <itemPath>../src/LCDcolor.h</itemPath>
-        <itemPath>../src/assetList.h</itemPath>
-        <itemPath>../src/assets.h</itemPath>
-        <itemPath>../src/colors.h</itemPath>
-        <itemPath>../src/fb.h</itemPath>
-        <itemPath>../src/S6B33.h</itemPath>
+        <itemPath>../src/include/LCDcolor.h</itemPath>
+        <itemPath>../src/include/assetList.h</itemPath>
+        <itemPath>../src/include/assets.h</itemPath>
+        <itemPath>../src/include/colors.h</itemPath>
+        <itemPath>../src/include/fb.h</itemPath>
+        <itemPath>../src/include/S6B33.h</itemPath>
       </logicalFolder>
       <logicalFolder name="bsp" displayName="bsp" projectFiles="true">
       </logicalFolder>
@@ -671,7 +671,7 @@
         <property key="use-indirect-calls" value="false"/>
       </C32CPP>
       <C32Global>
-        <property key="common-include-directories" value=""/>
+          <property key="common-include-directories" value="../src/include;../src/assets"/>
         <property key="gp-relative-option" value=""/>
         <property key="legacy-libc" value="false"/>
         <property key="relaxed-math" value="false"/>
