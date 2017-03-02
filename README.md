@@ -66,4 +66,11 @@ The steps described below, except for the clean & build at the end, should only 
 ![Build](http://i.imgur.com/XPyTwEs.png)
 
 
+If all has gone well, you'll see a message like the following in the Output/harmony\_badge\_2017 tab in the bottom part of the IDE:
+
+```
+BUILD SUCCESSFUL (total time: 3s)
+Loading code from […]Harmony-Badge-2017/firmware/harmony_badge_2017.X/dist/pic32mx_usb_badge_int_dyn/production/harmony_badge_2017.X.production.hex...
+Loading completed
+```
 
