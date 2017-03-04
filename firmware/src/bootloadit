@@ -1,5 +1,0 @@
-#!/bin/tcsh -f
-
-ls -lt ../freertosBadge.X/dist/pic32mx_usb_badge_int_dyn/production/freertosBadge.X.production.hex
-
-./pic32usb ../freertosBadge.X/dist/pic32mx_usb_badge_int_dyn/production/freertosBadge.X.production.hex
