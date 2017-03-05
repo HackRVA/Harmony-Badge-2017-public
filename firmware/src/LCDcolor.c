@@ -2,8 +2,9 @@
 #include "plib.h"
 #include "S6B33.h"
 #include "LCDcolor.h"
-//#include "assets.h"
-//#include "assetList.h"
+
+#include "system/ports/sys_ports.h"
+
 
 /*
     LCD  serial (S6Bxx) interface driver
@@ -11,6 +12,13 @@
     paul@killercats.com
     4/2015
 */
+
+
+void LCDBacklight(int val)
+{
+        SYS_PORTS_PinWrite( PORTS_ID_0, PORT_CHANNEL_C, PORTS_BIT_POS_9, val ); 
+}
+
 
 /* CS_ and _RESET are held low */
 /* so the LCD is doing nothing  until lcd_init_device happens */
