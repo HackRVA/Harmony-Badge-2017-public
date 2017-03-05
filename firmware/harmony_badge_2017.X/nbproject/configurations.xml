@@ -28,6 +28,8 @@
         <itemPath>../src/include/colors.h</itemPath>
         <itemPath>../src/include/fb.h</itemPath>
         <itemPath>../src/include/S6B33.h</itemPath>
+        <itemPath>../src/include/rgb_led.h</itemPath>
+        <itemPath>../src/include/badge_apps.h</itemPath>
       </logicalFolder>
       <logicalFolder name="bsp" displayName="bsp" projectFiles="true">
       </logicalFolder>
@@ -158,6 +160,9 @@
                    displayName="Source Files"
                    projectFiles="true">
       <logicalFolder name="app" displayName="app" projectFiles="true">
+        <logicalFolder name="f2" displayName="badge_apps" projectFiles="true">
+          <itemPath>../src/badge_apps/hello_world_app.c</itemPath>
+        </logicalFolder>
         <logicalFolder name="f1" displayName="system_config" projectFiles="true">
           <logicalFolder name="f1"
                          displayName="pic32mx_usb_badge_int_dyn"
@@ -191,6 +196,7 @@
         <itemPath>../src/assets.c</itemPath>
         <itemPath>../src/fb.c</itemPath>
         <itemPath>../src/S6B33.c</itemPath>
+        <itemPath>../src/rgb_led.c</itemPath>
       </logicalFolder>
       <logicalFolder name="bsp" displayName="bsp" projectFiles="true">
       </logicalFolder>
