@@ -4,6 +4,9 @@
 #ifndef LCDcolor_h
 #define LCDcolor_h
 
+
+/** Set the backlight level */
+void LCDBacklight(int val);
 /** Resets LCD to initial state */
 void LCDReset(void);
 /** Sets LCD display pins -- LCD will do nothing until LCDReset()  (??) */

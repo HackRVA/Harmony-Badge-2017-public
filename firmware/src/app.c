@@ -59,6 +59,9 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // badge
 #include "colors.h"
 #include "fb.h"
+#include "rgb_led.h"
+#include "LCDcolor.h"
+#include "badge_apps.h"
 
 // *****************************************************************************
 // *****************************************************************************
@@ -457,11 +460,11 @@ void USBDevice_Task(void* p_arg)
 
 void APP_Initialize ( void )
 {
-     void red(int val);
-     void green(int val);
-     void blue(int val);
-     void doText();
-     void backlight(int val);
+     //void red(int val);
+     //void green(int val);
+     //void blue(int val);
+     //void doText();
+     //void backlight(int val);
 
 
     USBDeviceTask_EventQueue_Handle = xQueueCreate(15, sizeof(uint32_t));
@@ -469,6 +472,7 @@ void APP_Initialize ( void )
     /*dont proceed if queue was not created...*/
     if(USBDeviceTask_EventQueue_Handle == NULL)
     {
+        red(1);
 //        BSP_LEDOn ( APP_USB_LED_1 );
 //        BSP_LEDOn ( APP_USB_LED_2 );
 //        BSP_LEDOn ( APP_USB_LED_3 );
@@ -518,49 +522,16 @@ void APP_Initialize ( void )
     green(1);
 
     LCDBars();
-    backlight(1);
+    LCDBacklight(1);
 
     FbInit();
 
-    doText();
+    //doText();
 
-    red(0);
-    green(0);
+    red(1);
+    green(1);
     blue(1);
 }
-
-void doText()
-{
-    FbTransparentIndex(0);
-    //FbBackgroundColor(WHITE);
-    //FbClear();
-
-    FbMove(16, 16);
-    FbColor(GREEN);
-    FbWriteLine("hello world");
-    FbSwapBuffers();
-}
-
-void red(int val)
-{
-        SYS_PORTS_PinWrite( PORTS_ID_0, PORT_CHANNEL_C, PORTS_BIT_POS_0, val );
-}
-
-void green(int val)
-{
-        SYS_PORTS_PinWrite( PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_3, val );
-}
-
-void blue(int val)
-{
-        SYS_PORTS_PinWrite( PORTS_ID_0, PORT_CHANNEL_C, PORTS_BIT_POS_1, val ); 
-}
-
-void backlight(int val)
-{
-        SYS_PORTS_PinWrite( PORTS_ID_0, PORT_CHANNEL_C, PORTS_BIT_POS_9, val ); 
-}
-
 
 /******************************************************************************
   Function:
@@ -584,15 +555,25 @@ void APP_Tasks ( void )
         /*Don't proceed if Task was not created...*/
         if(errStatus != pdTRUE)
         {
-//            BSP_LEDOn ( APP_USB_LED_1 );
-//            BSP_LEDOn ( APP_USB_LED_2 );
-//            BSP_LEDOn ( APP_USB_LED_3 );
+            red(1);
             while(1);
         }
+        
+        errStatus = xTaskCreate((TaskFunction_t) hello_world_task,
+                "hello_world_task",
+                128u,
+                NULL,
+                1,
+                NULL);
+        if(errStatus != pdTRUE)
+        {
+            red(1);
+            while(1);
+        }        
 
         /* The APP_Tasks() function need to exceute only once. Block it now */
         blockAppTask = true;
-    }  
+    }
 }
  
 
