@@ -62,6 +62,8 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "rgb_led.h"
 #include "LCDcolor.h"
 #include "badge_apps.h"
+#include "badge_menu.h"
+#include "touch_ctmu.h"
 
 // *****************************************************************************
 // *****************************************************************************
@@ -90,12 +92,15 @@ APP_DATA appData;
 /* Read Data Buffer */
 uint8_t APP_MAKE_BUFFER_DMA_READY com1ReadBuffer[APP_READ_BUFFER_SIZE] ;
 
+
 /* Write Data Buffer. Size is same as read buffer size */
-uint8_t APP_MAKE_BUFFER_DMA_READY WriteBuffer[1] ;
+uint8_t APP_MAKE_BUFFER_DMA_READY WriteBuffer[APP_WRITE_BUFFER_SIZE] ;
 
 /* Read Data Buffer */
 uint8_t APP_MAKE_BUFFER_DMA_READY com2ReadBuffer[APP_READ_BUFFER_SIZE];
 
+SemaphoreHandle_t cdc_write_buffer_lock;
+static TaskHandle_t cdc_write_requester = NULL;
 
 void USBDevice_Task(void* p_arg);
 // *****************************************************************************
@@ -127,6 +132,7 @@ void APP_USBDeviceEventHandler(USB_DEVICE_EVENT event, void * pData,
             /* Device was either de-configured or reset */
 
             /* Update LED indication */
+            led(0, 0, 1);
 //            BSP_LEDOn ( APP_USB_LED_1);
 //            BSP_LEDOn ( APP_USB_LED_2);
 //            BSP_LEDOff ( APP_USB_LED_3);
@@ -148,6 +154,7 @@ void APP_USBDeviceEventHandler(USB_DEVICE_EVENT event, void * pData,
                         APP_USBDeviceCDCEventHandler, (uintptr_t)&appData);
 
                 /* Update LED indication */
+                led(0, 1, 0);
 //                BSP_LEDOff ( APP_USB_LED_1 );
 //                BSP_LEDOff ( APP_USB_LED_2 );
 //                BSP_LEDOn ( APP_USB_LED_3 );
@@ -164,6 +171,7 @@ void APP_USBDeviceEventHandler(USB_DEVICE_EVENT event, void * pData,
 
         case USB_DEVICE_EVENT_SUSPENDED:
             /* Update LED indication */
+            led(1, 0, 0);
 //            BSP_LEDOff ( APP_USB_LED_1 );
 //            BSP_LEDOn ( APP_USB_LED_2 );
 //            BSP_LEDOn ( APP_USB_LED_3 );
@@ -306,7 +314,7 @@ USB_DEVICE_CDC_EVENT_RESPONSE APP_USBDeviceCDCEventHandler
     return USB_DEVICE_CDC_EVENT_RESPONSE_NONE;
 }
 
-
+#define USBDEVICETASK_WRITE_BUFFER_TO_COM1 7
 // *****************************************************************************
 /* Function:
     void APP_USB_DEVICE_AttachTask(void)
@@ -356,7 +364,8 @@ void USBDevice_Task(void* p_arg)
                 if(appData.deviceHandle != USB_DEVICE_HANDLE_INVALID)
                 {
                     //USBDeviceTask_State = USBDEVICETASK_PROCESSUSBEVENTS_STATE;
-                    USB_DEVICE_EventHandlerSet(appData.deviceHandle, APP_USBDeviceEventHandler, 0);
+                    USB_DEVICE_EventHandlerSet(appData.deviceHandle, 
+                            APP_USBDeviceEventHandler, 0);
                     USBDeviceTask_State = USBDEVICETASK_ATTACHUSB_STATE;
                     break;
                 }
@@ -398,41 +407,57 @@ void USBDevice_Task(void* p_arg)
                         break;                    
                     case USBDEVICETASK_READDONECOM1_EVENT:
                         /* Send the received data to COM2 */
-                        USB_DEVICE_CDC_Write(1, &COM2Write_Handle,
-                            &com1ReadBuffer, 1,
-                            USB_DEVICE_CDC_TRANSFER_FLAGS_DATA_COMPLETE);
+//                        USB_DEVICE_CDC_Write(1, &COM2Write_Handle,
+//                            &com1ReadBuffer, 1,
+//                            USB_DEVICE_CDC_TRANSFER_FLAGS_DATA_COMPLETE);
 
-			FbClear();
-			FbMove(16, 32);
-			FbColor(GREEN);
-			FbWriteLine("com2: ");
-       			FbWriteLine(com1ReadBuffer);
-    			FbSwapBuffers();
+//                        FbClear();
+//                        FbMove(16, 32);
+//                        FbColor(GREEN);
+//                        FbWriteLine("com2: ");
+//                        FbWriteLine(com1ReadBuffer);
+//                        FbSwapBuffers();
+                      
 
                         break;
                     case USBDEVICETASK_READDONECOM2_EVENT:
                         /* Send the received data to COM1 */
-                        USB_DEVICE_CDC_Write(0, &COM1Write_Handle,
-                            &com2ReadBuffer, 1,
-                            USB_DEVICE_CDC_TRANSFER_FLAGS_DATA_COMPLETE);
+//                        USB_DEVICE_CDC_Write(0, &COM1Write_Handle,
+//                            &com2ReadBuffer, 1,
+//                            USB_DEVICE_CDC_TRANSFER_FLAGS_DATA_COMPLETE);
 
-			FbClear();
-			FbMove(16, 48);
-			FbColor(RED);
-       			FbWriteLine("com1: ");
-       			FbWriteLine(com2ReadBuffer);
-    			FbSwapBuffers();
+//                        FbClear();
+//                        FbMove(16, 48);
+//                        FbColor(RED);
+//                        FbWriteLine("com1: ");
+//                        FbWriteLine(com2ReadBuffer);
+//                        FbSwapBuffers();
+                      
 
-                 break;
+                         break;
                     case USBDEVICETASK_WRITEDONECOM1_EVENT:
                         /* Schedule a CDC read on COM2 */
-                        USB_DEVICE_CDC_Read(1,&COM2Read_Handle,
-                            com2ReadBuffer,APP_READ_BUFFER_SIZE);
+//                        USB_DEVICE_CDC_Read(1,&COM2Read_Handle,
+//                            com2ReadBuffer,APP_READ_BUFFER_SIZE);
+                        
+                        // Not sure if things other than badge code
+                        // will set off this write event, so double check
+                        // that the write requester is set
+                        if(cdc_write_requester != NULL)
+                            // Let the write requester know that the write is complete
+                            xTaskNotify(cdc_write_requester, 2u, eSetValueWithoutOverwrite);
                         break;
                     case USBDEVICETASK_WRITEDONECOM2_EVENT:
                         /* Schedule a CDC read on COM1 */
-                        USB_DEVICE_CDC_Read(0, &COM1Read_Handle,
-                            com1ReadBuffer,APP_READ_BUFFER_SIZE);
+//                        USB_DEVICE_CDC_Read(0, &COM1Read_Handle,
+//                            com1ReadBuffer,APP_READ_BUFFER_SIZE);
+                        break;
+                    case USBDEVICETASK_WRITE_BUFFER_TO_COM1:                    
+                        USB_DEVICE_CDC_Write(0, &COM1Write_Handle, WriteBuffer,
+                                            APP_WRITE_BUFFER_SIZE, 
+                                            USB_DEVICE_CDC_TRANSFER_FLAGS_DATA_COMPLETE);  
+                        
+                    
                         break;
                     default:
                         break;
@@ -460,22 +485,17 @@ void USBDevice_Task(void* p_arg)
 
 void APP_Initialize ( void )
 {
-     //void red(int val);
-     //void green(int val);
-     //void blue(int val);
-     //void doText();
-     //void backlight(int val);
-
-
+    cdc_write_buffer_lock = xSemaphoreCreateMutex();
+    if(cdc_write_buffer_lock == NULL)
+    {
+        led(1, 0, 0);
+        while(1);
+    }    
+    
     USBDeviceTask_EventQueue_Handle = xQueueCreate(15, sizeof(uint32_t));
-
-    /*dont proceed if queue was not created...*/
     if(USBDeviceTask_EventQueue_Handle == NULL)
     {
-        red(1);
-//        BSP_LEDOn ( APP_USB_LED_1 );
-//        BSP_LEDOn ( APP_USB_LED_2 );
-//        BSP_LEDOn ( APP_USB_LED_3 );
+        led(1, 0, 0);
         while(1);
     }
 	/* Initialize the application object */
@@ -511,27 +531,180 @@ void APP_Initialize ( void )
 
     //PLIB_PORTS_ChangeNoticePullUpPerPortEnable(PORTS_ID_0, PORT_CHANNEL_C, PORTS_BIT_POS_3);
             
-    red(0);
-    green(0);
-    blue(1);
-
+    led(0, 0, 1);
     LCDInitPins();
-    red(1);
-
+    led(1, 0, 0);
     LCDReset();
-    green(1);
-
+    led(0, 1, 0);
     LCDBars();
     LCDBacklight(1);
 
     FbInit();
-
-    //doText();
-
-    red(1);
-    green(1);
-    blue(1);
 }
+
+void button_task(void* p_arg)
+{
+    const TickType_t xDelay = 20 / portTICK_PERIOD_MS;
+    //TickType_t xLastWakeTime;
+    //const TickType_t xFrequency = 30 / portTICK_PERIOD_MS;
+    // reset globals
+    G_button = 0;
+    G_buttonCnt = 0;
+    G_buttonDebounce = 0;
+   
+    for(;;){
+        //xLastWakeTime = xTaskGetTickCount();
+        if (!PORTCbits.RC3) {
+            if (G_buttonCnt > 3)
+            {
+                G_button = 1;
+            }
+
+            if (G_buttonCnt == 255) {
+               //if (menu_escape_cb != NULL) menu_escape_cb();
+               G_buttonCnt=0;
+            }
+            else
+               G_buttonCnt++;
+        }
+        else {
+            G_buttonCnt = 0;
+            G_button = 0;
+        }
+        vTaskDelay(xDelay);
+        //vTaskDelayUntil(&xLastWakeTime, xDelay);
+    }
+}
+
+
+void print_to_com1(unsigned char buffer[APP_WRITE_BUFFER_SIZE]){
+    portBASE_TYPE xHigherPriorityTaskWoken1 = pdFALSE;
+    uint32_t ulNotifiedValue = 0;
+    uint32_t USB_Event = USBDEVICETASK_WRITE_BUFFER_TO_COM1;
+    unsigned char i=0;
+    
+
+    //----------
+    // Write Buffer LOCKED
+    xSemaphoreTake(cdc_write_buffer_lock, portMAX_DELAY); // MaxDelay to block indefinitely
+    
+    // Track this task requesting the write so the USB task
+    // can notify it when done
+    cdc_write_requester = xTaskGetCurrentTaskHandle();
+    
+    // copy the data to the Write Buffer
+    for(i=0; i < APP_WRITE_BUFFER_SIZE & buffer[i] != 0; i++){
+        WriteBuffer[i] = buffer[i];
+    }
+    
+    // Tell the USB task that we want the write buffer printed
+    // 'FromISR' should make this ISR-safe
+    xQueueSendToBackFromISR(USBDeviceTask_EventQueue_Handle, &USB_Event, 
+                            &xHigherPriorityTaskWoken1);
+    // posting to the queue may have unblocked a high priority task (USB)
+    // so yield some time to that task (only matters if in interrupt...?)
+    portEND_SWITCHING_ISR( xHigherPriorityTaskWoken1 );
+    
+    // The USB task will send a notification to this task once the write
+    // buffer has been written (sets the 2nd bit in the 'mailbox')
+    while (xTaskNotifyWait(0, // Don't clear anything on entry
+                          2u, // clear bit 2 in the mailbox when done
+                          &ulNotifiedValue, // Mailbox value copied here before clearing
+                          50 / portTICK_PERIOD_MS) // Timeout for block is 50ms
+                          == pdFALSE);
+    // If bit 2 wasn't set for some reason....
+    if(ulNotifiedValue != 2)
+        led(1, 0, 0);
+    
+    // Zero out the buffer
+    for(i = 0; i < APP_WRITE_BUFFER_SIZE; i++)
+        WriteBuffer[i] = 0;
+    
+    // Reset the requester
+    cdc_write_requester = NULL;
+    
+    xSemaphoreGive(cdc_write_buffer_lock);
+    // Write Buffer UNLOCKED
+    //---------------
+}
+
+void print_task_high_water_mark_to_CDC(TaskHandle_t xHandle)
+{
+    int8_t to_print[8] = {0};
+    UBaseType_t uxHighWaterMark;
+
+    uxHighWaterMark = uxTaskGetStackHighWaterMark( xHandle );
+    
+    to_print[0] = '0' + (unsigned char)((uxHighWaterMark/1000) % 10);
+    to_print[1] = '0' + (unsigned char)((uxHighWaterMark/100) % 10);
+    to_print[2] = '0' + (unsigned char)((uxHighWaterMark/10)  % 10);
+    to_print[3] = '0' + (unsigned char)((uxHighWaterMark)     % 10);    
+    
+    to_print[4] = '.';
+    to_print[5] = '\n';
+    to_print[6] = '\r';
+    to_print[7] = 0;    
+    print_to_com1(to_print);
+
+    // Red LEDs everywhere
+    if(uxHighWaterMark == 0)
+        led(1, 0, 0);
+}
+
+void print_high_water_marks(){
+    TaskHandle_t xHandle = NULL;
+    
+    // The 'main' MHC provided task, stack size configured in MHC
+    xHandle = xTaskGetHandle("APP Tasks");
+    print_to_com1("main:\0");
+    print_task_high_water_mark_to_CDC(xHandle);
+    
+    // The running app, started from app tasks
+    xHandle = xTaskGetHandle("exec_app");
+    print_to_com1("app:\0");
+    print_task_high_water_mark_to_CDC(xHandle);
+    
+    // Button polling task
+    xHandle = xTaskGetHandle("button_task");
+    print_to_com1("btn:\0");
+    print_task_high_water_mark_to_CDC(xHandle);            
+
+    // USB task
+    xHandle = xTaskGetHandle("USB_AttachTask");
+    print_to_com1("usb:\0");
+    print_task_high_water_mark_to_CDC(xHandle);              
+
+    print_to_com1("----\n\r\0");
+}
+
+
+void test_task(void* p_arg)
+{
+    TaskHandle_t xHandle = NULL;
+    BaseType_t xReturned;
+    
+    // Swap out 'hello_world_task' for task function needing testing
+    xReturned = xTaskCreate((TaskFunction_t) hello_world_task,
+            "exec_app",
+            256u,
+            NULL,
+            1u,
+            &xHandle);
+    
+    for(;;)
+    {
+        // show high water marks on CDC com1
+        if(G_button){
+            print_high_water_marks();
+            vTaskDelay(100 / portTICK_PERIOD_MS);
+        }
+
+        vTaskDelay(50 / portTICK_PERIOD_MS);
+    }
+    
+    vTaskDelete( NULL );
+}
+
 
 /******************************************************************************
   Function:
@@ -542,43 +715,36 @@ void APP_Initialize ( void )
  */
 void APP_Tasks ( void )
 {
-    static bool blockAppTask = false;
     BaseType_t errStatus;
-    if (blockAppTask == false)
-    {
-        errStatus = xTaskCreate((TaskFunction_t) USBDevice_Task,
-                "USB_AttachTask",
-                USBDEVICETASK_SIZE,
-                NULL,
-                USBDEVICETASK_PRIO,
-                NULL);
-        /*Don't proceed if Task was not created...*/
-        if(errStatus != pdTRUE)
-        {
-            red(1);
-            while(1);
-        }
-        
-        errStatus = xTaskCreate((TaskFunction_t) hello_world_task,
-                "hello_world_task",
-                128u,
-                NULL,
-                1,
-                NULL);
-        if(errStatus != pdTRUE)
-        {
-            red(1);
-            while(1);
-        }        
 
-        /* The APP_Tasks() function need to exceute only once. Block it now */
-        blockAppTask = true;
+    errStatus = xTaskCreate((TaskFunction_t) USBDevice_Task,
+            "USB_AttachTask",
+            USBDEVICETASK_SIZE,
+            NULL,
+            USBDEVICETASK_PRIO,
+            NULL);
+
+    if(errStatus != pdTRUE){
+        red(1);
+        while(1);
     }
+
+    errStatus = xTaskCreate((TaskFunction_t) button_task, 
+            "button_task",
+            128u,
+            NULL,
+            1u,
+            NULL);
+    
+    if(errStatus != pdTRUE){
+        red(1);
+        while(1);
+    }
+    
+    test_task(NULL);
 }
  
 
 /*******************************************************************************
  End of File
  */
-
-

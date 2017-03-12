@@ -88,6 +88,8 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 
 #define APP_READ_BUFFER_SIZE 512
 
+#define APP_WRITE_BUFFER_SIZE 8
+
 #ifdef __PIC32MZ__
     #define APP_MAKE_BUFFER_DMA_READY  __attribute__((coherent)) __attribute__((aligned(4)))
 #else
