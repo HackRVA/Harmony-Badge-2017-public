@@ -1,4 +1,5 @@
-#include <plib.h>
+//#include <plib.h>
+#include "app.h"
 #include "assets.h"
 #include "S6B33.h"
 #include "assetList.h"
@@ -224,15 +225,18 @@ void doAudio()
    if (G_duration_cnt != G_duration) {
        if (G_freq_cnt == G_freq)  {
           G_freq_cnt = 0;
-          LATAbits.LATA9 = 1; // on
+          SYS_PORTS_PinWrite (PORTS_ID_0, PORT_CHANNEL_A, PORTS_BIT_POS_9, 1);
+          //LATAbits.LATA9 = 1; // on
        }
        else 
-          LATAbits.LATA9 = 0; // off
+          SYS_PORTS_PinWrite (PORTS_ID_0, PORT_CHANNEL_A, PORTS_BIT_POS_9, 0); 
+          //LATAbits.LATA9 = 0; // off
    }
    else {
        G_duration = 0;
 
-       LATAbits.LATA9 = 0; // off
+       SYS_PORTS_PinWrite (PORTS_ID_0, PORT_CHANNEL_A, PORTS_BIT_POS_9, 0);
+       //LATAbits.LATA9 = 0; // off
        if (G_audioAssetId != 255) assetList[G_audioAssetId].datacb(G_audioAssetId, G_audioFrame) ; /* callback routine */
    }
    G_audioFrame++;

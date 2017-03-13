@@ -1,6 +1,6 @@
-#include "plib.h"
 #include "S6B33.h"
 #include "LCDcolor.h"
+#include "app.h"
 
 /*
     Samsung S6Bxx driver
@@ -9,22 +9,22 @@
     4/2015
 */
 
+//
+#define PIN_BACKLIGHT(X) SYS_PORTS_PinWrite (PORTS_ID_0, PORT_CHANNEL_C, PORTS_BIT_POS_9, X)//LATCbits.LATC9
+#define PIN__RESET(X) SYS_PORTS_PinWrite (PORTS_ID_0, PORT_CHANNEL_C, PORTS_BIT_POS_8, X)//LATCbits.LATC8
+#define PIN_A0(X) SYS_PORTS_PinWrite (PORTS_ID_0, PORT_CHANNEL_C, PORTS_BIT_POS_7, X)//LATCbits.LATC7
+#define PIN_SDA(X) SYS_PORTS_PinWrite (PORTS_ID_0, PORT_CHANNEL_C, PORTS_BIT_POS_6, X)//LATCbits.LATC6
+#define PIN_SCLK(X) SYS_PORTS_PinWrite (PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_9, X)//LATBbits.LATB9
+#define PIN__CS(X) SYS_PORTS_PinWrite (PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_8, X)//LATBbits.LATB8
 
-#define PIN_BACKLIGHT LATCbits.LATC9
-#define PIN__RESET LATCbits.LATC8
-#define PIN_A0 LATCbits.LATC7
-#define PIN_SDA LATCbits.LATC6
-#define PIN_SCLK LATBbits.LATB9
-#define PIN__CS LATBbits.LATB8
-
-#define PIN_DC PIN_A0
+#define PIN_DC(X) SYS_PORTS_PinWrite (PORTS_ID_0, PORT_CHANNEL_C, PORTS_BIT_POS_7, X)
 
 // The high/low on the A0 pin tells the LCD if we are sending a data or command
 #define LCD_COMMAND 0
 #define LCD_DATA    1
 
-#define PIN_SDIN PIN_SDA
-#define PIN_SCE PIN__CS
+#define PIN_SDIN(X) SYS_PORTS_PinWrite (PORTS_ID_0, PORT_CHANNEL_C, PORTS_BIT_POS_6, X)
+#define PIN_SCE(X) SYS_PORTS_PinWrite (PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_8, X)
 
 
 /* controller commands- S6B33B2 */
@@ -67,139 +67,139 @@
 
 
 void S6B33_send_command(unsigned char data) {
-  PIN_SCE = 0; /* chip enable active low */
-  PIN_DC = LCD_COMMAND; /* COMMAND = 8 bit */
+  PIN_SCE(0); /* chip enable active low */
+  PIN_DC(LCD_COMMAND); /* COMMAND = 8 bit */
 
-  PIN_SDIN = (data & 0b10000000) ? 1 : 0;
-  PIN_SCLK = 1;
-  PIN_SCLK = 0;
+  PIN_SDIN((data & 0b10000000) ? 1 : 0);
+  PIN_SCLK(1);
+  PIN_SCLK(0);
 //  PIN_SDIN = 0;
 
-  PIN_SDIN = (data & 0b01000000) ? 1 : 0;
-  PIN_SCLK = 1;
-  PIN_SCLK = 0;
+  PIN_SDIN((data & 0b01000000) ? 1 : 0);
+  PIN_SCLK(1);
+  PIN_SCLK(0);
 //  PIN_SDIN = 0;
 
-  PIN_SDIN = (data & 0b00100000) ? 1 : 0;
-  PIN_SCLK = 1;
-  PIN_SCLK = 0;
+  PIN_SDIN((data & 0b00100000) ? 1 : 0);
+  PIN_SCLK(1);
+  PIN_SCLK(0);
 //  PIN_SDIN = 0;
 
-  PIN_SDIN = (data & 0b00010000) ? 1 : 0;
-  PIN_SCLK = 1;
-  PIN_SCLK = 0;
+  PIN_SDIN((data & 0b00010000) ? 1 : 0);
+  PIN_SCLK(1);
+  PIN_SCLK(0);
 //  PIN_SDIN = 0;
 
-  PIN_SDIN = (data & 0b00001000) ? 1 : 0;
-  PIN_SCLK = 1;
-  PIN_SCLK = 0;
+  PIN_SDIN((data & 0b00001000) ? 1 : 0);
+  PIN_SCLK(1);
+  PIN_SCLK(0);
 //  PIN_SDIN = 0;
 
-  PIN_SDIN = (data & 0b00000100) ? 1 : 0;
-  PIN_SCLK = 1;
-  PIN_SCLK = 0;
+  PIN_SDIN((data & 0b00000100) ? 1 : 0);
+  PIN_SCLK(1);
+  PIN_SCLK(0);
 //  PIN_SDIN = 0;
 
-  PIN_SDIN = (data & 0b00000010) ? 1 : 0;
-  PIN_SCLK = 1;
-  PIN_SCLK = 0;
+  PIN_SDIN((data & 0b00000010) ? 1 : 0);
+  PIN_SCLK(1);
+  PIN_SCLK(0);
 //  PIN_SDIN = 0;
 
-  PIN_SDIN = (data & 0b00000001) ? 1 : 0;
-  PIN_SCLK = 1;
-  PIN_SCLK = 0;
+  PIN_SDIN((data & 0b00000001) ? 1 : 0);
+  PIN_SCLK(1);
+  PIN_SCLK(0);
 //  PIN_SDIN = 0;
 
-  PIN_SCE = 1;
+  PIN_SCE(1);
 }
 
 void S6B33_send_data(unsigned short data) {
-  PIN_SCE = 0; /* chip enable active low */
+  PIN_SCE(0); /* chip enable active low */
 
-  PIN_DC = LCD_DATA; /* data = 16 bit */
+  PIN_DC(LCD_DATA); /* data = 16 bit */
 
-  PIN_SDIN = (data & 0b1000000000000000) ? 1 : 0;
-  PIN_SCLK = 1;
-  PIN_SCLK = 0;
+  PIN_SDIN((data & 0b1000000000000000) ? 1 : 0);
+  PIN_SCLK(1);
+  PIN_SCLK(0);
 //  PIN_SDIN = 0;
 
-  PIN_SDIN = (data & 0b0100000000000000) ? 1 : 0;
-  PIN_SCLK = 1;
-  PIN_SCLK = 0;
+  PIN_SDIN((data & 0b0100000000000000) ? 1 : 0);
+  PIN_SCLK(1);
+  PIN_SCLK(0);
 //  PIN_SDIN = 0;
 
-  PIN_SDIN = (data & 0b0010000000000000) ? 1 : 0;
-  PIN_SCLK = 1;
-  PIN_SCLK = 0;
+  PIN_SDIN((data & 0b0010000000000000) ? 1 : 0);
+  PIN_SCLK(1);
+  PIN_SCLK(0);
 //  PIN_SDIN = 0;
 
-  PIN_SDIN = (data & 0b0001000000000000) ? 1 : 0;
-  PIN_SCLK = 1;
-  PIN_SCLK = 0;
+  PIN_SDIN((data & 0b0001000000000000) ? 1 : 0);
+  PIN_SCLK(1);
+  PIN_SCLK(0);
 //  PIN_SDIN = 0;
 
-  PIN_SDIN = (data & 0b0000100000000000) ? 1 : 0;
-  PIN_SCLK = 1;
-  PIN_SCLK = 0;
+  PIN_SDIN((data & 0b0000100000000000) ? 1 : 0);
+  PIN_SCLK(1);
+  PIN_SCLK(0);
 //  PIN_SDIN = 0;
 
-  PIN_SDIN = (data & 0b0000010000000000) ? 1 : 0;
-  PIN_SCLK = 1;
-  PIN_SCLK = 0;
+  PIN_SDIN((data & 0b0000010000000000) ? 1 : 0);
+  PIN_SCLK(1);
+  PIN_SCLK(0);
 //  PIN_SDIN = 0;
 
-  PIN_SDIN = (data & 0b0000001000000000) ? 1 : 0;
-  PIN_SCLK = 1;
-  PIN_SCLK = 0;
+  PIN_SDIN((data & 0b0000001000000000) ? 1 : 0);
+  PIN_SCLK(1);
+  PIN_SCLK(0);
 //  PIN_SDIN = 0;
 
-  PIN_SDIN = (data & 0b0000000100000000) ? 1 : 0;
-  PIN_SCLK = 1;
-  PIN_SCLK = 0;
+  PIN_SDIN((data & 0b0000000100000000) ? 1 : 0);
+  PIN_SCLK(1);
+  PIN_SCLK(0);
 //  PIN_SDIN = 0;
 
-  PIN_SDIN = (data & 0b0000000010000000) ? 1 : 0;
-  PIN_SCLK = 1;
-  PIN_SCLK = 0;
+  PIN_SDIN((data & 0b0000000010000000) ? 1 : 0);
+  PIN_SCLK(1);
+  PIN_SCLK(0);
 //  PIN_SDIN = 0;
 
-  PIN_SDIN = (data & 0b0000000001000000) ? 1 : 0;
-  PIN_SCLK = 1;
-  PIN_SCLK = 0;
+  PIN_SDIN((data & 0b0000000001000000) ? 1 : 0);
+  PIN_SCLK(1);
+  PIN_SCLK(0);
 //  PIN_SDIN = 0;
 
-  PIN_SDIN = (data & 0b0000000000100000) ? 1 : 0;
-  PIN_SCLK = 1;
-  PIN_SCLK = 0;
+  PIN_SDIN((data & 0b0000000000100000) ? 1 : 0);
+  PIN_SCLK(1);
+  PIN_SCLK(0);
 //  PIN_SDIN = 0;
 
-  PIN_SDIN = (data & 0b0000000000010000) ? 1 : 0;
-  PIN_SCLK = 1;
-  PIN_SCLK = 0;
+  PIN_SDIN((data & 0b0000000000010000) ? 1 : 0);
+  PIN_SCLK(1);
+  PIN_SCLK(0);
 //  PIN_SDIN = 0;
 
-  PIN_SDIN = (data & 0b0000000000001000) ? 1 : 0;
-  PIN_SCLK = 1;
-  PIN_SCLK = 0;
+  PIN_SDIN((data & 0b0000000000001000) ? 1 : 0);
+  PIN_SCLK(1);
+  PIN_SCLK(0);
 //  PIN_SDIN = 0;
 
-  PIN_SDIN = (data & 0b0000000000000100) ? 1 : 0;
-  PIN_SCLK = 1;
-  PIN_SCLK = 0;
+  PIN_SDIN((data & 0b0000000000000100) ? 1 : 0);
+  PIN_SCLK(1);
+  PIN_SCLK(0);
 //  PIN_SDIN = 0;
 
-  PIN_SDIN = (data & 0b0000000000000010) ? 1 : 0;
-  PIN_SCLK = 1;
-  PIN_SCLK = 0;
+  PIN_SDIN((data & 0b0000000000000010) ? 1 : 0);
+  PIN_SCLK(1);
+  PIN_SCLK(0);
 //  PIN_SDIN = 0;
 
-  PIN_SDIN = (data & 0b0000000000000001) ? 1 : 0;
-  PIN_SCLK = 1;
-  PIN_SCLK = 0;
+  PIN_SDIN((data & 0b0000000000000001) ? 1 : 0);
+  PIN_SCLK(1);
+  PIN_SCLK(0);
 //  PIN_SDIN = 0;
 
 
-  PIN_SCE = 1;
+  PIN_SCE(1);
 }
 
 unsigned char G_bias  = 0b00000000; /* 0x00 = 1/4  0x11 = 1/5 0x22 = 1/6 0x33 = 1/7 */

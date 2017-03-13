@@ -1,5 +1,3 @@
-//#include <stdlib.h>
-#include "plib.h"
 #include "S6B33.h"
 #include "LCDcolor.h"
 
@@ -23,35 +21,48 @@ void LCDBacklight(int val)
 /* CS_ and _RESET are held low */
 /* so the LCD is doing nothing  until lcd_init_device happens */
 void LCDInitPins(void) {
-   /* RC9 == Backlight LED PIN active==high */
-   TRISCbits.TRISC9 = 0;    /* output */
-   LATCbits.LATC9 = 0;      /* init low */
+//   /* RC9 == Backlight LED PIN active==high */
+   SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_OUTPUT, PORT_CHANNEL_C, PORTS_BIT_POS_9);
+   //TRISCbits.TRISC9 = 0;    /* output */
+   SYS_PORTS_PinWrite( PORTS_ID_0, PORT_CHANNEL_C, PORTS_BIT_POS_9, 0 );
+   //LATCbits.LATC9 = 0;      /* init low */
    CNPDCbits.CNPDC9 = 1;    /* pulldown == on */
 
    /* RC8 == _RESET PIN active==low*/
-   TRISCbits.TRISC8 = 0;    /* output */
-   LATCbits.LATC8 = 0;      /* init low */
+   SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_OUTPUT, PORT_CHANNEL_C, PORTS_BIT_POS_8);
+   //TRISCbits.TRISC8 = 0;    /* output */
+   SYS_PORTS_PinWrite( PORTS_ID_0, PORT_CHANNEL_C, PORTS_BIT_POS_8, 0 );
+   //LATCbits.LATC8 = 0;      /* init low */
    CNPDCbits.CNPDC8 = 1;    /* pulldown == on */
 
    /* RC7 == A0 PIN */
-   TRISCbits.TRISC7 = 0;    /* output */
-   LATCbits.LATC7 = 0;      /* init low */
+   SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_OUTPUT, PORT_CHANNEL_C, PORTS_BIT_POS_7);
+   //TRISCbits.TRISC7 = 0;    /* output */
+   SYS_PORTS_PinWrite( PORTS_ID_0, PORT_CHANNEL_C, PORTS_BIT_POS_7, 0 );
+   //LATCbits.LATC7 = 0;      /* init low */
    CNPDCbits.CNPDC7 = 1;    /* pulldown == on */
 
    /* RC6 == SDA PIN */
-   TRISCbits.TRISC6 = 0;    /* output */
-   LATCbits.LATC6 = 0;      /* init low */
+   SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_OUTPUT, PORT_CHANNEL_C, PORTS_BIT_POS_6);
+   //TRISCbits.TRISC6 = 0;    /* output */
+   SYS_PORTS_PinWrite( PORTS_ID_0, PORT_CHANNEL_C, PORTS_BIT_POS_6, 0 );
+   //LATCbits.LATC6 = 0;      /* init low */
    CNPDCbits.CNPDC6 = 1;    /* pulldown == on */
 
    /* RB9 == SCLK PIN */
-   TRISBbits.TRISB9 = 0;    /* output */
-   LATBbits.LATB9 = 0;      /* init low */
+   SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_OUTPUT, PORT_CHANNEL_B, PORTS_BIT_POS_9);
+   //TRISBbits.TRISB9 = 0;    /* output */
+   SYS_PORTS_PinWrite( PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_9, 0 );
+   //LATBbits.LATB9 = 0;      /* init low */
    CNPDBbits.CNPDB9 = 1;    /* pulldown == on */
 
    /* RB8 == _CS PIN active==low */
-   TRISBbits.TRISB8 = 0;    /* output */
-   LATBbits.LATB8 = 0;      /* init low */
+   SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_OUTPUT, PORT_CHANNEL_B, PORTS_BIT_POS_8);
+   //TRISBbits.TRISB8 = 0;    /* output */
+   SYS_PORTS_PinWrite( PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_8, 0 );
+   //LATBbits.LATB8 = 0;      /* init low */
    CNPDBbits.CNPDB8 = 1;    /* pulldown == on */
+  
 }
 
 void LCDDelay()
@@ -62,14 +73,18 @@ void LCDDelay()
 
 void LCDReset(void) {
 
-   LATBbits.LATB8 = 0; /* CS = yes */
-   LATCbits.LATC8 = 0; /* reset = yes */
+   SYS_PORTS_PinWrite( PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_8, 0 );
+   SYS_PORTS_PinWrite( PORTS_ID_0, PORT_CHANNEL_C, PORTS_BIT_POS_8, 0 );
+   //LATBbits.LATB8 = 0; /* CS = yes */
+   //LATCbits.LATC8 = 0; /* reset = yes */
    LCDDelay();
 
-   LATCbits.LATC8 = 1; /* reset = no */
+   SYS_PORTS_PinWrite( PORTS_ID_0, PORT_CHANNEL_C, PORTS_BIT_POS_8, 1 );
+   //LATCbits.LATC8 = 1; /* reset = no */
    LCDDelay();
 
-   LATBbits.LATB8 = 1; /* CS = no */
+   SYS_PORTS_PinWrite( PORTS_ID_0, PORT_CHANNEL_B, PORTS_BIT_POS_8, 1 );
+   //LATBbits.LATB8 = 1; /* CS = no */
    LCDDelay();
 
    S6B33_init_device(); /* set important internal registers */
