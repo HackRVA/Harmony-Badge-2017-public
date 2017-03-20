@@ -50,7 +50,8 @@ struct menu_t {
         keep compiler from whining. */
     union {
         const struct menu_t *menu;
-        void (*func)(struct menu_t *m); /**< An application callback function */
+        //void (*func)(struct menu_t *m); /**< An application callback function */
+        void (*func)(void* p_arg);
         void *generic;
     } data; /**< extra data used to process menu item; depends on type */
 };
@@ -114,7 +115,11 @@ void genericMenu(struct menu_t *L_menu, MENU_STYLE style);
  */
 void closeMenuAndReturn();
 
-void menu_task(void* p_arg);
+/**
+ * Displays main navigation menu and manages the launching of
+ * applications in the main menu
+ */
+void menu_and_manage_task(void* p_arg);
 
 #endif	/* BADGE_MENU_H */
 

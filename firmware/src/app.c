@@ -544,7 +544,7 @@ void APP_Initialize ( void )
 
 void button_task(void* p_arg)
 {
-    const TickType_t xDelay = 20 / portTICK_PERIOD_MS;
+    const TickType_t xDelay = 10 / portTICK_PERIOD_MS;
     //TickType_t xLastWakeTime;
     //const TickType_t xFrequency = 30 / portTICK_PERIOD_MS;
     // reset globals
@@ -603,7 +603,7 @@ void print_to_com1(unsigned char buffer[APP_WRITE_BUFFER_SIZE]){
                             &xHigherPriorityTaskWoken1);
     // posting to the queue may have unblocked a high priority task (USB)
     // so yield some time to that task (only matters if in interrupt...?)
-    portEND_SWITCHING_ISR( xHigherPriorityTaskWoken1 );
+    //portEND_SWITCHING_ISR( xHigherPriorityTaskWoken1 );
     
     // The USB task will send a notification to this task once the write
     // buffer has been written (sets the 2nd bit in the 'mailbox')
@@ -612,7 +612,8 @@ void print_to_com1(unsigned char buffer[APP_WRITE_BUFFER_SIZE]){
                           &ulNotifiedValue, // Mailbox value copied here before clearing
                           50 / portTICK_PERIOD_MS) // Timeout for block is 50ms
                           == pdFALSE);
-    // If bit 2 wasn't set for some reason....
+    // If bit 2 wasn't set, then we may have caught a different notify
+    // should consider how to share the mailbox - only use for expected events?
     if(ulNotifiedValue != 2)
         led(1, 0, 0);
     
@@ -654,12 +655,15 @@ void print_task_high_water_mark_to_CDC(TaskHandle_t xHandle)
 void print_high_water_marks(){
     TaskHandle_t xHandle = NULL;
     
+    
     // The 'main' MHC provided task, stack size configured in MHC
     xHandle = xTaskGetHandle("APP Tasks");
     print_to_com1("main:\0");
     print_task_high_water_mark_to_CDC(xHandle);
     
     // The running app, started from app tasks
+    // If an app isn't running, xHandle will be NULL
+    // So this will be the callers amount if no app is running
     xHandle = xTaskGetHandle("exec_app");
     print_to_com1("app:\0");
     print_task_high_water_mark_to_CDC(xHandle);
@@ -682,6 +686,7 @@ void test_task(void* p_arg)
 {
     TaskHandle_t xHandle = NULL;
     BaseType_t xReturned;
+
     
     // Swap out 'hello_world_task' for task function needing testing
     xReturned = xTaskCreate((TaskFunction_t) hello_world_task,
@@ -693,17 +698,13 @@ void test_task(void* p_arg)
     
     for(;;)
     {
-        // show high water marks on CDC com1
-        if(G_button){
-            print_high_water_marks();
-            vTaskDelay(100 / portTICK_PERIOD_MS);
-        }
-
-        vTaskDelay(50 / portTICK_PERIOD_MS);
+        print_high_water_marks();
+        vTaskDelay(200 / portTICK_PERIOD_MS);
     }
     
     vTaskDelete( NULL );
 }
+
 
 
 /******************************************************************************
@@ -731,7 +732,7 @@ void APP_Tasks ( void )
 
     errStatus = xTaskCreate((TaskFunction_t) button_task, 
             "button_task",
-            128u,
+            100u,
             NULL,
             1u,
             NULL);
@@ -741,7 +742,11 @@ void APP_Tasks ( void )
         while(1);
     }
     
-    test_task(NULL);
+    // Wait for for things (USB) to be ready? easier debugging
+    vTaskDelay(2000 / portTICK_PERIOD_MS);    
+    
+    //test_task(NULL);
+    menu_and_manage_task(NULL);
 }
  
 
