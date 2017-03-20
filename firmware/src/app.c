@@ -577,7 +577,7 @@ void button_task(void* p_arg)
 }
 
 
-void print_to_com1(unsigned char buffer[APP_WRITE_BUFFER_SIZE]){
+void print_to_com1(uint8_t buffer[APP_WRITE_BUFFER_SIZE]){
     portBASE_TYPE xHigherPriorityTaskWoken1 = pdFALSE;
     uint32_t ulNotifiedValue = 0;
     uint32_t USB_Event = USBDEVICETASK_WRITE_BUFFER_TO_COM1;
