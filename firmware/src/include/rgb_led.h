@@ -11,7 +11,7 @@
 #ifdef	__cplusplus
 extern "C" {
 #endif
-
+void led(int red, int green, int blue);
 
 void red(int val);
 
