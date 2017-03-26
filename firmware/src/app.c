@@ -593,7 +593,7 @@ void print_to_com1(uint8_t buffer[APP_WRITE_BUFFER_SIZE]){
     cdc_write_requester = xTaskGetCurrentTaskHandle();
     
     // copy the data to the Write Buffer
-    for(i=0; i < APP_WRITE_BUFFER_SIZE & buffer[i] != 0; i++){
+    for(i=0; (i < APP_WRITE_BUFFER_SIZE) && (buffer[i] != 0); i++){
         WriteBuffer[i] = buffer[i];
     }
     
