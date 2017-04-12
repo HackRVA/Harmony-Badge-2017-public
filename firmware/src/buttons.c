@@ -1,18 +1,23 @@
 #include "app.h"
 #include "buttons.h"
 
+unsigned char G_pressed_button = 0;
+
+// Solo bottom right btn
 unsigned char G_button_cnt = 0;
 
+// D-Pad
 unsigned char G_up_button_cnt = 0;
 unsigned char G_down_button_cnt = 0;
 unsigned char G_left_button_cnt = 0;
 unsigned char G_right_button_cnt = 0;
-unsigned char G_pressed_button = 0;
 
+// Cap Touch
 unsigned char G_up_touch_cnt = 0;
 unsigned char G_middle_touch_cnt = 0;
 unsigned char G_down_touch_cnt = 0;
 char G_touch_pct = 0;
+
 
 unsigned int G_entropy_pool = 961748927;
 unsigned int timestamp = 0;
@@ -59,7 +64,7 @@ void button_task(void* p_arg)
     
     unsigned short int VmeasADC; // Measured Voltages, 65536 = Full Scale
     unsigned long int ADC_Sum; // For averaging multiple ADC measurements
-    unsigned char i = 0, btn_cnt=0, chan_idx = 0;
+    unsigned char i = 0, chan_idx = 0;
     
     TickType_t xDelay = 10 / portTICK_PERIOD_MS;
 
