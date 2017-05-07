@@ -1,9 +1,9 @@
 /*******************************************************************************
   MPLAB Harmony Application Source File
-  
+
   Company:
     Microchip Technology Inc.
-  
+
   File Name:
     app.c
 
@@ -11,8 +11,8 @@
     This file contains the source code for the MPLAB Harmony application.
 
   Description:
-    This file contains the source code for the MPLAB Harmony application.  It 
-    implements the logic of the application's state machine and it may call 
+    This file contains the source code for the MPLAB Harmony application.  It
+    implements the logic of the application's state machine and it may call
     API routines of other MPLAB Harmony modules in the system, such as drivers,
     system services, and middleware.  However, it does not call any of the
     system interfaces (such as the "Initialize" and "Tasks" functions) of any of
@@ -49,7 +49,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 
 // *****************************************************************************
 // *****************************************************************************
-// Section: Included Files 
+// Section: Included Files
 // *****************************************************************************
 // *****************************************************************************
 
@@ -63,7 +63,6 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "LCDcolor.h"
 #include "badge_apps.h"
 #include "badge_menu.h"
-#include "touch_ctmu.h"
 
 // *****************************************************************************
 // *****************************************************************************
@@ -82,7 +81,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 
   Remarks:
     This structure should be initialized by the APP_Initialize function.
-    
+
     Application strings and buffers are be defined outside this structure.
 */
 QueueHandle_t USBDeviceTask_EventQueue_Handle;
@@ -162,7 +161,7 @@ void APP_USBDeviceEventHandler(USB_DEVICE_EVENT event, void * pData,
                 /*let processing USB Task know USB if configured..*/
                 USB_Event = USBDEVICETASK_USBCONFIGURED_EVENT;
 
-                xQueueSendToBackFromISR(USBDeviceTask_EventQueue_Handle, &USB_Event, 
+                xQueueSendToBackFromISR(USBDeviceTask_EventQueue_Handle, &USB_Event,
                     &xHigherPriorityTaskWoken1);
                 portEND_SWITCHING_ISR( xHigherPriorityTaskWoken1 );
             }
@@ -183,7 +182,7 @@ void APP_USBDeviceEventHandler(USB_DEVICE_EVENT event, void * pData,
             /*let processing USB Task know USB is powered..*/
             USB_Event = USBDEVICETASK_USBPOWERED_EVENT;
 
-            xQueueSendToBackFromISR(USBDeviceTask_EventQueue_Handle, &USB_Event, 
+            xQueueSendToBackFromISR(USBDeviceTask_EventQueue_Handle, &USB_Event,
                 &xHigherPriorityTaskWoken1);
             portEND_SWITCHING_ISR( xHigherPriorityTaskWoken1 );
             /* Attach the device */
@@ -272,11 +271,11 @@ USB_DEVICE_CDC_EVENT_RESPONSE APP_USBDeviceCDCEventHandler
         case USB_DEVICE_CDC_EVENT_READ_COMPLETE:
             if(index == 0)
                 USB_Event = USBDEVICETASK_READDONECOM1_EVENT;
-            else 
+            else
                 USB_Event = USBDEVICETASK_READDONECOM2_EVENT;
-            
+
             /*let processing USB Task know USB if configured..*/
-            xQueueSendToBackFromISR(USBDeviceTask_EventQueue_Handle, &USB_Event, 
+            xQueueSendToBackFromISR(USBDeviceTask_EventQueue_Handle, &USB_Event,
                 &xHigherPriorityTaskWoken1);
             portEND_SWITCHING_ISR( xHigherPriorityTaskWoken1 );
             break;
@@ -299,11 +298,11 @@ USB_DEVICE_CDC_EVENT_RESPONSE APP_USBDeviceCDCEventHandler
         case USB_DEVICE_CDC_EVENT_WRITE_COMPLETE:
             if(index == 0)
                 USB_Event = USBDEVICETASK_WRITEDONECOM1_EVENT;
-            else 
+            else
                 USB_Event = USBDEVICETASK_WRITEDONECOM2_EVENT;
-            
+
             /*let processing USB Task know USB if configured..*/
-            xQueueSendToBackFromISR(USBDeviceTask_EventQueue_Handle, &USB_Event, 
+            xQueueSendToBackFromISR(USBDeviceTask_EventQueue_Handle, &USB_Event,
                 &xHigherPriorityTaskWoken1);
             portEND_SWITCHING_ISR( xHigherPriorityTaskWoken1 );
             break;
@@ -345,7 +344,7 @@ void USBDevice_Task(void* p_arg)
     BaseType_t errStatus;
     uint32_t USBDeviceTask_State = USBDEVICETASK_OPENUSB_STATE;
     uint32_t USBDeviceTask_Event = 0;
-    USB_DEVICE_CDC_TRANSFER_HANDLE COM1Read_Handle, COM1Write_Handle, 
+    USB_DEVICE_CDC_TRANSFER_HANDLE COM1Read_Handle, COM1Write_Handle,
                                    COM2Read_Handle, COM2Write_Handle;
 
     COM1Read_Handle = USB_DEVICE_CDC_TRANSFER_HANDLE_INVALID;
@@ -364,7 +363,7 @@ void USBDevice_Task(void* p_arg)
                 if(appData.deviceHandle != USB_DEVICE_HANDLE_INVALID)
                 {
                     //USBDeviceTask_State = USBDEVICETASK_PROCESSUSBEVENTS_STATE;
-                    USB_DEVICE_EventHandlerSet(appData.deviceHandle, 
+                    USB_DEVICE_EventHandlerSet(appData.deviceHandle,
                             APP_USBDeviceEventHandler, 0);
                     USBDeviceTask_State = USBDEVICETASK_ATTACHUSB_STATE;
                     break;
@@ -373,14 +372,14 @@ void USBDevice_Task(void* p_arg)
                 USBDeviceTask_State = USBDEVICETASK_OPENUSB_STATE;
                 vTaskDelay(10 / portTICK_PERIOD_MS);
                 break;
-            case USBDEVICETASK_ATTACHUSB_STATE: 
+            case USBDEVICETASK_ATTACHUSB_STATE:
                 USB_DEVICE_Attach (appData.deviceHandle);
                 USBDeviceTask_State = USBDEVICETASK_PROCESSUSBEVENTS_STATE;
                 break;
             case USBDEVICETASK_PROCESSUSBEVENTS_STATE:
-                /*once here, usb task becomes event driven, user input will 
+                /*once here, usb task becomes event driven, user input will
                   will generate events. */
-                USBDeviceTask_State = USBDEVICETASK_PROCESSUSBEVENTS_STATE;                
+                USBDeviceTask_State = USBDEVICETASK_PROCESSUSBEVENTS_STATE;
 
                 /*wait for an event to occur and process, see event handler*/
                 errStatus = xQueueReceive(USBDeviceTask_EventQueue_Handle,
@@ -404,7 +403,7 @@ void USBDevice_Task(void* p_arg)
                         /* Schedule a CDC read on COM2 */
                         USB_DEVICE_CDC_Read(1,&COM2Read_Handle,
                             com2ReadBuffer,APP_READ_BUFFER_SIZE);
-                        break;                    
+                        break;
                     case USBDEVICETASK_READDONECOM1_EVENT:
                         /* Send the received data to COM2 */
 //                        USB_DEVICE_CDC_Write(1, &COM2Write_Handle,
@@ -417,7 +416,7 @@ void USBDevice_Task(void* p_arg)
 //                        FbWriteLine("com2: ");
 //                        FbWriteLine(com1ReadBuffer);
 //                        FbSwapBuffers();
-                      
+
 
                         break;
                     case USBDEVICETASK_READDONECOM2_EVENT:
@@ -432,14 +431,14 @@ void USBDevice_Task(void* p_arg)
 //                        FbWriteLine("com1: ");
 //                        FbWriteLine(com2ReadBuffer);
 //                        FbSwapBuffers();
-                      
+
 
                          break;
                     case USBDEVICETASK_WRITEDONECOM1_EVENT:
                         /* Schedule a CDC read on COM2 */
 //                        USB_DEVICE_CDC_Read(1,&COM2Read_Handle,
 //                            com2ReadBuffer,APP_READ_BUFFER_SIZE);
-                        
+
                         // Not sure if things other than badge code
                         // will set off this write event, so double check
                         // that the write requester is set
@@ -452,12 +451,12 @@ void USBDevice_Task(void* p_arg)
 //                        USB_DEVICE_CDC_Read(0, &COM1Read_Handle,
 //                            com1ReadBuffer,APP_READ_BUFFER_SIZE);
                         break;
-                    case USBDEVICETASK_WRITE_BUFFER_TO_COM1:                    
+                    case USBDEVICETASK_WRITE_BUFFER_TO_COM1:
                         USB_DEVICE_CDC_Write(0, &COM1Write_Handle, WriteBuffer,
-                                            APP_WRITE_BUFFER_SIZE, 
-                                            USB_DEVICE_CDC_TRANSFER_FLAGS_DATA_COMPLETE);  
-                        
-                    
+                                            APP_WRITE_BUFFER_SIZE,
+                                            USB_DEVICE_CDC_TRANSFER_FLAGS_DATA_COMPLETE);
+
+
                         break;
                     default:
                         break;
@@ -490,8 +489,8 @@ void APP_Initialize ( void )
     {
         led(1, 0, 0);
         while(1);
-    }    
-    
+    }
+
     USBDeviceTask_EventQueue_Handle = xQueueCreate(15, sizeof(uint32_t));
     if(USBDeviceTask_EventQueue_Handle == NULL)
     {
@@ -524,13 +523,13 @@ void APP_Initialize ( void )
     SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_OUTPUT, PORT_CHANNEL_B, PORTS_BIT_POS_8); // CS active low out  chip select
     SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_OUTPUT, PORT_CHANNEL_B, PORTS_BIT_POS_9); // SCLK out  serial clock
 
-    SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_OUTPUT, PORT_CHANNEL_A, PORTS_BIT_POS_9); // piezo 
+    SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_OUTPUT, PORT_CHANNEL_A, PORTS_BIT_POS_9); // piezo
 
-    SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_INPUT, PORT_CHANNEL_C, PORTS_BIT_POS_3);  // button 
+    SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_INPUT, PORT_CHANNEL_C, PORTS_BIT_POS_3);  // button
     CNPUCbits.CNPUC3 = 1; // pullup == on
 
     //PLIB_PORTS_ChangeNoticePullUpPerPortEnable(PORTS_ID_0, PORT_CHANNEL_C, PORTS_BIT_POS_3);
-            
+
     led(0, 0, 1);
     LCDInitPins();
     led(1, 0, 0);
@@ -551,7 +550,7 @@ void button_task(void* p_arg)
     G_button = 0;
     G_buttonCnt = 0;
     G_buttonDebounce = 0;
-   
+
     for(;;){
         //xLastWakeTime = xTaskGetTickCount();
         if (!PORTCbits.RC3) {
@@ -582,29 +581,29 @@ void print_to_com1(uint8_t buffer[APP_WRITE_BUFFER_SIZE]){
     uint32_t ulNotifiedValue = 0;
     uint32_t USB_Event = USBDEVICETASK_WRITE_BUFFER_TO_COM1;
     unsigned char i=0;
-    
+
 
     //----------
     // Write Buffer LOCKED
     xSemaphoreTake(cdc_write_buffer_lock, portMAX_DELAY); // MaxDelay to block indefinitely
-    
+
     // Track this task requesting the write so the USB task
     // can notify it when done
     cdc_write_requester = xTaskGetCurrentTaskHandle();
-    
+
     // copy the data to the Write Buffer
     for(i=0; (i < APP_WRITE_BUFFER_SIZE) && (buffer[i] != 0); i++){
         WriteBuffer[i] = buffer[i];
     }
-    
+
     // Tell the USB task that we want the write buffer printed
     // 'FromISR' should make this ISR-safe
-    xQueueSendToBackFromISR(USBDeviceTask_EventQueue_Handle, &USB_Event, 
+    xQueueSendToBackFromISR(USBDeviceTask_EventQueue_Handle, &USB_Event,
                             &xHigherPriorityTaskWoken1);
     // posting to the queue may have unblocked a high priority task (USB)
     // so yield some time to that task (only matters if in interrupt...?)
     //portEND_SWITCHING_ISR( xHigherPriorityTaskWoken1 );
-    
+
     // The USB task will send a notification to this task once the write
     // buffer has been written (sets the 2nd bit in the 'mailbox')
     while (xTaskNotifyWait(0, // Don't clear anything on entry
@@ -616,14 +615,14 @@ void print_to_com1(uint8_t buffer[APP_WRITE_BUFFER_SIZE]){
     // should consider how to share the mailbox - only use for expected events?
     if(ulNotifiedValue != 2)
         led(1, 0, 0);
-    
+
     // Zero out the buffer
     for(i = 0; i < APP_WRITE_BUFFER_SIZE; i++)
         WriteBuffer[i] = 0;
-    
+
     // Reset the requester
     cdc_write_requester = NULL;
-    
+
     xSemaphoreGive(cdc_write_buffer_lock);
     // Write Buffer UNLOCKED
     //---------------
@@ -635,16 +634,16 @@ void print_task_high_water_mark_to_CDC(TaskHandle_t xHandle)
     UBaseType_t uxHighWaterMark;
 
     uxHighWaterMark = uxTaskGetStackHighWaterMark( xHandle );
-    
+
     to_print[0] = '0' + (unsigned char)((uxHighWaterMark/1000) % 10);
     to_print[1] = '0' + (unsigned char)((uxHighWaterMark/100) % 10);
     to_print[2] = '0' + (unsigned char)((uxHighWaterMark/10)  % 10);
-    to_print[3] = '0' + (unsigned char)((uxHighWaterMark)     % 10);    
-    
+    to_print[3] = '0' + (unsigned char)((uxHighWaterMark)     % 10);
+
     to_print[4] = '.';
     to_print[5] = '\n';
     to_print[6] = '\r';
-    to_print[7] = 0;    
+    to_print[7] = 0;
     print_to_com1(to_print);
 
     // Red LEDs everywhere
@@ -654,29 +653,29 @@ void print_task_high_water_mark_to_CDC(TaskHandle_t xHandle)
 
 void print_high_water_marks(){
     TaskHandle_t xHandle = NULL;
-    
-    
+
+
     // The 'main' MHC provided task, stack size configured in MHC
     xHandle = xTaskGetHandle("APP Tasks");
     print_to_com1("main:\0");
     print_task_high_water_mark_to_CDC(xHandle);
-    
+
     // The running app, started from app tasks
     // If an app isn't running, xHandle will be NULL
     // So this will be the callers amount if no app is running
     xHandle = xTaskGetHandle("exec_app");
     print_to_com1("app:\0");
     print_task_high_water_mark_to_CDC(xHandle);
-    
+
     // Button polling task
     xHandle = xTaskGetHandle("button_task");
     print_to_com1("btn:\0");
-    print_task_high_water_mark_to_CDC(xHandle);            
+    print_task_high_water_mark_to_CDC(xHandle);
 
     // USB task
     xHandle = xTaskGetHandle("USB_AttachTask");
     print_to_com1("usb:\0");
-    print_task_high_water_mark_to_CDC(xHandle);              
+    print_task_high_water_mark_to_CDC(xHandle);
 
     print_to_com1("----\n\r\0");
 }
@@ -687,7 +686,7 @@ void test_task(void* p_arg)
     TaskHandle_t xHandle = NULL;
     BaseType_t xReturned;
 
-    
+
     // Swap out 'hello_world_task' for task function needing testing
     xReturned = xTaskCreate((TaskFunction_t) hello_world_task,
             "exec_app",
@@ -695,13 +694,13 @@ void test_task(void* p_arg)
             NULL,
             1u,
             &xHandle);
-    
+
     for(;;)
     {
         print_high_water_marks();
         vTaskDelay(200 / portTICK_PERIOD_MS);
     }
-    
+
     vTaskDelete( NULL );
 }
 
@@ -730,25 +729,25 @@ void APP_Tasks ( void )
         while(1);
     }
 
-    errStatus = xTaskCreate((TaskFunction_t) button_task, 
+    errStatus = xTaskCreate((TaskFunction_t) button_task,
             "button_task",
             100u,
             NULL,
             1u,
             NULL);
-    
+
     if(errStatus != pdTRUE){
         red(1);
         while(1);
     }
-    
+
     // Wait for for things (USB) to be ready? easier debugging
-    vTaskDelay(2000 / portTICK_PERIOD_MS);    
-    
+    vTaskDelay(2000 / portTICK_PERIOD_MS);
+
     //test_task(NULL);
     menu_and_manage_task(NULL);
 }
- 
+
 
 /*******************************************************************************
  End of File
