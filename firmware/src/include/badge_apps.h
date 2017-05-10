@@ -16,7 +16,10 @@ void hello_world_task(void* p_arg);
 
 void badgey_bird_task(void* p_arg);
 
-//Declare other functions or structures that can be used across apps?
+void badgelandia_task(void* p_arg);
 
+void screensaver_task(void* p_arg);
+
+void boot_splash_task(void *p_arg);
 #endif
 
