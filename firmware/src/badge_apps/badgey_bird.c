@@ -29,7 +29,6 @@ void badgey_bird_menu_play(){
 }
 
 void badgey_bird_menu_exit(){
-    led(1, 1, 1);
     FbBackgroundColor(BLACK);
     FbClear();
     badgey_bird_state = BADGEYB_SHOW_MENU;
