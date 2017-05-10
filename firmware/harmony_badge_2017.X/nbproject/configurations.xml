@@ -585,7 +585,7 @@
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
         <property key="pre-instruction-scheduling" value="default"/>
-        <property key="preprocessor-macros" value="__XC;_DISABLE_OPENADC10_CONFIGPORT_WARNING;_SUPPRESS_PLIB_WARNING"/>
+        <property key="preprocessor-macros" value="__XC;_DISABLE_OPENADC10_CONFIGPORT_WARNING"/>
         <property key="strict-ansi" value="false"/>
         <property key="support-ansi" value="false"/>
         <property key="toplevel-reordering" value=""/>

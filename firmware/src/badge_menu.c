@@ -7,9 +7,7 @@
 #include "rgb_led.h"
 #include "badge_menu.h"
 #include "badge_apps.h"
-//#include "touch_ctmu.h"
 #include "buttons.h"
-//#include "timers.h"
 
 struct menuStack_t {
    struct menu_t *selectedMenu;
@@ -290,26 +288,24 @@ struct menu_t *display_menu(struct menu_t *menu,
 
 
 struct menu_t main_m[] = {
-    
     //{"Badgelandia", VERT_ITEM|DEFAULT_ITEM, FUNCTION,
-    //    {badgelandia_task}},            
+    //    {badgelandia_task}},
     {"Badgey Bird", VERT_ITEM|DEFAULT_ITEM, FUNCTION,
         {badgey_bird_task}},
     //{"Screensavers", VERT_ITEM|DEFAULT_ITEM, FUNCTION,
-    //    {screensaver_task}},        
-        
+    //    {screensaver_task}},
 
-   //{"Arcade",       VERT_ITEM|DEFAULT_ITEM, MENU, 
+   //{"Arcade",       VERT_ITEM|DEFAULT_ITEM, MENU,
    //     {games_m}},
-   //{"Transmitters",       VERT_ITEM, MENU, 
+   //{"Transmitters",       VERT_ITEM, MENU,
    //     {gadgets_m}},
    //{"Schedule",    VERT_ITEM, MENU,
    //     {schedule_main_m}},
-   //{"Settings",    VERT_ITEM, MENU, 
+   //{"Settings",    VERT_ITEM, MENU,
    //     {settings_m}},
-   //{"Clear Message", VERT_ITEM|LAST_ITEM|HIDDEN_ITEM, FUNCTION, 
+   //{"Clear Message", VERT_ITEM|LAST_ITEM|HIDDEN_ITEM, FUNCTION,
    //     {(struct menu_t *)clear_msg_cb}},
-   {"", VERT_ITEM|LAST_ITEM|HIDDEN_ITEM, BACK, 
+   {"", VERT_ITEM|LAST_ITEM|HIDDEN_ITEM, BACK,
        {NULL}},
 } ;
 
@@ -319,11 +315,11 @@ void returnToMenus(){
     BaseType_t notify_ret;
     if(xHandle == NULL)
         led(1, 0, 0);
-    
+
     notify_ret = xTaskNotify(xHandle,
                              1u,
                              eSetBits);
-    vTaskSuspend(NULL);    
+    vTaskSuspend(NULL);
 }
 
 //#define DEBUG_PRINT_TO_CDC
@@ -333,17 +329,14 @@ void menu_and_manage_task(void *p_arg){
     BaseType_t xReturned;
     struct menu_t *prev_selected_menu = main_m;
     G_currMenu = prev_selected_menu;
-    //badgelandia_task(NULL);
-    //boot_splash_task(NULL);
-    
     for(;;){
         // No running task, display menu or something
         if(xHandle == NULL)
         {
             // Only redraw when we must
             if (prev_selected_menu != G_selectedMenu){
-                G_selectedMenu = display_menu(G_currMenu, 
-                                              G_selectedMenu, 
+                G_selectedMenu = display_menu(G_currMenu,
+                                              G_selectedMenu,
                                               MAIN_MENU_STYLE);
                 prev_selected_menu = G_selectedMenu;
                 FbSwapBuffers();
@@ -390,7 +383,7 @@ void menu_and_manage_task(void *p_arg){
                                                 512u, //may want to increase?
                                                 NULL,
                                                 1u,
-                                                &xHandle);                        
+                                                &xHandle);
                         //(*selectedMenu->data.func)();
                         break;
                     default:
@@ -445,8 +438,8 @@ void menu_and_manage_task(void *p_arg){
                 }
             }
         }
-        
-        //Handle other events? Marshal messages?        
+
+        //Handle other events? Marshal messages?
 #ifdef DEBUG_PRINT_TO_CDC
         // TODO: this will have a conflict in the notify field with the kill signal
         print_high_water_marks();
@@ -455,6 +448,6 @@ void menu_and_manage_task(void *p_arg){
         // Doesn't need to be too responsive
         vTaskDelay(50 / portTICK_PERIOD_MS);
 #endif
-        
+
     }
 }
