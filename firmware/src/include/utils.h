@@ -8,6 +8,12 @@
 #ifndef UTILS_H
 #define	UTILS_H
 
+#define SIN(x) sin(x)
+#define COS(x) cos(x)
+#define PI 3.141
+#define TWO_PI 6.282
+
+
 unsigned int irbit2(unsigned int iseed);
 unsigned int quick_rand(unsigned int seed);
 
@@ -20,5 +26,17 @@ unsigned char check_box_collision(unsigned char x1, unsigned char y1,
                                   unsigned char w1, unsigned char h1,
                                   unsigned char x2, unsigned char y2,
                                   unsigned char w2, unsigned char h2);
+
+void equilateral_polygon_points(short point_arr[][2], 
+                                float radius, 
+                                unsigned int n_sides,
+                                float rotate_rads);
+void scale_points(short point_arr[][2],
+                  unsigned int n_points,
+                  float scale);
+
+void rotate_points(short point_arr[][2],
+                   unsigned int n_points,
+                   float rotate_rads);
 #endif	/* UTILS_H */
 

@@ -31,6 +31,8 @@
         <itemPath>../src/include/rgb_led.h</itemPath>
         <itemPath>../src/include/badge_apps.h</itemPath>
         <itemPath>../src/include/badge_menu.h</itemPath>
+        <itemPath>../src/include/buttons.h</itemPath>
+        <itemPath>../src/include/utils.h</itemPath>
       </logicalFolder>
       <logicalFolder name="bsp" displayName="bsp" projectFiles="true">
       </logicalFolder>
@@ -200,6 +202,8 @@
         <itemPath>../src/S6B33.c</itemPath>
         <itemPath>../src/rgb_led.c</itemPath>
         <itemPath>../src/badge_menu.c</itemPath>
+        <itemPath>../src/buttons.c</itemPath>
+        <itemPath>../src/utils.c</itemPath>
       </logicalFolder>
       <logicalFolder name="bsp" displayName="bsp" projectFiles="true">
       </logicalFolder>

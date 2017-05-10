@@ -11,13 +11,14 @@
 #ifdef	__cplusplus
 extern "C" {
 #endif
-void led(int red, int green, int blue);
+    
+void led(unsigned char r, unsigned char g, unsigned char b);
 
-void red(int val);
+void red(unsigned char pwm);
 
-void green(int val);
+void green(unsigned char pwm);
 
-void blue(int val);
+void blue(unsigned char pwm);
 
 #ifdef	__cplusplus
 }

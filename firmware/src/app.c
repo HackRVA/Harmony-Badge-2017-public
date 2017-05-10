@@ -60,6 +60,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "colors.h"
 #include "fb.h"
 #include "rgb_led.h"
+#include "buttons.h"
 #include "LCDcolor.h"
 #include "badge_apps.h"
 #include "badge_menu.h"
@@ -523,10 +524,19 @@ void APP_Initialize ( void )
     SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_OUTPUT, PORT_CHANNEL_B, PORTS_BIT_POS_8); // CS active low out  chip select
     SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_OUTPUT, PORT_CHANNEL_B, PORTS_BIT_POS_9); // SCLK out  serial clock
 
-    SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_OUTPUT, PORT_CHANNEL_A, PORTS_BIT_POS_9); // piezo
+    SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_OUTPUT, PORT_CHANNEL_A, PORTS_BIT_POS_9); // spkr
 
     SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_INPUT, PORT_CHANNEL_C, PORTS_BIT_POS_3);  // button
+    SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_INPUT, PORT_CHANNEL_B, PORTS_BIT_POS_14); //up
+    SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_INPUT, PORT_CHANNEL_B, PORTS_BIT_POS_15); //left
+    SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_INPUT, PORT_CHANNEL_A, PORTS_BIT_POS_0);  //right
+    SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_INPUT, PORT_CHANNEL_A, PORTS_BIT_POS_1);  //down
+
     CNPUCbits.CNPUC3 = 1; // pullup == on
+    CNPUBbits.CNPUB14 = 1; //pullup == on
+    CNPUBbits.CNPUB15 = 1; // pullup == on
+    CNPUAbits.CNPUA0 = 1; // pullup == on
+    CNPUAbits.CNPUA1 = 1; // pullup == on
 
     //PLIB_PORTS_ChangeNoticePullUpPerPortEnable(PORTS_ID_0, PORT_CHANNEL_C, PORTS_BIT_POS_3);
 
@@ -537,44 +547,10 @@ void APP_Initialize ( void )
     led(0, 1, 0);
     LCDBars();
     LCDBacklight(1);
-
+    led(0, 0, 1);
     FbInit();
+    led(0, 0, 0);
 }
-
-void button_task(void* p_arg)
-{
-    const TickType_t xDelay = 10 / portTICK_PERIOD_MS;
-    //TickType_t xLastWakeTime;
-    //const TickType_t xFrequency = 30 / portTICK_PERIOD_MS;
-    // reset globals
-    G_button = 0;
-    G_buttonCnt = 0;
-    G_buttonDebounce = 0;
-
-    for(;;){
-        //xLastWakeTime = xTaskGetTickCount();
-        if (!PORTCbits.RC3) {
-            if (G_buttonCnt > 3)
-            {
-                G_button = 1;
-            }
-
-            if (G_buttonCnt == 255) {
-               //if (menu_escape_cb != NULL) menu_escape_cb();
-               G_buttonCnt=0;
-            }
-            else
-               G_buttonCnt++;
-        }
-        else {
-            G_buttonCnt = 0;
-            G_button = 0;
-        }
-        vTaskDelay(xDelay);
-        //vTaskDelayUntil(&xLastWakeTime, xDelay);
-    }
-}
-
 
 void print_to_com1(uint8_t buffer[APP_WRITE_BUFFER_SIZE]){
     portBASE_TYPE xHigherPriorityTaskWoken1 = pdFALSE;
@@ -609,8 +585,11 @@ void print_to_com1(uint8_t buffer[APP_WRITE_BUFFER_SIZE]){
     while (xTaskNotifyWait(0, // Don't clear anything on entry
                           2u, // clear bit 2 in the mailbox when done
                           &ulNotifiedValue, // Mailbox value copied here before clearing
-                          50 / portTICK_PERIOD_MS) // Timeout for block is 50ms
-                          == pdFALSE);
+                          100 / portTICK_PERIOD_MS) // Timeout for block is 100ms
+                          == pdFALSE)
+        led(1, 0, 0);
+    
+    
     // If bit 2 wasn't set, then we may have caught a different notify
     // should consider how to share the mailbox - only use for expected events?
     if(ulNotifiedValue != 2)
@@ -697,13 +676,12 @@ void test_task(void* p_arg)
 
     for(;;)
     {
-        print_high_water_marks();
+        //print_high_water_marks();
         vTaskDelay(200 / portTICK_PERIOD_MS);
     }
 
     vTaskDelete( NULL );
 }
-
 
 
 /******************************************************************************
@@ -731,9 +709,9 @@ void APP_Tasks ( void )
 
     errStatus = xTaskCreate((TaskFunction_t) button_task,
             "button_task",
-            100u,
+            256u,
             NULL,
-            1u,
+            2u,
             NULL);
 
     if(errStatus != pdTRUE){
@@ -742,8 +720,7 @@ void APP_Tasks ( void )
     }
 
     // Wait for for things (USB) to be ready? easier debugging
-    vTaskDelay(2000 / portTICK_PERIOD_MS);
-
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
     //test_task(NULL);
     menu_and_manage_task(NULL);
 }
