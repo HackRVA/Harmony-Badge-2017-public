@@ -31,6 +31,8 @@ struct framebuffer_t {
    unsigned short changed;
 };
 
+#define TWO_PI 6.282
+
 extern struct framebuffer_t G_Fb;
 
 void FbInit() ;
@@ -52,11 +54,22 @@ void FbLine(unsigned char x0, unsigned char y0, unsigned char x1, unsigned char 
 void FbWriteLine(unsigned char *string);
 void FbRectangle(unsigned char width, unsigned char height);
 
+//TODO: doesn't work!
+void FbPushRegion(unsigned int x, unsigned int y, 
+                  unsigned int width,unsigned int height);
+
+// Connects together a set of (x,y) points
+void FbPolygonFromPoints(short points[][2],
+                         unsigned char n_points, 
+                         short center_x,
+                         short center_y);
+
 void FbImage1bit(unsigned char assetId, unsigned char seqNum);
 void FbImage2bit(unsigned char assetId, unsigned char seqNum);
 void FbImage4bit(unsigned char assetId, unsigned char seqNum);
 void FbImage8bit(unsigned char assetId, unsigned char seqNum);
 void FbSwapBuffers();
+void FbPushBuffer();
 void LCDInitPins();
 void LCDReset();
 void LCDBars();

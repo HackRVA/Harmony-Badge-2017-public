@@ -7,7 +7,8 @@
 #include "rgb_led.h"
 #include "badge_menu.h"
 #include "badge_apps.h"
-#include "touch_ctmu.h"
+//#include "touch_ctmu.h"
+#include "buttons.h"
 //#include "timers.h"
 
 struct menuStack_t {
@@ -289,8 +290,15 @@ struct menu_t *display_menu(struct menu_t *menu,
 
 
 struct menu_t main_m[] = {
+    
+    //{"Badgelandia", VERT_ITEM|DEFAULT_ITEM, FUNCTION,
+    //    {badgelandia_task}},            
     {"Badgey Bird", VERT_ITEM|DEFAULT_ITEM, FUNCTION,
         {badgey_bird_task}},
+    //{"Screensavers", VERT_ITEM|DEFAULT_ITEM, FUNCTION,
+    //    {screensaver_task}},        
+        
+
    //{"Arcade",       VERT_ITEM|DEFAULT_ITEM, MENU, 
    //     {games_m}},
    //{"Transmitters",       VERT_ITEM, MENU, 
@@ -325,10 +333,10 @@ void menu_and_manage_task(void *p_arg){
     BaseType_t xReturned;
     struct menu_t *prev_selected_menu = main_m;
     G_currMenu = prev_selected_menu;
+    //badgelandia_task(NULL);
+    //boot_splash_task(NULL);
     
     for(;;){
-        
-
         // No running task, display menu or something
         if(xHandle == NULL)
         {
@@ -341,7 +349,7 @@ void menu_and_manage_task(void *p_arg){
                 FbSwapBuffers();
             }
 
-            if (G_button){//BUTTON_PRESSED_AND_CONSUME) {
+            if (BUTTON_PRESSED_AND_CONSUME){//BUTTON_PRESSED_AND_CONSUME) {
                 // action happened that will result in menu redraw
                 //do_animation = 1;
                 switch (G_selectedMenu->type) {
@@ -387,6 +395,41 @@ void menu_and_manage_task(void *p_arg){
                         break;
                     default:
                         break;
+                }
+            }
+            else if (UP_TOUCH_AND_CONSUME) /* handle slider/soft button clicks */ {
+                setNote(109, 800); /* f */
+
+                /* make sure not on first menu item */
+                if (G_selectedMenu > G_currMenu) {
+                    G_selectedMenu--;
+
+                    while (((G_selectedMenu->attrib & SKIP_ITEM) || (G_selectedMenu->attrib & HIDDEN_ITEM))
+                            && G_selectedMenu > G_currMenu)
+                        G_selectedMenu--;
+
+                    G_selectedMenu = display_menu(G_currMenu, G_selectedMenu, MAIN_MENU_STYLE);
+                }
+            }/* *** PEB ***** not convinced this should be an else
+               both sliders can be pressed then this one will never get handled
+            */
+            else if (DOWN_TOUCH_AND_CONSUME) {
+                setNote(97, 1024); /* g */
+
+                /* make sure not on last menu item */
+                if (!(G_selectedMenu->attrib & LAST_ITEM)) {
+                    G_selectedMenu++;
+
+                    //Last item should never be a skipped item!!
+                    while (((G_selectedMenu->attrib & SKIP_ITEM) || (G_selectedMenu->attrib & HIDDEN_ITEM))
+                            && (!(G_selectedMenu->attrib & LAST_ITEM)))
+                        G_selectedMenu++;
+
+                    // at this point, may be on last item, if it's hidden, back off of it
+                    if((G_selectedMenu->attrib & LAST_ITEM) && (G_selectedMenu->attrib & HIDDEN_ITEM))
+                        G_selectedMenu--;
+
+                    G_selectedMenu = display_menu(G_currMenu, G_selectedMenu, MAIN_MENU_STYLE);
                 }
             }
         }
