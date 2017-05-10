@@ -166,6 +166,8 @@
         <logicalFolder name="f2" displayName="badge_apps" projectFiles="true">
           <itemPath>../src/badge_apps/hello_world_app.c</itemPath>
           <itemPath>../src/badge_apps/badgey_bird.c</itemPath>
+          <itemPath>../src/badge_apps/badgelandia.c</itemPath>
+          <itemPath>../src/badge_apps/screensaver.c</itemPath>
         </logicalFolder>
         <logicalFolder name="f1" displayName="system_config" projectFiles="true">
           <logicalFolder name="f1"
