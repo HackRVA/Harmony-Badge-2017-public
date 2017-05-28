@@ -83,6 +83,8 @@ extern char G_touch_pct;
 #define MIDDLE_TOUCH MIDDLE_TOUCH_HOLD(DEFAULT_TOUCH_DBC)
 #define UP_TOUCH UP_TOUCH_HOLD(DEFAULT_TOUCH_DBC)
 
+void clear_buttons();
+
 void button_task(void *p_arg);
 
 #endif	/* BUTTONS_H */

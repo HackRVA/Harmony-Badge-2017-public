@@ -80,7 +80,7 @@ void IRPair()
     union IRpacket_u pkt;
     
     // reset our peer and send out request to peer
-    G_peerBadgeId = 0;
+    //G_peerBadgeId = 0;
     
     //Send ping
     pkt.p.command = IR_WRITE;

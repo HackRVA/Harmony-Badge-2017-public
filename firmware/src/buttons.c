@@ -272,3 +272,17 @@ void button_task(void* p_arg)
     }
 }
 
+
+void clear_buttons(){
+    
+    G_button_cnt = 0;
+    G_up_button_cnt = 0;
+    G_down_button_cnt = 0;
+    G_left_button_cnt = 0;
+    G_right_button_cnt = 0;
+    
+    G_up_touch_cnt = 0;
+    G_middle_touch_cnt = 0;
+    G_down_touch_cnt = 0;
+    G_touch_pct = 0;
+}
