@@ -58,6 +58,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 
 // badge
 #include "colors.h"
+#include "flash.h"
 #include "fb.h"
 #include "rgb_led.h"
 #include "buttons.h"
@@ -103,6 +104,8 @@ SemaphoreHandle_t cdc_write_buffer_lock;
 static TaskHandle_t cdc_write_requester = NULL;
 
 void USBDevice_Task(void* p_arg);
+
+struct sysData_t G_sysData;
 // *****************************************************************************
 // *****************************************************************************
 // Section: Application Callback Functions
@@ -550,6 +553,8 @@ void APP_Initialize ( void )
     led(0, 0, 1);
     FbInit();
     led(0, 0, 0);
+    
+    timerInit();
 }
 
 void print_to_com1(uint8_t buffer[APP_WRITE_BUFFER_SIZE]){

@@ -1,6 +1,8 @@
 #include "app.h"
 #include "queue.h"
 #include "buttons.h"
+#include "ir.h"
+#include "flash.h"
 // badge
 #include "colors.h"
 #include "fb.h"
@@ -33,8 +35,12 @@ void hello_world_task(void* p_arg)
             redraw = 1;
             led(0, 0, 0);
 
-        }        
-        if(BUTTON_PRESSED_AND_CONSUME){
+        }      
+        
+        if(BUTTON_PRESSED_AND_CONSUME){          
+    
+            //IRPair();
+            
             FbMove(16, 16);
             FbWriteLine("BTN");
             led(1, 1, 1);

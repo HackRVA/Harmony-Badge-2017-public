@@ -288,12 +288,14 @@ struct menu_t *display_menu(struct menu_t *menu,
 
 
 struct menu_t main_m[] = {
-    //{"Badgelandia", VERT_ITEM|DEFAULT_ITEM, FUNCTION,
-    //    {badgelandia_task}},
+    {"TEST", VERT_ITEM|DEFAULT_ITEM, FUNCTION,
+        {hello_world_task}},    
+    {"Badgelandia", VERT_ITEM|DEFAULT_ITEM, FUNCTION,
+        {badgelandia_task}},
     {"Badgey Bird", VERT_ITEM|DEFAULT_ITEM, FUNCTION,
         {badgey_bird_task}},
-    //{"Screensavers", VERT_ITEM|DEFAULT_ITEM, FUNCTION,
-    //    {screensaver_task}},
+    {"Screensavers", VERT_ITEM|DEFAULT_ITEM, FUNCTION,
+        {screensaver_task}},
 
    //{"Arcade",       VERT_ITEM|DEFAULT_ITEM, MENU,
    //     {games_m}},
