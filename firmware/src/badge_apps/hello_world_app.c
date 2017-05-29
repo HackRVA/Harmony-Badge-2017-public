@@ -32,7 +32,12 @@ void hello_world_task(void* p_arg)
     FbTransparentIndex(0);
     FbColor(GREEN);
     FbClear();
+    FbMove(45, 45);
+    FbWriteLine("QC!");
+    FbMove(5, 55);
+    FbWriteLine("Do things");
     FbSwapBuffers();
+    led(0, 30, 0);
     
     for(;;)
     {
@@ -47,6 +52,7 @@ void hello_world_task(void* p_arg)
             FbFilledRectangle(5, 15);
             redraw = 1;
             led(0, 0, 0);
+            setNote(100 + (G_touch_pct>>1), 768);
 
         }      
         
@@ -66,6 +72,7 @@ void hello_world_task(void* p_arg)
         if(DOWN_BTN_AND_CONSUME){
             FbMove(16, 16);
             FbWriteLine("DOWN");
+            setNote(103, 1024);
             led(0, LED_LVL, 0);
             //print_to_com1("DOWN\n\r");
             redraw = 1;
@@ -83,6 +90,7 @@ void hello_world_task(void* p_arg)
         if(UP_BTN_AND_CONSUME){
             FbMove(16, 16);
             FbWriteLine("UP");
+            setNote(104, 1024);
             led(LED_LVL, LED_LVL, LED_LVL);
             //print_to_com1("UP\n\r");
             redraw = 1;
@@ -91,7 +99,8 @@ void hello_world_task(void* p_arg)
         if(LEFT_BTN_AND_CONSUME){
             FbMove(16, 16);
             FbWriteLine("LEFT");
-            led(255, 0, 0);
+            setNote(105, 1024);
+            led(LED_LVL, 0, 0);
             //print_to_com1("LEFT\n\r");
             redraw = 1;
         }
@@ -99,7 +108,8 @@ void hello_world_task(void* p_arg)
         if(RIGHT_BTN_AND_CONSUME){
             FbMove(16, 16);
             FbWriteLine("RIGHT");
-            led(0, 0, 255);
+            led(0, 0, LED_LVL);
+            setNote(106, 1024);
             //print_to_com1("RIGHT");
             redraw = 1;
         }        
