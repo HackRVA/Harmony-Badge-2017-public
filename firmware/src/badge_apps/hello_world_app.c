@@ -18,6 +18,13 @@ void hello_world_task(void* p_arg)
     BaseType_t notify_ret;
     //TaskHandle_t xHandle = xTaskGetHandle("APP Tasks");
     unsigned char redraw = 0;
+    union IRpacket_u pkt;
+    pkt.p.command = IR_WRITE;
+    pkt.p.address = IR_LED;
+    pkt.p.badgeId = G_sysData.badgeId;
+    //pkt.p.data    = PING_PAIR_REQUEST;
+    pkt.p.data = PACKRGB(0, 100, 100);
+    
     
     //if(xHandle == NULL)
     //    led(1, 0, 0);
@@ -45,8 +52,9 @@ void hello_world_task(void* p_arg)
         
         if(BUTTON_PRESSED_AND_CONSUME){          
     
-            IRPair();
-            
+            //IRPair();
+            IRqueueSend(pkt);
+            setNote(102, 1024);
             FbMove(16, 16);
             FbWriteLine("BTN");
             led(LED_LVL, 0, LED_LVL);

@@ -488,6 +488,64 @@ void USBDevice_Task(void* p_arg)
 
 void APP_Initialize ( void )
 {
+
+
+    /* badgy badge badge */
+    SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_OUTPUT, PORT_CHANNEL_C, PORTS_BIT_POS_0); // red
+    SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_OUTPUT, PORT_CHANNEL_B, PORTS_BIT_POS_3); // green
+    SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_OUTPUT, PORT_CHANNEL_C, PORTS_BIT_POS_1); // blue
+
+    SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_OUTPUT, PORT_CHANNEL_C, PORTS_BIT_POS_6); // SDA == SDIN == serial data to LCD
+    SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_OUTPUT, PORT_CHANNEL_C, PORTS_BIT_POS_7); // A0 == data=1 or command=0
+    SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_OUTPUT, PORT_CHANNEL_C, PORTS_BIT_POS_8); // reset == active low
+    SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_OUTPUT, PORT_CHANNEL_C, PORTS_BIT_POS_9); // backlight
+
+    SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_OUTPUT, PORT_CHANNEL_B, PORTS_BIT_POS_8); // CS active low out  chip select
+    SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_OUTPUT, PORT_CHANNEL_B, PORTS_BIT_POS_9); // SCLK out  serial clock
+
+    //SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_OUTPUT, PORT_CHANNEL_A, PORTS_BIT_POS_9); // spkr
+
+    SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_INPUT, PORT_CHANNEL_C, PORTS_BIT_POS_3);  // button
+    SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_INPUT, PORT_CHANNEL_B, PORTS_BIT_POS_14); //up
+    SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_INPUT, PORT_CHANNEL_B, PORTS_BIT_POS_15); //left
+    SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_INPUT, PORT_CHANNEL_A, PORTS_BIT_POS_0);  //right
+    SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_INPUT, PORT_CHANNEL_A, PORTS_BIT_POS_1);  //down
+
+    CFGCONbits.JTAGEN = 0;                                      
+//    ANSELA = 0x00;                                              
+//    ANSELB = 0x00;
+//    ANSELC = 0x00;                                              
+//    TRISA = 0;
+//    LATA = 0;
+//    TRISB = 0;
+//    LATB = 0;
+//    TRISC = 0;                                                  
+//    LATC = 0;   
+
+    TRISAbits.TRISA9 = 0;       // piezo == output should be handled above
+    LATAbits.LATA9 = 0;      // piezo init off
+    CNPUAbits.CNPUA9 = 0;    // RA9  pull up == off
+    CNPDAbits.CNPDA9 = 0;    /* pulldown == off */    
+    
+    CNPUCbits.CNPUC3 = 1; // pullup == on
+    CNPUBbits.CNPUB14 = 1; //pullup == on
+    CNPUBbits.CNPUB15 = 1; // pullup == on
+    CNPUAbits.CNPUA0 = 1; // pullup == on
+    CNPUAbits.CNPUA1 = 1; // pullup == on
+
+    //PLIB_PORTS_ChangeNoticePullUpPerPortEnable(PORTS_ID_0, PORT_CHANNEL_C, PORTS_BIT_POS_3);
+
+    led(0, 0, 1);
+    LCDInitPins();
+    led(1, 0, 0);
+    LCDReset();
+    led(0, 1, 0);
+    LCDBars();
+    LCDBacklight(1);
+    led(0, 0, 1);
+    FbInit();
+    led(0, 0, 0);
+    
     cdc_write_buffer_lock = xSemaphoreCreateMutex();
     if(cdc_write_buffer_lock == NULL)
     {
@@ -512,49 +570,8 @@ void APP_Initialize ( void )
     appData.appCOMPortObjects[1].getLineCodingData.bDataBits = 8;
     appData.appCOMPortObjects[1].getLineCodingData.bParityType = 0;
     appData.appCOMPortObjects[1].getLineCodingData.bCharFormat = 0;
-
-
-    /* badgy badge badge */
-    SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_OUTPUT, PORT_CHANNEL_C, PORTS_BIT_POS_0); // red
-    SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_OUTPUT, PORT_CHANNEL_B, PORTS_BIT_POS_3); // green
-    SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_OUTPUT, PORT_CHANNEL_C, PORTS_BIT_POS_1); // blue
-
-    SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_OUTPUT, PORT_CHANNEL_C, PORTS_BIT_POS_6); // SDA == SDIN == serial data to LCD
-    SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_OUTPUT, PORT_CHANNEL_C, PORTS_BIT_POS_7); // A0 == data=1 or command=0
-    SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_OUTPUT, PORT_CHANNEL_C, PORTS_BIT_POS_8); // reset == active low
-    SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_OUTPUT, PORT_CHANNEL_C, PORTS_BIT_POS_9); // backlight
-
-    SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_OUTPUT, PORT_CHANNEL_B, PORTS_BIT_POS_8); // CS active low out  chip select
-    SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_OUTPUT, PORT_CHANNEL_B, PORTS_BIT_POS_9); // SCLK out  serial clock
-
-    SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_OUTPUT, PORT_CHANNEL_A, PORTS_BIT_POS_9); // spkr
-
-    SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_INPUT, PORT_CHANNEL_C, PORTS_BIT_POS_3);  // button
-    SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_INPUT, PORT_CHANNEL_B, PORTS_BIT_POS_14); //up
-    SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_INPUT, PORT_CHANNEL_B, PORTS_BIT_POS_15); //left
-    SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_INPUT, PORT_CHANNEL_A, PORTS_BIT_POS_0);  //right
-    SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_INPUT, PORT_CHANNEL_A, PORTS_BIT_POS_1);  //down
-
-    CNPUCbits.CNPUC3 = 1; // pullup == on
-    CNPUBbits.CNPUB14 = 1; //pullup == on
-    CNPUBbits.CNPUB15 = 1; // pullup == on
-    CNPUAbits.CNPUA0 = 1; // pullup == on
-    CNPUAbits.CNPUA1 = 1; // pullup == on
-
-    //PLIB_PORTS_ChangeNoticePullUpPerPortEnable(PORTS_ID_0, PORT_CHANNEL_C, PORTS_BIT_POS_3);
-
-    led(0, 0, 1);
-    LCDInitPins();
-    led(1, 0, 0);
-    LCDReset();
-    led(0, 1, 0);
-    LCDBars();
-    LCDBacklight(1);
-    led(0, 0, 1);
-    FbInit();
-    led(0, 0, 0);
     
-    timerInit();
+   
 }
 
 void print_to_com1(uint8_t buffer[APP_WRITE_BUFFER_SIZE]){
@@ -699,7 +716,8 @@ void test_task(void* p_arg)
 void APP_Tasks ( void )
 {
     BaseType_t errStatus;
-
+    timerInit();
+    
     errStatus = xTaskCreate((TaskFunction_t) USBDevice_Task,
             "USB_AttachTask",
             USBDEVICETASK_SIZE,
@@ -723,7 +741,7 @@ void APP_Tasks ( void )
         red(1);
         while(1);
     }
-
+    setNote(100, 1024);
     // Wait for for things (USB) to be ready? easier debugging
     vTaskDelay(1000 / portTICK_PERIOD_MS);
     //test_task(NULL);
