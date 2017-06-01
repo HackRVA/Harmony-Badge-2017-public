@@ -10,6 +10,8 @@
 #include "task.h"
 #include "badge_menu.h"
 
+extern unsigned char QC_IR;
+
 #define LED_LVL 50
 void hello_world_task(void* p_arg)
 {
@@ -20,27 +22,75 @@ void hello_world_task(void* p_arg)
     unsigned char redraw = 0;
     union IRpacket_u pkt;
     pkt.p.command = IR_WRITE;
-    pkt.p.address = IR_LED;
-    pkt.p.badgeId = G_sysData.badgeId;
+    //pkt.p.address = IR_LED;
+    pkt.p.address = IR_APP0;
+    pkt.p.badgeId = 0;
     //pkt.p.data    = PING_PAIR_REQUEST;
-    pkt.p.data = PACKRGB(0, 100, 100);
-    
-    
-    //if(xHandle == NULL)
-    //    led(1, 0, 0);
+    pkt.p.data = 1;//PACKRGB(0, 100, 100);
     
     FbTransparentIndex(0);
     FbColor(GREEN);
     FbClear();
     FbMove(45, 45);
     FbWriteLine("QC!");
-    FbMove(5, 55);
+    FbMove(15, 55);
     FbWriteLine("Do things");
     FbSwapBuffers();
     led(0, 30, 0);
+    QC_IR = 0;
     
     for(;;)
     {
+//        if(pinged){
+//            setNote(77, 1024);
+//            FbClear();
+//            FbMove(40, 50);
+//            FbColor(GREEN);
+//            //FbFilledRectangle(20, 20);
+//            FbWriteLine('IR RECV');
+//            setNote(50, 2048);
+//            led(100, 0, 100); 
+//            pinged = 0;
+//            redraw = 1;
+//        }
+        
+        // Received a QC ping
+        if(QC_IR == 1){
+            setNote(77, 1024);
+            FbMove(10, 50);
+            FbColor(GREEN);
+            //FbFilledRectangle(20, 20);
+            FbWriteLine("I was pinged");
+            led(100, 0, 100); 
+            QC_IR = 0;
+            redraw = 1;
+            pkt.p.data = 2;
+            IRqueueSend(pkt);
+        }
+        // Received a QC ping 
+        else if(QC_IR == 2){
+            setNote(99, 2048);
+            FbMove(10, 50);
+            FbColor(YELLOW);
+            //FbFilledRectangle(20, 20);
+            //FbWriteLine('IR RECV');
+            FbWriteLine("ping response");
+            led(100, 100, 0); 
+            QC_IR = 0;
+            redraw = 1;          
+        }
+        
+        if(BUTTON_PRESSED_AND_CONSUME){          
+            pkt.p.data = 1;
+            IRqueueSend(pkt);
+            setNote(50, 1024);
+            FbMove(16, 16);
+            FbWriteLine("BTN");
+            led(LED_LVL, 0, LED_LVL);
+            //print_to_com1("DOWN\n\r");
+            redraw = 1;
+        }
+
         if(G_touch_pct >0){
             FbMove(16, 16);
             //FbWriteLine((unsigned char) "TOUCH");
@@ -52,27 +102,13 @@ void hello_world_task(void* p_arg)
             FbFilledRectangle(5, 15);
             redraw = 1;
             led(0, 0, 0);
-            setNote(100 + (G_touch_pct>>1), 768);
-
+            setNote(100 - (G_touch_pct), 1024);
         }      
-        
-        if(BUTTON_PRESSED_AND_CONSUME){          
-    
-            //IRPair();
-            IRqueueSend(pkt);
-            setNote(102, 1024);
-            FbMove(16, 16);
-            FbWriteLine("BTN");
-            led(LED_LVL, 0, LED_LVL);
-            //print_to_com1("DOWN\n\r");
-            redraw = 1;
-        }
-                
-        
+
         if(DOWN_BTN_AND_CONSUME){
             FbMove(16, 16);
             FbWriteLine("DOWN");
-            setNote(103, 1024);
+            setNote(55, 1024);
             led(0, LED_LVL, 0);
             //print_to_com1("DOWN\n\r");
             redraw = 1;
@@ -90,7 +126,7 @@ void hello_world_task(void* p_arg)
         if(UP_BTN_AND_CONSUME){
             FbMove(16, 16);
             FbWriteLine("UP");
-            setNote(104, 1024);
+            setNote(60, 1024);
             led(LED_LVL, LED_LVL, LED_LVL);
             //print_to_com1("UP\n\r");
             redraw = 1;
@@ -99,7 +135,7 @@ void hello_world_task(void* p_arg)
         if(LEFT_BTN_AND_CONSUME){
             FbMove(16, 16);
             FbWriteLine("LEFT");
-            setNote(105, 1024);
+            setNote(45, 1024);
             led(LED_LVL, 0, 0);
             //print_to_com1("LEFT\n\r");
             redraw = 1;
@@ -109,7 +145,7 @@ void hello_world_task(void* p_arg)
             FbMove(16, 16);
             FbWriteLine("RIGHT");
             led(0, 0, LED_LVL);
-            setNote(106, 1024);
+            setNote(20, 1024);
             //print_to_com1("RIGHT");
             redraw = 1;
         }        
@@ -121,7 +157,6 @@ void hello_world_task(void* p_arg)
         
         vTaskDelay(xDelay);
 
-        
     }
     vTaskDelete( NULL );
 }
