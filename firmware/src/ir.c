@@ -5,8 +5,12 @@
 #include "ir.h"
 #include "debug.h"
 
-extern rtccTime G_time ;
-extern rtccDate G_date ;
+//extern rtccTime G_time ;
+//extern rtccDate G_date ;
+
+rtccTime G_time ;
+rtccDate G_date ;
+
 
 unsigned char IRpacketInCurr = 0;
 unsigned char IRpacketInNext = 0;
@@ -21,6 +25,8 @@ unsigned short pinged = 0 ;
 
 // Set to a badge id if badge got a ping response
 unsigned short ping_responded = 0;
+
+unsigned char QC_IR = 0;
 
 /*
    Dont change the order of this without also changing the enum's in ir.h
@@ -100,14 +106,14 @@ void IRhandler()
 
     /* curr == next == empty */
     if (IRpacketInCurr != IRpacketInNext) {
-	unsigned char *tmp, tmpstr[16];
-	extern unsigned char hextab[];
+        unsigned char *tmp, tmpstr[16];
+        extern unsigned char hextab[];
 
-	if (IRpacketsIn[IRpacketInCurr].p.address < IR_LASTADRESS) /* basic sanity check before we call unknown handlers */
-		IRcallbacks[ IRpacketsIn[IRpacketInCurr].p.address].handler( IRpacketsIn[IRpacketInCurr].p );
+        if (IRpacketsIn[IRpacketInCurr].p.address < IR_LASTADRESS) /* basic sanity check before we call unknown handlers */
+            IRcallbacks[ IRpacketsIn[IRpacketInCurr].p.address].handler( IRpacketsIn[IRpacketInCurr].p );
 
-	IRpacketInCurr++;
-	IRpacketInCurr %= MAXPACKETQUEUE;
+        IRpacketInCurr++;
+        IRpacketInCurr %= MAXPACKETQUEUE;
     }
 }
 
@@ -309,9 +315,20 @@ void ir_liveled(struct IRpacket_t p)
    DEBUGSTRLVL(DNOISE, "ir_liveled");
 }
 
+//QC APP
 void ir_app0(struct IRpacket_t p)
 {
-   DEBUGSTRLVL(DNOISE, "ir_app0");
+    //DEBUGSTRLVL(DNOISE, "ir_app0");
+    QC_IR = (unsigned char) p.data;
+//    setNote(77, 1024);
+//    FbMove(40, 50);
+//    FbColor(GREEN);
+//    FbFilledRectangle(20, 20);
+//    //FbWriteLine('IR RECV');
+//    //setNote(50, 2048);
+//    led(100, 0, 100);
+//    FbSwapBuffers();
+
 }
 
 void ir_app1(struct IRpacket_t p)
