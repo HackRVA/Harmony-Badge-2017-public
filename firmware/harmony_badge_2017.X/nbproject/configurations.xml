@@ -33,6 +33,9 @@
         <itemPath>../src/include/badge_menu.h</itemPath>
         <itemPath>../src/include/buttons.h</itemPath>
         <itemPath>../src/include/utils.h</itemPath>
+        <itemPath>../src/include/ir.h</itemPath>
+        <itemPath>../src/include/timer1_int.h</itemPath>
+        <itemPath>../src/include/flash.h</itemPath>
       </logicalFolder>
       <logicalFolder name="bsp" displayName="bsp" projectFiles="true">
       </logicalFolder>
@@ -203,6 +206,9 @@
         <itemPath>../src/badge_menu.c</itemPath>
         <itemPath>../src/buttons.c</itemPath>
         <itemPath>../src/utils.c</itemPath>
+        <itemPath>../src/ir.c</itemPath>
+        <itemPath>../src/timer1_int.c</itemPath>
+        <itemPath>../src/debug.c</itemPath>
       </logicalFolder>
       <logicalFolder name="bsp" displayName="bsp" projectFiles="true">
       </logicalFolder>
