@@ -12,14 +12,7 @@
 extern "C" {
 #endif
     
-void led(unsigned char r, unsigned char g, unsigned char b);
-
-void red(unsigned char pwm);
-
-void green(unsigned char pwm);
-
-void blue(unsigned char pwm);
-
+#include "timer1_int.h"
 #ifdef	__cplusplus
 }
 #endif

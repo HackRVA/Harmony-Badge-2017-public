@@ -8,6 +8,7 @@
 #include "badge_menu.h"
 #include "badge_apps.h"
 #include "buttons.h"
+#include "colors.h"
 
 struct menuStack_t {
    struct menu_t *selectedMenu;
@@ -288,12 +289,14 @@ struct menu_t *display_menu(struct menu_t *menu,
 
 
 struct menu_t main_m[] = {
-    //{"Badgelandia", VERT_ITEM|DEFAULT_ITEM, FUNCTION,
-    //    {badgelandia_task}},
-    {"Badgey Bird", VERT_ITEM|DEFAULT_ITEM, FUNCTION,
-        {badgey_bird_task}},
-    //{"Screensavers", VERT_ITEM|DEFAULT_ITEM, FUNCTION,
-    //    {screensaver_task}},
+    {"TEST", VERT_ITEM|DEFAULT_ITEM, FUNCTION,
+        {hello_world_task}},    
+//    {"Badgelandia", VERT_ITEM|DEFAULT_ITEM, FUNCTION,
+//        {badgelandia_task}},
+//    {"Badgey Bird", VERT_ITEM|DEFAULT_ITEM, FUNCTION,
+//        {badgey_bird_task}},
+//    {"Screensavers", VERT_ITEM|DEFAULT_ITEM, FUNCTION,
+//        {screensaver_task}},
 
    //{"Arcade",       VERT_ITEM|DEFAULT_ITEM, MENU,
    //     {games_m}},
@@ -314,25 +317,39 @@ void returnToMenus(){
     TaskHandle_t xHandle = xTaskGetHandle("APP Tasks");
     BaseType_t notify_ret;
     if(xHandle == NULL)
-        led(1, 0, 0);
+        led(100, 0, 0);
 
+    clear_buttons();
     notify_ret = xTaskNotify(xHandle,
                              1u,
                              eSetBits);
+    
     vTaskSuspend(NULL);
 }
 
+#define QC_FIRST
 //#define DEBUG_PRINT_TO_CDC
 void menu_and_manage_task(void *p_arg){
     TaskHandle_t xHandle = NULL;
     uint32_t ulNotifiedValue;
     BaseType_t xReturned;
-    struct menu_t *prev_selected_menu = main_m;
-    G_currMenu = prev_selected_menu;
+    struct menu_t *prev_selected_menu = NULL;
+    G_currMenu = main_m;
+    G_selectedMenu = &main_m[1];
+#ifdef QC_FIRST
+    xReturned = xTaskCreate((TaskFunction_t) hello_world_task,
+                            "exec_app",
+                            128u, //may want to increase?
+                            NULL,
+                            1u,
+                            &xHandle);
+#endif
+    
     for(;;){
         // No running task, display menu or something
         if(xHandle == NULL)
         {
+           //led(30, 30, 0);
             // Only redraw when we must
             if (prev_selected_menu != G_selectedMenu){
                 G_selectedMenu = display_menu(G_currMenu,
@@ -390,7 +407,7 @@ void menu_and_manage_task(void *p_arg){
                         break;
                 }
             }
-            else if (UP_TOUCH_AND_CONSUME) /* handle slider/soft button clicks */ {
+            else if (UP_TOUCH_AND_CONSUME || UP_BTN_AND_CONSUME) /* handle slider/soft button clicks */ {
                 setNote(109, 800); /* f */
 
                 /* make sure not on first menu item */
@@ -401,12 +418,12 @@ void menu_and_manage_task(void *p_arg){
                             && G_selectedMenu > G_currMenu)
                         G_selectedMenu--;
 
-                    G_selectedMenu = display_menu(G_currMenu, G_selectedMenu, MAIN_MENU_STYLE);
+                    //G_selectedMenu = display_menu(G_currMenu, G_selectedMenu, MAIN_MENU_STYLE);
                 }
             }/* *** PEB ***** not convinced this should be an else
                both sliders can be pressed then this one will never get handled
             */
-            else if (DOWN_TOUCH_AND_CONSUME) {
+            else if (DOWN_TOUCH_AND_CONSUME || DOWN_BTN_AND_CONSUME) {
                 setNote(97, 1024); /* g */
 
                 /* make sure not on last menu item */
@@ -422,7 +439,7 @@ void menu_and_manage_task(void *p_arg){
                     if((G_selectedMenu->attrib & LAST_ITEM) && (G_selectedMenu->attrib & HIDDEN_ITEM))
                         G_selectedMenu--;
 
-                    G_selectedMenu = display_menu(G_currMenu, G_selectedMenu, MAIN_MENU_STYLE);
+                   // G_selectedMenu = display_menu(G_currMenu, G_selectedMenu, MAIN_MENU_STYLE);
                 }
             }
         }
@@ -431,13 +448,14 @@ void menu_and_manage_task(void *p_arg){
             // TODO: Might be able to let task kill itself
             if (xTaskNotifyWait(0, 1u, &ulNotifiedValue, 10 / portTICK_PERIOD_MS)){
                 if(ulNotifiedValue & 0x01){
-                    vTaskSuspend(xHandle); // doesn't hurt to call suspend here too?
+                    //vTaskSuspend(xHandle); // doesn't hurt to call suspend here too?
                     vTaskDelete(xHandle);
                     xHandle = NULL;
                     prev_selected_menu = NULL;
                 }
             }
         }
+        IRhandler();
 
         //Handle other events? Marshal messages?
 #ifdef DEBUG_PRINT_TO_CDC

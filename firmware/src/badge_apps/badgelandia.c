@@ -137,6 +137,8 @@ void badgelandia_task(void* p_arg){
 
     unsigned char i = 0, redraw=1;
 
+    unsigned char spkr_factor = 10;
+    
     // Use floats to accumulate small changes, cast before draw
     struct badgelandia_player_t player;
 #define N_GOONS 5
@@ -175,7 +177,18 @@ void badgelandia_task(void* p_arg){
         if(BUTTON_PRESSED_AND_CONSUME)
             returnToMenus();
 #endif
+        
+        if(UP_BTN_HOLD(3)){
+            //green(100);
+            //setNote(10*spkr_factor, 2048);
+            //spkr_factor++;
+            //setNote(100, 1024);
+        }
 
+        if(DOWN_BTN_HOLD(3)){
+            //green(0);
+        }
+        
         if(LEFT_BTN_HOLD(3))
         {
             ship_rotation -= ((float)G_left_button_cnt)/150.0;
@@ -210,6 +223,8 @@ void badgelandia_task(void* p_arg){
 #else
             thruster_pct = ((unsigned char) thruster_pct) >> 4;
 #endif
+                
+            //red(thruster_pct*2);
 
             if( abs(player.ship.o.vel_x) < 6.0)
                 player.ship.o.vel_x += thruster_pct * cos_rot;
