@@ -292,6 +292,10 @@ struct menu_t main_m[] = {
     //    {badgelandia_task}},
     {"Badgey Bird", VERT_ITEM|DEFAULT_ITEM, FUNCTION,
         {badgey_bird_task}},
+    {"Star Shooter", VERT_ITEM|DEFAULT_ITEM, FUNCTION, 
+        {star_shooter_task}},
+    {"U Draw", VERT_ITEM|DEFAULT_ITEM, FUNCTION, 
+        {udraw_task}},
     //{"Screensavers", VERT_ITEM|DEFAULT_ITEM, FUNCTION,
     //    {screensaver_task}},
 

@@ -22,6 +22,7 @@ extern unsigned char G_right_button_cnt;
 extern unsigned char G_pressed_button;
 // Mix some randomness up
 extern unsigned int G_entropy_pool;
+extern unsigned int timestamp;
 
 #define SOLO_BTN_MASK  1
 #define UP_BTN_MASK    2

@@ -21,5 +21,9 @@ void badgelandia_task(void* p_arg);
 void screensaver_task(void* p_arg);
 
 void boot_splash_task(void *p_arg);
+
+void star_shooter_task(void *p_arg);
+
+void udraw_task(void *p_arg);
 #endif
 
