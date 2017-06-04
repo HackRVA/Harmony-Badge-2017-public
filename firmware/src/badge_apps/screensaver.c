@@ -50,7 +50,7 @@ void random_dots(void* p_arg){
 
 
 #define NUM_POLYS 11
-void boot_splash_task(void* p_arg){
+void spirals_task(void* p_arg){
     short points[15][2] = {0};
     unsigned char n_edges = 3, i=0;
     const TickType_t tick_rate = 10 / portTICK_PERIOD_MS;
@@ -228,7 +228,7 @@ void screensaver_task(void* p_arg)
 #endif
     {
         game_of_life_task(NULL);
-        boot_splash_task(NULL);
+        spirals_task(NULL);
         random_dots(NULL);
 #ifndef SDL_BADGE
         returnToMenus();
