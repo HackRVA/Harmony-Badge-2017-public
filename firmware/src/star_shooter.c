@@ -109,6 +109,11 @@ struct _ss_stars ss_stars;
 struct _ss_torp_map ss_torp_map;
 
 void star_shooter_task(void *p_arg){
+    static unsigned char init = 1;
+    if(init) {
+        game.game_state = ss_init;
+        init = 0;
+    }
     const TickType_t ss_tick_rate = 20 / portTICK_PERIOD_MS;
     for(;;) {
         game.game_state();

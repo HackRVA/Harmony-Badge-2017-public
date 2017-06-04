@@ -13,8 +13,8 @@
 #include "ir.h"
 
 //ir bit masks
-#define FIRST_PKT 0b111111111
-#define BG_ID_MASK 0b011111111
+#define FIRST_PKT 0b111111111           //used to indicate a packet is first packet
+#define BG_ID_MASK 0b011111111          //used to store data in pkt.p.badgeId
 
 //bit masks 32bit should change with pixel bit type
 #define EMPTY_MASK 0b00000000000000000000000000000000 //black line
@@ -25,7 +25,7 @@
 
 //constants 
 #define PIX_NUM 32                      //number of pixels high should match PIX_NUM_WIDE bit type
-#define PIX_BYTES PIX_NUM/8             //number of bytes in 
+#define PIX_BYTES PIX_NUM/8             //number of bytes in a buffer line
 #define SCREEN_WIDTH 128                //width of samsung display
 #define PIX_WIDTH SCREEN_WIDTH/PIX_NUM  //width of each pixel
 
@@ -48,18 +48,17 @@ enum {                                  //draw color control enumerator
 };
 
 //App IR send structs
-
-struct short_halfs {
+struct short_halfs {                    //used to access halves of 16bits
     unsigned char upper;
     unsigned char lower;
 };
 
 union half_pkt {
-    struct short_halfs bits8;
+    struct short_halfs bits8;           //union for breaking up packet data
     uint16_t bits16;
 };
 
-union line_byte_index {
+union line_byte_index {                 //union for breaking up image buffer data
     unsigned char bytes[4];
     uint32_t line;
 };
@@ -85,6 +84,9 @@ struct _draw_state {
     void (*state)(void);                //current app state function
 };
 
+//public global vars
+unsigned char image_received = 0;
+
 
 //Game State Functions
 void draw_init(void);
@@ -99,6 +101,7 @@ unsigned char draw_get_last_line(struct _image_buffer img_buf);
 unsigned char draw_is_empty(struct _image_buffer img_buf, unsigned char line);
 void draw_send_packet(struct _image_buffer img_buf, unsigned char byte, unsigned char vert_index);
 void draw_send_image(struct _image_buffer img_buf);
+void draw_ir_udraw(struct IRpacket_t p);
 
 //draw cursor location
 void draw_cursor(struct _cursor pos);
@@ -116,6 +119,7 @@ void draw_remove_pixel_data(PIX_NUM_WIDE * vert_index,unsigned const char horz_i
 //Game control variables
 struct _draw_state draw_state = {{0,0},0,DRAW_BLACK, DRAW_OFF,draw_init};
 struct _image_buffer image_buffer;
+struct _image_buffer ir_in_buffer;
 
 //app loop
 void udraw_task(void *p_arg){
@@ -365,6 +369,41 @@ void draw_send_image(struct _image_buffer img_buf) {
     for(hpkt.bits8.lower;hpkt.bits8.lower<=hpkt.bits8.upper;hpkt.bits8.lower++) {
         for(byte_index=0;byte_index<PIX_BYTES;byte_index++) {
             draw_send_packet(img_buf,byte_index,hpkt.bits8.lower);
+        }
+    }
+}
+
+void draw_ir_udraw(struct IRpacket_t p) {
+    static union half_pkt first_last;
+    static unsigned char byteIndx = 0;
+    union half_pkt hpkt;
+    union line_byte_index line;
+    line.line = EMPTY_MASK;
+    if(p.badgeId == FIRST_PKT) {
+        first_last.bits16 = p.data;
+    }
+    else {
+        hpkt.bits16 = p.data;
+        line.bytes[byteIndx] = hpkt.bits8.lower;
+        ir_in_buffer.red[first_last.bits8.lower] |= line.line;
+        line.bytes[byteIndx] = hpkt.bits8.upper;
+        ir_in_buffer.green[first_last.bits8.lower] |= line.line;
+        line.bytes[byteIndx] = p.badgeId & BG_ID_MASK;
+        ir_in_buffer.blue[first_last.bits8.lower] |= line.line;
+     
+        if(byteIndx == (PIX_BYTES-1)) {
+            byteIndx = 0;
+        }
+        else {
+            byteIndx++;
+        }
+        
+        if(first_last.bits8.lower == first_last.bits8.upper) {
+            image_received = 1;
+            first_last.bits16 = 0;
+        }
+        else {
+            first_last.bits8.lower++;
         }
     }
 }

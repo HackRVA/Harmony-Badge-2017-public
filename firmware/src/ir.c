@@ -316,8 +316,11 @@ void ir_liveled(struct IRpacket_t p)
    DEBUGSTRLVL(DNOISE, "ir_liveled");
 }
 
+extern void draw_ir_udraw(struct IRpacket_t p);//from udraw.c
+
 void ir_udraw(struct IRpacket_t p)
 {
+    draw_ir_udraw(p);
     DEBUGSTRLVL(DNOISE, "ir_udraw");
 }
 
