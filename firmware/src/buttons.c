@@ -125,7 +125,9 @@ void button_task(void* p_arg)
                 ButtonVavgADCs[chan_idx] = ADC_Sum << (6-log2_n_averages); // Full scale = 2^10<<6 = 65536
 
             // May be mixing too often...
-            G_entropy_pool = (ADC_Sum ^ (G_entropy_pool)<<(0xF&timestamp));
+            G_entropy_pool = (ADC_Sum ^ 
+                    ((G_entropy_pool)<<(0xF&timestamp)) ^
+                    (timestamp));
             ADC_Sum = 0;
         }
         //---------

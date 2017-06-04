@@ -32,7 +32,7 @@ void badgey_bird_menu_exit(){
     FbBackgroundColor(BLACK);
     FbClear();
     badgey_bird_state = BADGEYB_SHOW_MENU;
-    //setNote(175, 1024);
+    setNote(175, 1024);
     returnToMenus();
 }
 
@@ -52,7 +52,7 @@ const unsigned char bird_pos_x = BADGEY_BIRD_POS_X;
 #define BADGEY_BIRD_BIRD_HEIGHT 14
 
 #define BADGEY_BIRD_PIPE_WIDTH 12
-#define BADGEY_BIRD_OPENING_SIZE 55
+#define BADGEY_BIRD_OPENING_SIZE 45
 #define BADGEY_BIRD_PIPE_SPEED 3
 
 #define BADGEY_BIRD_FLAP_ACC -10
@@ -85,7 +85,7 @@ void badgey_bird_add_active_pipe(){
     if(i == BADGEY_BIRD_MAX_PIPES)
         return;
 
-    //setNote(100, 1024);
+    setNote(100, 1024);
     badgey_bird_active_pipe_cnt++;
     badgey_bird_pipes[i].is_active = 1;
     badgey_bird_pipes[i].pos_x = 110;
@@ -192,13 +192,13 @@ void badgey_bird_update(){
 }
 
 void badgey_bird_draw_bird(){
-    FbColor(YELLOW);
-    FbMove(bird_pos_x, bird_pos_y);
-    FbFilledRectangle(16, 16);
+//    FbColor(YELLOW);
+//    FbMove(bird_pos_x, bird_pos_y);
+//    FbFilledRectangle(16, 16);
     
-    //FbMove(bird_pos_x, bird_pos_y);
-    //FbTransparentIndex(3);
-    //FbImage(BADGEY_BIRD, 0);
+    FbMove(bird_pos_x, bird_pos_y);
+    FbTransparentIndex(3);
+    FbImage(BADGEY_BIRD, 0);
     
 }
 
@@ -360,7 +360,7 @@ void badgey_bird_task(void* p_arg){
 }
 
 void badgey_bird_task_real(void* p_arg){
-    const TickType_t tick_rate = 20 / portTICK_PERIOD_MS;
+    const TickType_t tick_rate = 5 / portTICK_PERIOD_MS;
     FbBackgroundColor(CYAN);
     FbClear();
 

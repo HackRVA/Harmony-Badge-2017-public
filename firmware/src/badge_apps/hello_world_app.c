@@ -9,6 +9,7 @@
 #include "rgb_led.h"
 #include "task.h"
 #include "badge_menu.h"
+#include "assetList.h"
 
 extern unsigned char QC_IR;
 
@@ -31,6 +32,7 @@ void hello_world_task(void* p_arg)
     FbTransparentIndex(0);
     FbColor(GREEN);
     FbClear();
+
     FbMove(45, 45);
     FbWriteLine("QC!");
     FbMove(15, 55);
@@ -159,8 +161,4 @@ void hello_world_task(void* p_arg)
 
     }
     vTaskDelete( NULL );
-}
-
-void QC_task(void *p_arg){
-    
 }

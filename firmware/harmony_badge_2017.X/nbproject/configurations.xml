@@ -171,6 +171,11 @@
           <itemPath>../src/badge_apps/badgey_bird.c</itemPath>
           <itemPath>../src/badge_apps/badgelandia.c</itemPath>
           <itemPath>../src/badge_apps/screensaver.c</itemPath>
+          <itemPath>../src/badge_apps/groundwar.c</itemPath>
+          <itemPath>../src/badge_apps/boot_splash.c</itemPath>
+          <itemPath>../src/badge_apps/blinkenlights.c</itemPath>
+          <itemPath>../src/badge_apps/conductor.c</itemPath>
+          <itemPath>../src/badge_apps/dice_roll.c</itemPath>
         </logicalFolder>
         <logicalFolder name="f1" displayName="system_config" projectFiles="true">
           <logicalFolder name="f1"
