@@ -12,11 +12,12 @@
 */
 enum {
 //    DRBOB=0,
-//    HACKRVA4=0,
-//    RVASEC2016,
-    FONT,
+        FONT=0,
+    HACKRVA4,
+    RVASEC2016,
+
 //    BI_SPRITE,
-//    BADGEY_BIRD,
+    BADGEY_BIRD,
     LASTASSET,
 };
 
