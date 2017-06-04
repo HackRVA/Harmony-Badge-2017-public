@@ -3,7 +3,7 @@
 #include "colors.h"
 #include "flash.h"
 #include "ir.h"
-#include "debug.h"
+#include "include/debug.h"
 
 //extern rtccTime G_time ;
 //extern rtccDate G_date ;
@@ -56,6 +56,7 @@ struct IRcallback_t IRcallbacks[] = {
 	{ ir_livetext },	/* stream text screen */
 	{ ir_liveled },	/* stream rgb to LED */
 
+    { ir_udraw },
 	{ ir_app0 },
 	{ ir_app1 },
 	{ ir_app2 },
@@ -75,9 +76,9 @@ void IRqueueSend(union IRpacket_u pkt)
 {
     /* make sure not full */
     if ( ((IRpacketOutNext+1) % MAXPACKETQUEUE) != IRpacketOutCurr) {
-	IRpacketsOut[IRpacketOutNext].v = pkt.v;
-	IRpacketOutNext++;
-	IRpacketOutNext %= MAXPACKETQUEUE;
+        IRpacketsOut[IRpacketOutNext].v = pkt.v;
+        IRpacketOutNext++;
+        IRpacketOutNext %= MAXPACKETQUEUE;
     }
 }
 
@@ -313,6 +314,11 @@ void ir_livetext(struct IRpacket_t p)
 void ir_liveled(struct IRpacket_t p)
 {
    DEBUGSTRLVL(DNOISE, "ir_liveled");
+}
+
+void ir_udraw(struct IRpacket_t p)
+{
+    DEBUGSTRLVL(DNOISE, "ir_udraw");
 }
 
 //QC APP

@@ -8,6 +8,7 @@
 #include "badge_menu.h"
 #include "badge_apps.h"
 #include "buttons.h"
+#include "colors.h"
 
 struct menuStack_t {
    struct menu_t *selectedMenu;
@@ -288,17 +289,19 @@ struct menu_t *display_menu(struct menu_t *menu,
 
 
 struct menu_t main_m[] = {
-    //{"Badgelandia", VERT_ITEM|DEFAULT_ITEM, FUNCTION,
-    //    {badgelandia_task}},
-    {"Badgey Bird", VERT_ITEM|DEFAULT_ITEM, FUNCTION,
-        {badgey_bird_task}},
-    {"Star Shooter", VERT_ITEM|DEFAULT_ITEM, FUNCTION, 
-        {star_shooter_task}},
-    {"U Draw", VERT_ITEM|DEFAULT_ITEM, FUNCTION, 
-        {udraw_task}},
     {"TEST", VERT_ITEM|DEFAULT_ITEM, FUNCTION,
         {hello_world_task}},    
 //    {"Badgelandia", VERT_ITEM|DEFAULT_ITEM, FUNCTION,
+//        {badgelandia_task}},
+    {"Badgey Bird", VERT_ITEM|DEFAULT_ITEM, FUNCTION,
+        {badgey_bird_task}},
+//    {"Screensavers", VERT_ITEM|DEFAULT_ITEM, FUNCTION,
+//        {screensaver_task}},
+    {"U Draw", VERT_ITEM|DEFAULT_ITEM, FUNCTION,
+        {udraw_task}},
+    {"Star Shooter", VERT_ITEM|DEFAULT_ITEM, FUNCTION,
+        {star_shooter_task}},
+
    //{"Arcade",       VERT_ITEM|DEFAULT_ITEM, MENU,
    //     {games_m}},
    //{"Transmitters",       VERT_ITEM, MENU,

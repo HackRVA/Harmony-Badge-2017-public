@@ -2,7 +2,7 @@
 /*******************************************************************************
  * Author: Jonathan Lundquist / jonathan46000@gmail.com
  * Date: 5-24-17
- * ****************************************************************************/
+ ******************************************************************************/
 
 #include "app.h"
 #include "colors.h"
@@ -10,6 +10,11 @@
 #include "assetList.h"
 #include "buttons.h"
 #include "utils.h"
+#include "ir.h"
+
+//ir bit masks
+#define FIRST_PKT 0b111111111
+#define BG_ID_MASK 0b011111111
 
 //bit masks 32bit should change with pixel bit type
 #define EMPTY_MASK 0b00000000000000000000000000000000 //black line
@@ -20,6 +25,7 @@
 
 //constants 
 #define PIX_NUM 32                      //number of pixels high should match PIX_NUM_WIDE bit type
+#define PIX_BYTES PIX_NUM/8             //number of bytes in 
 #define SCREEN_WIDTH 128                //width of samsung display
 #define PIX_WIDTH SCREEN_WIDTH/PIX_NUM  //width of each pixel
 
@@ -39,6 +45,23 @@ enum {                                  //draw color control enumerator
     DRAW_YELLOW,
     DRAW_PURPLE,
     DRAW_CYAN,
+};
+
+//App IR send structs
+
+struct short_halfs {
+    unsigned char upper;
+    unsigned char lower;
+};
+
+union half_pkt {
+    struct short_halfs bits8;
+    uint16_t bits16;
+};
+
+union line_byte_index {
+    unsigned char bytes[4];
+    uint32_t line;
 };
 
 //App image buffer struct
@@ -70,6 +93,13 @@ void draw_get_input(void);
 void draw_exit(void);
 void draw_process(void);
 
+//draw ir functions
+unsigned char draw_get_first_line(struct _image_buffer img_buf);
+unsigned char draw_get_last_line(struct _image_buffer img_buf);
+unsigned char draw_is_empty(struct _image_buffer img_buf, unsigned char line);
+void draw_send_packet(struct _image_buffer img_buf, unsigned char byte, unsigned char vert_index);
+void draw_send_image(struct _image_buffer img_buf);
+
 //draw cursor location
 void draw_cursor(struct _cursor pos);
 
@@ -84,11 +114,16 @@ void draw_write_pixel_data(PIX_NUM_WIDE * vert_index,unsigned const char horz_in
 void draw_remove_pixel_data(PIX_NUM_WIDE * vert_index,unsigned const char horz_index);
 
 //Game control variables
-struct _draw_state draw_state = {{0,0},0,DRAW_BLACK, DRAW_OFF, draw_init};
+struct _draw_state draw_state = {{0,0},0,DRAW_BLACK, DRAW_OFF,draw_init};
 struct _image_buffer image_buffer;
 
 //app loop
 void udraw_task(void *p_arg){
+    static unsigned char init = 1;
+    if(init) {
+        draw_state.state = draw_init;
+        init=0;
+    }
     for(;;) {
         draw_state.state();
     } 
@@ -271,4 +306,65 @@ void draw_cursor(struct _cursor pos) {
     FbColor(MAGENTA);
     FbMove(pos.x*PIX_WIDTH,pos.y*PIX_WIDTH);
     FbRectangle(PIX_WIDTH,PIX_WIDTH);
+}
+
+unsigned char draw_is_empty(struct _image_buffer img_buf, unsigned char line) {
+    uint32_t is_empty=0;
+    is_empty = img_buf.red[line] | img_buf.green[line] | img_buf.blue[line];
+    return ((is_empty)? 0 : 1);
+}
+
+unsigned char draw_get_first_line(struct _image_buffer img_buf) {
+    unsigned char first_line = 0;
+    while(draw_is_empty(img_buf,first_line)&&first_line<PIX_WIDTH) {
+        first_line++;
+    }
+    return first_line;
+}
+
+unsigned char draw_get_last_line(struct _image_buffer img_buf) {
+    unsigned char last_line = PIX_WIDTH;
+    while(draw_is_empty(img_buf,last_line)&&last_line>0){
+        last_line--;
+    }
+    return last_line;
+}
+
+union half_pkt draw_send_first_pkt(struct _image_buffer img_buf) {
+    union half_pkt hpkt;
+    union IRpacket_u draw_pkt;
+    hpkt.bits8.lower = draw_get_first_line(img_buf);
+    hpkt.bits8.upper = draw_get_last_line(img_buf);
+    draw_pkt.p.badgeId = FIRST_PKT;
+    draw_pkt.p.command = IR_WRITE;
+    draw_pkt.p.address = IR_UDRAW;
+    draw_pkt.p.data = hpkt.bits16;
+    IRqueuSend(draw_pkt);
+}
+
+void draw_send_packet(struct _image_buffer img_buf, unsigned char byte, unsigned char vert_index) {
+    union IRpacket_u draw_pkt;
+    union half_pkt hpkt;
+    union line_byte_index line;
+    line.line = img_buf.red[vert_index];
+    hpkt.bits8.lower = line.bytes[byte];
+    line.line = img_buf.green[vert_index];
+    hpkt.bits8.upper = line.bytes[byte];
+    line.line = img_buf.red[vert_index];
+    draw_pkt.p.data = hpkt.bits16;
+    draw_pkt.p.badgeId = (BG_ID_MASK)&(line.bytes[byte]);
+    draw_pkt.p.command = IR_WRITE;
+    draw_pkt.p.address = IR_UDRAW;
+    IRqueuSend(draw_pkt);
+}
+
+void draw_send_image(struct _image_buffer img_buf) {
+    union half_pkt hpkt;
+    hpkt = draw_send_first_pkt(img_buf);
+    unsigned char byte_index;
+    for(hpkt.bits8.lower;hpkt.bits8.lower<=hpkt.bits8.upper;hpkt.bits8.lower++) {
+        for(byte_index=0;byte_index<PIX_BYTES;byte_index++) {
+            draw_send_packet(img_buf,byte_index,hpkt.bits8.lower);
+        }
+    }
 }
