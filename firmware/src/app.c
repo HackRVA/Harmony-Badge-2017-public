@@ -726,7 +726,7 @@ void APP_Tasks ( void )
             NULL);
 
     if(errStatus != pdTRUE){
-        red(1);
+        red(100);
         while(1);
     }
 
@@ -738,12 +738,13 @@ void APP_Tasks ( void )
             NULL);
 
     if(errStatus != pdTRUE){
-        red(1);
+        red(100);
         while(1);
     }
     setNote(100, 1024);
     // Wait for for things (USB) to be ready? easier debugging
     vTaskDelay(1000 / portTICK_PERIOD_MS);
+    led(0,0,0);
     //test_task(NULL);
     menu_and_manage_task(NULL);
 }
