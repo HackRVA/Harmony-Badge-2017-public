@@ -14,6 +14,7 @@
 #include "buttons.h"
 #endif
 #include "badge_menu.h"
+#include "utils.h"
 
 
 #define CIRCLE_GRUNT_SPEED 1
@@ -28,6 +29,9 @@
 void enter_spectate_mode();
 void enter_build_mode();
 void exit_groundwar();
+
+short groundwar_points = 0;
+short groundwar_level_health = 100;
 
 struct menu_t groundwar_menu[] = {
     {"return", VERT_ITEM, FUNCTION, {(struct menu_t *)enter_spectate_mode}},
@@ -52,7 +56,7 @@ enum groundwar_minion_type{
 };
 
 unsigned char minion_speeds[] = {
-        1, 4, 7, 15
+        2, 4, 7, 15
 };
 
 unsigned char minion_hp[] = {
@@ -74,7 +78,8 @@ struct groundwar_minion_t {
 enum groundwar_defense_type{
     SMALL,
     MEDIUM,
-    LARGE
+    LARGE,
+    UNUSED
 };
 
 unsigned char defense_damage[] = {
@@ -96,12 +101,18 @@ unsigned char defense_cooldown[] = {
 };
 
 #define MAX_DEFENSE_STRUCTURES 30
+#define DEFENSE_NOT_TARGETING 255
+struct groundwar_projectile_t{
+    unsigned char targeted_minion, x, y;
+};
 
 struct groundwar_defense_t{
     unsigned char type;
     unsigned char x, y;
+    struct groundwar_projectile_t projectile;
 };
 
+char selected_defense_idx = 0;
 
 // basic high-level app states
 enum groundwar_state {
@@ -128,13 +139,20 @@ enum groundwar_game_state {
 #endif
 
 
-struct groundwar_game_ctx{
-    struct groundwar_minion_t minions[NUM_MINIONS];
-    struct groundwar_defense_t defenses[MAX_DEFENSE_STRUCTURES];
-    //struct groundwar_defense_t *selected_defense;
-    char selected_defense;
-    struct groundwar_level_t lvl;
-};
+enum groundwar_state state = INIT;
+enum groundwar_game_state game_state = SPECTATING;
+
+void enter_spectate_mode(){
+    game_state = SPECTATING;
+}
+
+void enter_build_mode(){
+    game_state = BUILDING;
+}
+
+void exit_groundwar(){
+    state=EXIT;
+}
 
 void init_minions(struct groundwar_minion_t minions[NUM_MINIONS],
                   struct groundwar_level_t lvl){
@@ -161,18 +179,29 @@ void init_minions(struct groundwar_minion_t minions[NUM_MINIONS],
 
 }
 
+
+void init_defenses(struct groundwar_defense_t defenses[MAX_DEFENSE_STRUCTURES]){
+    unsigned char i = 0, type_idx=0, create_count = 0;
+    for(i=0; i < MAX_DEFENSE_STRUCTURES; i++){
+        defenses[i].type = UNUSED;
+        defenses[i].x = 40;
+        defenses[i].y = 40;
+        defenses[i].projectile.targeted_minion = DEFENSE_NOT_TARGETING;
+        defenses[i].projectile.x = 40;
+        defenses[i].projectile.y = 40;
+    }
+}
+
 void groundwar_step(struct groundwar_minion_t minions[NUM_MINIONS],
+                    struct groundwar_defense_t defenses[MAX_DEFENSE_STRUCTURES],
                     struct groundwar_level_t lvl) {
     int dx, dy,
         sx, sy,
         err, e2;
-    unsigned char x0, y0, x1, y1;
+    unsigned char x0, y0, x1, y1, i, j;
     static unsigned char step_cnt = 0;
-    //int dx = abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
-    //int dy = abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
-    //int err = (dx > dy ? dx : -dy)/2, e2;
 
-    unsigned char i;
+    // draw our minions
     for(i=0; i < NUM_MINIONS; i++){
         if(minions[i].current_hp == 0){
             continue;
@@ -209,6 +238,12 @@ void groundwar_step(struct groundwar_minion_t minions[NUM_MINIONS],
                 //minion is done
                 // to do - takeaway player health
                 minions[i].current_hp = 0;
+                minions[i].type = UNUSED;
+
+                if(groundwar_level_health < minions[i].current_hp)
+                    groundwar_level_health = 0;
+                else
+                    groundwar_level_health -= minions[i].current_hp;
             }
             else{
                 minions[i].point_heading++;
@@ -216,14 +251,93 @@ void groundwar_step(struct groundwar_minion_t minions[NUM_MINIONS],
         }
     }
 
+#define DEFENSES_TARGET_IDX defenses[i].projectile.targeted_minion
+    for(i=0; i < MAX_DEFENSE_STRUCTURES; i++){
+
+        if(defenses[i].type == UNUSED)
+            continue;
+
+
+        if(defenses[i].projectile.targeted_minion == DEFENSE_NOT_TARGETING){
+            //TODO:find front minion within range
+            for(j=0; j<NUM_MINIONS; j++){
+                if(minions[j].type != UNUSED && minions[j].current_hp != 0) {
+                    defenses[i].projectile.targeted_minion = j;
+                    defenses[i].projectile.x = defenses[i].x;
+                    defenses[i].projectile.y = defenses[i].y;
+
+                    break;
+                }
+            }
+        }
+        else if(minions[defenses[i].projectile.targeted_minion].type == UNUSED
+                    || minions[defenses[i].projectile.targeted_minion].current_hp == 0){
+                defenses[i].projectile.targeted_minion = DEFENSE_NOT_TARGETING;
+            }
+        else{
+
+
+            path_between_points(&defenses[i].projectile.x,
+                                &defenses[i].projectile.y,
+                                minions[DEFENSES_TARGET_IDX].x, minions[DEFENSES_TARGET_IDX].y);
+            // If projectile gets close, decrease health of minion
+            // and destroy projectile
+            if((abs(minions[DEFENSES_TARGET_IDX].x - defenses[i].projectile.x) < 2)
+                    &&(abs(minions[DEFENSES_TARGET_IDX].y - defenses[i].projectile.y) < 2))
+            {
+
+                if(minions[DEFENSES_TARGET_IDX].current_hp <= defense_damage[defenses[i].type]) {
+                    minions[DEFENSES_TARGET_IDX].type = UNUSED;
+                    minions[DEFENSES_TARGET_IDX].current_hp = 0;
+                    groundwar_points += minion_hp[minions[DEFENSES_TARGET_IDX].type];
+                    defenses[i].projectile.targeted_minion = DEFENSE_NOT_TARGETING;
+                }
+                else{
+                    minions[DEFENSES_TARGET_IDX].current_hp -= defense_damage[defenses[i].type];
+                }
+            }
+        }
+    }
+
     step_cnt++;
-    //printf("(%d, %d)\n", minions[0].x, minions[1].y);
+}
+
+void groundwar_draw_defense(unsigned char x, unsigned char y,
+                            unsigned char defense_id,
+                            unsigned char with_placement_outline) {
+
+    switch(defense_id){
+        case SMALL:
+            if(with_placement_outline){
+
+                FbColor(WHITE);
+                FbMove(x-6, y-6);
+                FbRectangle(11, 11);
+            }
+            // Draw stem
+            FbMove(x-1, y-5);
+            FbColor(GREEN);
+            FbFilledRectangle(3, 10);
+
+            FbMove(x-4, y-5);
+            FbFilledRectangle(10, 3);
+
+            break;
+        case MEDIUM:
+            break;
+        case LARGE:
+            break;
+    }
+
 }
 
 void groundwar_draw(struct groundwar_minion_t minions[NUM_MINIONS],
+                    struct groundwar_defense_t defenses[MAX_DEFENSE_STRUCTURES],
                     struct groundwar_level_t lvl){
     unsigned char i = 0;
     short shared_vertices[8][2] = {0};
+    static unsigned char place_x = 40, place_y = 40;
+
     FbColor(WHITE);
     FbDrawVectors(lvl.unit_path, lvl.num_path_points, 5, 5, 0);
     for(i=0; i < NUM_MINIONS; i++){
@@ -251,12 +365,6 @@ void groundwar_draw(struct groundwar_minion_t minions[NUM_MINIONS],
                 FbMove(minions[i].x,
                        minions[i].y);
                 FbFilledRectangle(7, 7);
-//                equilateral_polygon_points(shared_vertices, 6.0, 4,
-//                                           0);
-//                FbPolygonFromPoints(shared_vertices,//goon_vertices,
-//                                    4,
-//                                    (short)minions[i].x,
-//                                    (short)minions[i].y);
                 break;
             case CIRCLE:
                 FbColor(WHITE);
@@ -269,32 +377,41 @@ void groundwar_draw(struct groundwar_minion_t minions[NUM_MINIONS],
                 break;
         }
     }
+
+    for(i=0; i<MAX_DEFENSE_STRUCTURES && i != selected_defense_idx; i++){
+
+        groundwar_draw_defense(
+                defenses[i].x,
+                defenses[i].y,
+                defenses[i].type,
+                0
+        );
+
+        if(defenses[i].projectile.targeted_minion != DEFENSE_NOT_TARGETING){
+
+            FbColor(WHITE);
+            FbMove(defenses[i].projectile.x, defenses[i].projectile.y);
+            FbFilledRectangle(2, 2);
+        }
+    }
+
+    if(game_state != BUILDING)
+        return;
+
+    //FbMove(2, 32);
+    //FbColor(GREEN);
+    groundwar_draw_defense(defenses[selected_defense_idx].x,
+                           defenses[selected_defense_idx].y,
+                           defenses[selected_defense_idx].type, 1);
+
 }
 
-void groundwar_build_mode_draw(struct groundwar_game_ctx ctx){
-    FbMove(2, 32);
-    FbColor(GREEN);
-    FbWriteLine("BUILDING");
-}
 
-enum groundwar_state state = INIT;
-enum groundwar_game_state game_state = SPECTATING;
 
-void enter_spectate_mode(){
-    game_state = SPECTATING;
-}
-
-void enter_build_mode(){
-    game_state = BUILDING;
-}
-
-void exit_groundwar(){
-    state=EXIT;
-}
-
-void groundwar_io(struct groundwar_defense_t *selected_defense,
+void groundwar_io(struct groundwar_defense_t defenses[MAX_DEFENSE_STRUCTURES],
                   struct groundwar_level_t lvl){
 
+#define selected_defense defenses[selected_defense_idx]
     // main button brings up menu and is used to select items in the menu?
     if(game_state != MENUING){
         if(BUTTON_PRESSED_AND_CONSUME){
@@ -302,16 +419,37 @@ void groundwar_io(struct groundwar_defense_t *selected_defense,
         }
 
         if(game_state == BUILDING){
-            if(UP_BTN_AND_CONSUME){
 
+            if(UP_BTN_AND_CONSUME){
+                selected_defense.y -= 2;
             }
             if(DOWN_BTN_AND_CONSUME){
-
+                selected_defense.y += 2;
             }
             if(LEFT_BTN_AND_CONSUME){
-
+                selected_defense.x -= 2;
             }
             if(RIGHT_BTN_AND_CONSUME){
+                selected_defense.x += 2;
+            }
+
+            if(selected_defense.type == UNUSED)
+                selected_defense.type = SMALL;
+
+            if(UP_TOUCH_AND_CONSUME){
+                if(selected_defense.type == LARGE)
+                    selected_defense.type = SMALL;
+                else {
+                    selected_defense.type = (selected_defense.type++);
+
+                }
+            }
+
+            if(DOWN_TOUCH_AND_CONSUME){
+                selected_defense_idx++;
+                selected_defense.x = defenses[selected_defense_idx-1].x - 5;
+                selected_defense.y = defenses[selected_defense_idx-1].y - 5;
+                selected_defense.type = defenses[selected_defense_idx-1].type;
 
             }
         }
@@ -319,22 +457,19 @@ void groundwar_io(struct groundwar_defense_t *selected_defense,
 }
 
 
-#define IS_ACTIVE_GAME_STATE ((game_state == SPECTATING) || (game_state == BUILDING))
 void groundwar_task(void* p_arg) {
     unsigned char cnt= 0;
     const TickType_t tick_rate = 10 / portTICK_PERIOD_MS;
 
     struct groundwar_minion_t groundwar_minions[NUM_MINIONS] = {0};
+    struct groundwar_defense_t defenses[MAX_DEFENSE_STRUCTURES];
 
     struct groundwar_level_t lvl = {
             .unit_path = {{10, 0}, {10, 30}, {70, 30}, {70, 90}, {120, 90}},
             .num_path_points = 5,
-            .distribution_of_units = {15, 4, 2, 1}
+            //.distribution_of_units = {15, 4, 2, 1}
+            .distribution_of_units = {15, 0, 0, 0}
     };
-
-    //struct groundwar_game_ctx ctx;
-    //ctx.lvl = lvl;
-    //ctx.selected_defense = -1;
 
 #ifdef SDL_BADGE
     while(G_Fb.status)
@@ -345,6 +480,14 @@ void groundwar_task(void* p_arg) {
         switch (state){
             case INIT:
                 init_minions(groundwar_minions, lvl);
+                init_defenses(defenses);
+                // TEST BUILD
+                //enter_build_mode();
+                defenses[0].type = SMALL;
+                defenses[0].x = 10;
+                defenses[0].y = 50;
+                selected_defense_idx = 1;
+
                 state = DRAW;
                 break;
             case DRAW:
@@ -353,11 +496,7 @@ void groundwar_task(void* p_arg) {
                                 WHITE_ON_BLACK);
                 }
                 else {
-                    groundwar_draw(groundwar_minions, lvl);
-
-                    //if(game_state == BUILDING)
-                        //groundwar_build_mode_draw(ctx);
-
+                    groundwar_draw(groundwar_minions, defenses, lvl);
                     state = IO;
                 }
 
@@ -365,7 +504,7 @@ void groundwar_task(void* p_arg) {
                 break;
             case IO:
                 if(game_state != MENUING){
-                    groundwar_io(groundwar_minions, lvl);
+                    groundwar_io(defenses, lvl);
                 }
                 state = STEP;
                 break;
@@ -376,7 +515,7 @@ void groundwar_task(void* p_arg) {
                     {
 #endif
                     if(game_state != MENUING)
-                        groundwar_step(groundwar_minions, lvl);
+                        groundwar_step(groundwar_minions, defenses, lvl);
 
                     cnt = 0;
                 }
