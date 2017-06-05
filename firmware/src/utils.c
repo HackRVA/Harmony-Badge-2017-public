@@ -28,7 +28,7 @@ unsigned int irbit2(unsigned int iseed)
 }
 
 unsigned int quick_rand(unsigned int seed){
-    return irbit2(seed ^ G_entropy_pool);
+    return irbit2(seed ^ G_entropy_pool ^ rand());
 }
 
 
@@ -155,3 +155,36 @@ void path_between_points(unsigned char *x0, unsigned char *y0,
     if (e2 < dy) { err += dx; *y0 += sy; }
 
 }
+
+#define NOPE
+#ifdef NOPE
+// grabbed from online, so it's gotta be good:
+//char *itoa(int value)
+void badge_itoa(int value, unsigned char buffer[])
+{
+    //static char buffer[12];        // 12 bytes is big enough for an INT32
+    int original = value;        // save original value
+    unsigned char i = 0;
+
+    int c = sizeof(buffer)-1;
+
+    buffer[c] = 0;                // write trailing null in last byte of buffer
+
+    for(i=0; i<c; i++ )
+        buffer[i] = ' ';
+
+    if (value < 0)                 // if it's negative, note that and take the absolute value
+        value = -value;
+
+    do                             // write least significant digit of value that's left
+    {
+        buffer[--c] = (value % 10) + '0';
+        value /= 10;
+    } while (value);
+
+    if (original < 0)
+        buffer[--c] = '-';
+
+    //return &buffer[c];
+}
+#endif
