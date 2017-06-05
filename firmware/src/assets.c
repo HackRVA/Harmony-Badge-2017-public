@@ -190,6 +190,7 @@ unsigned char G_audioAssetId = 255;
 unsigned int G_audioFrame = 0; /**< persistent current "frame" of audio, like a "frame" of video */
 unsigned short G_currentNote=0;
 unsigned short G_duration = 0;
+unsigned char G_hold_note = 0;
 unsigned short G_duration_cnt = 0;
 unsigned short G_freq_cnt = 0;
 unsigned short G_freq = 0;
@@ -212,17 +213,28 @@ void setNote(unsigned short freq, unsigned short dur) {
 
    G_freq_cnt = 0;
    G_duration_cnt = 0;
+   G_hold_note = 0;
+}
+
+void beginNote(unsigned short freq){
+    G_hold_note = 1;
+    setNote(freq, 1024);
+}
+
+void endNote(){
+    G_duration_cnt = G_duration;
+    G_hold_note = 0;
 }
 
 // RA9
 void doAudio()
 {
-   if (G_duration == 0) return;
+   if (G_duration == 0 && G_hold_note == 0) return;
 
    G_freq_cnt++; /* current note freq counter */
    G_duration_cnt++;
 
-   if (G_duration_cnt != G_duration) {
+   if ((G_duration_cnt != G_duration) || G_hold_note) {
        if (G_freq_cnt == G_freq)  {
           G_freq_cnt = 0;
           //SYS_PORTS_PinWrite (PORTS_ID_0, PORT_CHANNEL_A, PORTS_BIT_POS_9, 1);
