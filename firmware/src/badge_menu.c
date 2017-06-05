@@ -444,7 +444,7 @@ void returnToMenus(){
     
     vTaskSuspend(NULL);
 }
-
+#define TIME_BEFORE_SLEEP 1000
 //#define QC_FIRST
 //#define DO_BOOT_SPLASH
 //#define DEBUG_PRINT_TO_CDC
@@ -453,8 +453,10 @@ void menu_and_manage_task(void *p_arg){
     uint32_t ulNotifiedValue;
     BaseType_t xReturned;
     struct menu_t *prev_selected_menu = NULL;
+    
     G_currMenu = main_m;
     G_selectedMenu = &main_m[1];
+    
 #ifdef QC_FIRST
     xReturned = xTaskCreate((TaskFunction_t) hello_world_task,
                             "exec_app",
@@ -471,6 +473,7 @@ void menu_and_manage_task(void *p_arg){
                             1u,
                             &xHandle);
 #endif    
+   
     
     for(;;){
         // No running task, display menu or something
@@ -522,7 +525,7 @@ void menu_and_manage_task(void *p_arg){
                     case FUNCTION: /* call the function pointer if clicked */
                         //setNote(115, 2048); /* e */
                         //runningApp = G_selectedMenu->data.func;
-                        xReturned = xTaskCreate((TaskFunction_t) G_selectedMenu->data.func, //hello_world_task,
+                        xReturned = xTaskCreate((TaskFunction_t) G_selectedMenu->data.func, 
                                                 "exec_app",
                                                 650u, //may want to increase?
                                                 NULL,
@@ -573,17 +576,26 @@ void menu_and_manage_task(void *p_arg){
         // Manage a running task
         else if(xHandle !=NULL){
             // TODO: Might be able to let task kill itself
-            if (xTaskNotifyWait(0, 1u, &ulNotifiedValue, 10 / portTICK_PERIOD_MS)){
+            if (xTaskNotifyWait(0, 1u, &ulNotifiedValue, 50 / portTICK_PERIOD_MS)){
                 if(ulNotifiedValue & 0x01){
                     //vTaskSuspend(xHandle); // doesn't hurt to call suspend here too?
                     vTaskDelete(xHandle);
                     xHandle = NULL;
                     prev_selected_menu = NULL;
+                     
                 }
             }
+            // Add some extra delay  since don't need responsive menu
+            //vTaskDelay(50 / portTICK_PERIOD_MS);
         }
         IRhandler();
 
+        if(TIME_SINCE_LAST_INPUT > TIME_BEFORE_SLEEP){
+            led(100, 0, 0);
+        }
+        else
+            led(0,0,0);
+        
         //Handle other events? Marshal messages?
 #ifdef DEBUG_PRINT_TO_CDC
         // TODO: this will have a conflict in the notify field with the kill signal
@@ -591,7 +603,7 @@ void menu_and_manage_task(void *p_arg){
         vTaskDelay(200 / portTICK_PERIOD_MS);
 #else
         // Doesn't need to be too responsive
-        vTaskDelay(50 / portTICK_PERIOD_MS);
+        vTaskDelay(5 / portTICK_PERIOD_MS);
 #endif
 
     }

@@ -7,6 +7,7 @@
 
 #include "utils.h"
 #include <math.h> // for sin/cos, may want to approx instead
+#include <stdlib.h>
 
 #define IB1 1
 #define IB2 2
@@ -50,6 +51,10 @@ unsigned char check_box_collision(unsigned char x1, unsigned char y1,
     return (x_check && y_check);
 }
 
+unsigned char distance_between_coords(unsigned char x1, unsigned char y1,
+                                      unsigned char x2, unsigned y2){
+    return sqrt(((x2 - x1)<< 1) + ((y2 - y1) << 1));
+}
 
 void rotate_points_to(short point_arr[][2],
                    unsigned int n_points, 
@@ -130,4 +135,23 @@ void equilateral_polygon_points(short point_arr[][2],
         point_arr[n][1] = (radius * SIN(rads));
         point_arr[n][0] = (radius * COS(rads));
     }  
+}
+
+void path_between_points(unsigned char *x0, unsigned char *y0,
+                         unsigned char x1, unsigned char y1){
+    int dx, dy,
+    sx, sy,
+    err, e2;
+
+    //unsigned char x0, y0, x1, y1, i, j;
+    dx = abs(x1 - *x0);
+    dy = abs(y1 - *y0);
+    sx = *x0 < x1 ? 1: -1;
+    sy = *y0 < y1 ? 1: -1;
+    err = (dx > dy ? dx : -dy)/2;
+
+    e2 = err;
+    if (e2 > -dx) { err -= dy; *x0 += sx; }
+    if (e2 < dy) { err += dx; *y0 += sy; }
+
 }
