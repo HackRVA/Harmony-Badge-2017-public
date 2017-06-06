@@ -16,6 +16,8 @@
 
 #define MASK (IB1+IB2+IB5)
 
+const char hextab[]={"0123456789ABCDEF"};
+
 unsigned int irbit2(unsigned int iseed)
 {
   if (iseed & IB18){

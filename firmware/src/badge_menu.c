@@ -15,6 +15,7 @@
 #include "badge_menu.h"
 #include "badge_apps.h"
 #include "colors.h"
+#include "settings.h"
 
 struct menuStack_t {
    struct menu_t *selectedMenu;
@@ -394,28 +395,68 @@ struct menu_t *display_menu(struct menu_t *menu,
 }
 
 
+struct menu_t settings_m[] = {
+    {"ping", VERT_ITEM, FUNCTION,
+        {(struct menu_t *)ping_cb}},
+    //{"peer badgeId", VERT_ITEM, MENU,
+    //    {(struct menu_t *) peerBadgeid_m}},
+    //{"time n date", VERT_ITEM , MENU,
+    //    {(struct menu_t *) timedate_m}},
+    {"rotate", VERT_ITEM, MENU,
+        {(struct menu_t *) rotate_m}},
+    {"backlight", VERT_ITEM, MENU,
+        {(struct menu_t *) backlight_m}},
+    {"led", VERT_ITEM, MENU,
+        {(struct menu_t *) LEDlight_m}}, /* coerce/cast to a menu_t data pointer */
+    {"buzzer", VERT_ITEM, MENU,
+        {(struct menu_t *) buzzer_m}},
+//    {"slider", VERT_ITEM, MENU,
+//        {(struct menu_t *) slider_m}},
+//    {"tests", VERT_ITEM, MENU,
+//        {(struct menu_t *) tests_m}},
+#ifdef IS_ADMIN
+        {"silence others", VERT_ITEM, FUNCTION,
+                {(struct menu_t *) silence_cb}},
+        {"full fucktard", VERT_ITEM, FUNCTION,
+                {(struct menu_t *) note_crazy_cb}},
+#endif
+    {"Back", VERT_ITEM | LAST_ITEM| DEFAULT_ITEM, BACK,
+        {NULL}},
+};
+
+
+void closeMenuAndReturn() {
+//    if (G_menuCnt == 0) return; /* stack is empty, error or main menu */
+//    G_menuCnt--;
+//    G_currMenu = G_menuStack[G_menuCnt].currMenu;
+//    G_selectedMenu = G_menuStack[G_menuCnt].selectedMenu;
+
+    //G_selectedMenu = display_menu(G_currMenu, G_selectedMenu, MAIN_MENU_STYLE);
+    //runningApp = NULL;
+}
+
 
 #ifndef SDL_BADGE
 struct menu_t main_m[] = {
-    {"TEST", VERT_ITEM|DEFAULT_ITEM, FUNCTION,
+    {"TEST", VERT_ITEM|DEFAULT_ITEM, TASK,
         {hello_world_task}},    
-    {"GroundWar", VERT_ITEM|DEFAULT_ITEM, FUNCTION,
+    {"GroundWar", VERT_ITEM|DEFAULT_ITEM, TASK,
         {groundwar_task}},    
-    {"Badgelandia", VERT_ITEM|DEFAULT_ITEM, FUNCTION,
+    {"Badgelandia", VERT_ITEM|DEFAULT_ITEM, TASK,
         {badgelandia_task}},
-    {"Badgey Bird", VERT_ITEM|DEFAULT_ITEM, FUNCTION,
+    {"Badgey Bird", VERT_ITEM|DEFAULT_ITEM, TASK,
         {badgey_bird_task}},
-    {"Screensavers", VERT_ITEM|DEFAULT_ITEM, FUNCTION,
+    {"Screensavers", VERT_ITEM|DEFAULT_ITEM, TASK,
         {screensaver_task}},
         
-    {"Conductor", VERT_ITEM|DEFAULT_ITEM, FUNCTION,
+    {"Conductor", VERT_ITEM|DEFAULT_ITEM, TASK,
         {conductor_task}},
-    {"blinkenlite", VERT_ITEM|DEFAULT_ITEM, FUNCTION,
+    {"blinkenlite", VERT_ITEM|DEFAULT_ITEM, TASK,
         {blinkenlights_task}},        
         
         
         
-    {"dice roll", VERT_ITEM|DEFAULT_ITEM, FUNCTION,
+    {"dice roll", VERT_ITEM|DEFAULT_ITEM, TASK,
         {dice_roll_task}},         
 
    //{"Arcade",       VERT_ITEM|DEFAULT_ITEM, MENU,
@@ -424,13 +465,15 @@ struct menu_t main_m[] = {
    //     {gadgets_m}},
    //{"Schedule",    VERT_ITEM, MENU,
    //     {schedule_main_m}},
-   //{"Settings",    VERT_ITEM, MENU,
-   //     {settings_m}},
+   {"Settings",    VERT_ITEM, MENU,
+        {settings_m}},
    //{"Clear Message", VERT_ITEM|LAST_ITEM|HIDDEN_ITEM, FUNCTION,
    //     {(struct menu_t *)clear_msg_cb}},
    {"", VERT_ITEM|LAST_ITEM|HIDDEN_ITEM, BACK,
        {NULL}},
 } ;
+
+
 void returnToMenus(){
     TaskHandle_t xHandle = xTaskGetHandle("APP Tasks");
     BaseType_t notify_ret;
@@ -445,6 +488,8 @@ void returnToMenus(){
     vTaskSuspend(NULL);
 }
 #define TIME_BEFORE_SLEEP 1000
+#define LAUNCH_APP groundwar_task
+//#define LAUNCH_APP boot_splash_task
 //#define QC_FIRST
 //#define DO_BOOT_SPLASH
 //#define DEBUG_PRINT_TO_CDC
@@ -466,9 +511,9 @@ void menu_and_manage_task(void *p_arg){
                             &xHandle);
 #else
     
-    xReturned = xTaskCreate((TaskFunction_t) boot_splash_task,
+    xReturned = xTaskCreate((TaskFunction_t) LAUNCH_APP,
                             "exec_app",
-                            256u, //may want to increase?
+                            650u, //may want to increase?
                             NULL,
                             1u,
                             &xHandle);
@@ -522,16 +567,18 @@ void menu_and_manage_task(void *p_arg){
                         G_selectedMenu = NULL;
                         break;
 
-                    case FUNCTION: /* call the function pointer if clicked */
-                        //setNote(115, 2048); /* e */
-                        //runningApp = G_selectedMenu->data.func;
-                        xReturned = xTaskCreate((TaskFunction_t) G_selectedMenu->data.func, 
+                    case TASK: // Launch a task if clicked
+                        setNote(105, 2048);
+                        xReturned = xTaskCreate((TaskFunction_t) G_selectedMenu->data.task, 
                                                 "exec_app",
                                                 650u, //may want to increase?
                                                 NULL,
                                                 1u,
-                                                &xHandle);
-                        //(*selectedMenu->data.func)();
+                                                &xHandle);                        
+                        break;
+                    case FUNCTION: /* call the function pointer if clicked */
+                        setNote(115, 2048); /* e */
+                        (*G_selectedMenu->data.func)();
                         break;
                     default:
                         break;
