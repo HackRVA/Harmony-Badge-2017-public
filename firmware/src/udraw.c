@@ -47,7 +47,7 @@ enum {                                  //draw color control enumerator
     DRAW_CYAN,
 };
 
-enum {
+enum {                                  //drop down menu control enum
     DRAW_DROP_DOWN_OFF,
     DRAW_DROP_DOWN_LEFT,
     DRAW_DROP_DOWN_RIGHT,
@@ -150,9 +150,14 @@ void draw_init(void) {
     FbClear();
     unsigned char j;
     for(j=0;j<PIX_NUM;j++) {
+        //clear image buffer
         image_buffer.blue[j]=WHITE_MASK;
         image_buffer.green[j]=WHITE_MASK;
         image_buffer.red[j]=WHITE_MASK;
+        //clear ir buffer
+        ir_in_buffer.blue[j]=WHITE_MASK;
+        ir_in_buffer.green[j]=WHITE_MASK;
+        ir_in_buffer.red[j]=WHITE_MASK;
     }
     draw_state.state = draw_render;
     draw_state.color = DRAW_BLACK;
@@ -165,6 +170,7 @@ void draw_init(void) {
 //render all pixels and cursor to the display
 void draw_render(void) {
     unsigned char j,k;
+    //render image buffer or ir buffer
     for(j=0;j<PIX_NUM;j++) {
         for(k=0;k<PIX_NUM;k++) {
             draw_draw_pixel(j,k,
@@ -172,6 +178,7 @@ void draw_render(void) {
         }
     }
     draw_cursor(draw_state.cursor);
+    //render drop down menu
     if(show_drop_down != DRAW_DROP_DOWN_OFF) {
         draw_drop_down();
     }
@@ -179,6 +186,7 @@ void draw_render(void) {
     FbSwapBuffers();
 }
 
+//draws drop down menu to display
 void draw_drop_down(void) {
     FbColor(BLACK);
     FbMove(0,0);
@@ -214,6 +222,7 @@ void draw_get_input(void) {
                 break;
             case DRAW_DROP_DOWN_RIGHT:
                 show_ir_buff = !show_ir_buff;
+                image_received = 0;
                 break;
             default:
                 draw_state.state = draw_exit;
@@ -447,6 +456,13 @@ void draw_ir_udraw(struct IRpacket_t p) {
     union line_byte_index line;
     line.line = EMPTY_MASK;
     if(p.badgeId == FIRST_PKT) {
+        unsigned char j;
+        for(j=0;j<PIX_NUM;j++) {
+            //clear ir buffer
+            ir_in_buffer.blue[j]=WHITE_MASK;
+            ir_in_buffer.green[j]=WHITE_MASK;
+            ir_in_buffer.red[j]=WHITE_MASK;
+        }
         first_last.bits16 = p.data;
     }
     else {
