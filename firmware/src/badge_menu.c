@@ -16,6 +16,7 @@
 #include "badge_menu.h"
 #include "badge_apps.h"
 #include "colors.h"
+#include "flash_test.h"
 
 struct menuStack_t {
    struct menu_t *selectedMenu;
@@ -445,6 +446,7 @@ struct menu_t settings_m[] = {
 };
 
 struct menu_t main_m[] = {
+
     {"TEST", VERT_ITEM|DEFAULT_ITEM, TASK,
         {hello_world_task}},    
     {"GroundWar", VERT_ITEM|DEFAULT_ITEM, TASK,
@@ -461,10 +463,12 @@ struct menu_t main_m[] = {
     {"blinkenlite", VERT_ITEM|DEFAULT_ITEM, TASK,
         {blinkenlights_task}},        
         
-        
+    {"flash test", VERT_ITEM | DEFAULT_ITEM, TASK,
+        {flash_test_task}},        
         
     {"dice roll", VERT_ITEM|DEFAULT_ITEM, TASK,
         {dice_roll_task}},         
+
 
    //{"Arcade",       VERT_ITEM|DEFAULT_ITEM, MENU,
    //     {games_m}},
@@ -491,12 +495,12 @@ void returnToMenus(){
     notify_ret = xTaskNotify(xHandle,
                              1u,
                              eSetBits);
-    
+
     vTaskSuspend(NULL);
 }
 #define TIME_BEFORE_SLEEP 1000
-#define LAUNCH_APP groundwar_task
-//#define LAUNCH_APP boot_splash_task
+//#define LAUNCH_APP groundwar_task
+#define LAUNCH_APP boot_splash_task
 //#define QC_FIRST
 //#define DO_BOOT_SPLASH
 //#define DEBUG_PRINT_TO_CDC
@@ -517,16 +521,18 @@ void menu_and_manage_task(void *p_arg){
                             1u,
                             &xHandle);
 #else
+
     
     xReturned = xTaskCreate((TaskFunction_t) LAUNCH_APP,
+
                             "exec_app",
                             650u, //may want to increase?
                             NULL,
                             1u,
                             &xHandle);
+
+
 #endif    
-   
-    
     for(;;){
         // No running task, display menu or something
         if(xHandle == NULL)
