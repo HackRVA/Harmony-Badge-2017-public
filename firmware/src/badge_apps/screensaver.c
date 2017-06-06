@@ -287,5 +287,7 @@ void random_screen_saver(void* p_arg){
         else
             random_dots(NULL);        
     }
+#ifndef SDL_BADGE
     returnToMenus();
+#endif
 }
