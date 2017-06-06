@@ -47,6 +47,12 @@ enum {                                  //draw color control enumerator
     DRAW_CYAN,
 };
 
+enum {
+    DRAW_DROP_DOWN_OFF,
+    DRAW_DROP_DOWN_LEFT,
+    DRAW_DROP_DOWN_RIGHT,
+};
+
 //App IR send structs
 struct short_halfs {                    //used to access halves of 16bits
     unsigned char upper;
@@ -86,6 +92,8 @@ struct _draw_state {
 
 //public global vars
 unsigned char image_received = 0;
+unsigned char show_drop_down = DRAW_DROP_DOWN_OFF;
+unsigned char show_ir_buff = 0;
 
 
 //Game State Functions
@@ -102,6 +110,9 @@ unsigned char draw_is_empty(struct _image_buffer img_buf, unsigned char line);
 void draw_send_packet(struct _image_buffer img_buf, unsigned char byte, unsigned char vert_index);
 void draw_send_image(struct _image_buffer img_buf);
 void draw_ir_udraw(struct IRpacket_t p);
+
+//drop down menu function
+void draw_drop_down(void);
 
 //draw cursor location
 void draw_cursor(struct _cursor pos);
@@ -147,6 +158,8 @@ void draw_init(void) {
     draw_state.color = DRAW_BLACK;
     draw_state.cursor.x = 0;
     draw_state.cursor.y = 0;
+    show_drop_down = DRAW_DROP_DOWN_OFF;
+    show_ir_buff = 0;
 }
 
 //render all pixels and cursor to the display
@@ -154,24 +167,67 @@ void draw_render(void) {
     unsigned char j,k;
     for(j=0;j<PIX_NUM;j++) {
         for(k=0;k<PIX_NUM;k++) {
-            draw_draw_pixel(j,k,draw_read_pixel(image_buffer,j,k));
+            draw_draw_pixel(j,k,
+                    draw_read_pixel((show_ir_buff? ir_in_buffer : image_buffer),j,k));
         }
     }
     draw_cursor(draw_state.cursor);
+    if(show_drop_down != DRAW_DROP_DOWN_OFF) {
+        draw_drop_down();
+    }
     draw_state.state = draw_get_input;
     FbSwapBuffers();
+}
+
+void draw_drop_down(void) {
+    FbColor(BLACK);
+    FbMove(0,0);
+    FbFilledRectangle(SCREEN_WIDTH,SCREEN_WIDTH/8);
+    FbMove(2,4);
+    if(show_drop_down == DRAW_DROP_DOWN_LEFT) {
+        FbColor(GREEN);
+    }
+    else {
+        FbColor(WHITE);
+    }
+    FbWriteLine("SEND PIC");
+    FbMove(SCREEN_WIDTH/2+6,4);
+    if(show_drop_down == DRAW_DROP_DOWN_RIGHT) {
+        FbColor(GREEN);
+    }
+    else {
+        FbColor(WHITE);
+    }
+    FbWriteLine("GET PIC");
 }
 
 //get inputs and set data accordingly
 void draw_get_input(void) {
     draw_state.state = draw_process;
     if(BUTTON_PRESSED_AND_CONSUME) {
-        draw_state.state = draw_exit;
+        switch(show_drop_down) {
+            case DRAW_DROP_DOWN_OFF:
+                draw_state.state = draw_exit;
+                break;
+            case DRAW_DROP_DOWN_LEFT:
+                draw_send_image(image_buffer);
+                break;
+            case DRAW_DROP_DOWN_RIGHT:
+                show_ir_buff = !show_ir_buff;
+                break;
+            default:
+                draw_state.state = draw_exit;
+                break;
+        }
     }
     if(DOWN_BTN) {
-        if(draw_state.cursor.y < PIX_NUM) {
+        if((draw_state.cursor.y < PIX_NUM) && 
+           (show_drop_down == DRAW_DROP_DOWN_OFF)) {
             draw_state.cursor.y++;
             draw_state.cursor.moved = 1;
+        }
+        if(show_drop_down != DRAW_DROP_DOWN_OFF) {
+            show_drop_down = DRAW_DROP_DOWN_OFF;
         }
     }
     if(UP_BTN) {
@@ -179,17 +235,28 @@ void draw_get_input(void) {
             draw_state.cursor.y--;
             draw_state.cursor.moved = 1;
         }
+        else {
+            show_drop_down = DRAW_DROP_DOWN_LEFT;
+        }
     }
     if(LEFT_BTN) {
-        if(draw_state.cursor.x > 0) {
+        if((draw_state.cursor.x > 0) && 
+           (show_drop_down == DRAW_DROP_DOWN_OFF)) {
             draw_state.cursor.x--;
             draw_state.cursor.moved = 1;
         }
+        if(show_drop_down == DRAW_DROP_DOWN_RIGHT) {
+            show_drop_down = DRAW_DROP_DOWN_LEFT;
+        }
     }
     if(RIGHT_BTN) {
-        if(draw_state.cursor.x < PIX_NUM) {
+        if((draw_state.cursor.x < PIX_NUM) &&
+            (show_drop_down == DRAW_DROP_DOWN_OFF)) {
             draw_state.cursor.x++;
             draw_state.cursor.moved = 1;
+        }
+        if(show_drop_down == DRAW_DROP_DOWN_LEFT) {
+            show_drop_down = DRAW_DROP_DOWN_RIGHT;
         }
     }
     if(DOWN_TOUCH_AND_CONSUME) {
@@ -343,7 +410,7 @@ union half_pkt draw_send_first_pkt(struct _image_buffer img_buf) {
     draw_pkt.p.command = IR_WRITE;
     draw_pkt.p.address = IR_UDRAW;
     draw_pkt.p.data = hpkt.bits16;
-    IRqueuSend(draw_pkt);
+    IRqueueSend(draw_pkt);
 }
 
 void draw_send_packet(struct _image_buffer img_buf, unsigned char byte, unsigned char vert_index) {
@@ -359,7 +426,7 @@ void draw_send_packet(struct _image_buffer img_buf, unsigned char byte, unsigned
     draw_pkt.p.badgeId = (BG_ID_MASK)&(line.bytes[byte]);
     draw_pkt.p.command = IR_WRITE;
     draw_pkt.p.address = IR_UDRAW;
-    IRqueuSend(draw_pkt);
+    IRqueueSend(draw_pkt);
 }
 
 void draw_send_image(struct _image_buffer img_buf) {
