@@ -239,8 +239,8 @@ void about_the_bird(void* p_arg){
         vTaskDelay(tick_rate);
         if(BUTTON_PRESSED_AND_CONSUME) {
             FbBackgroundColor(BLACK);
+            FbClear();
             return;
-
         }
     }
 }

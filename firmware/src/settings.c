@@ -236,7 +236,7 @@ void buzzer_config_cb()
     strcpy(dstMenu->name, selectedMenu->name);
 
     G_mute = selectedMenu->attrib & 0x1;
-    closeMenuAndReturn();
+    //closeMenuAndReturn();
 }
 
 struct menu_t buzzer_config_m[] = {
