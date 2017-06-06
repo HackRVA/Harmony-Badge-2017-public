@@ -15,6 +15,7 @@
 #include "badge_menu.h"
 #include "badge_apps.h"
 #include "colors.h"
+#include "flash_test.h"
 
 struct menuStack_t {
    struct menu_t *selectedMenu;
@@ -397,26 +398,24 @@ struct menu_t *display_menu(struct menu_t *menu,
 
 #ifndef SDL_BADGE
 struct menu_t main_m[] = {
-    {"TEST", VERT_ITEM|DEFAULT_ITEM, FUNCTION,
-        {hello_world_task}},    
-    {"GroundWar", VERT_ITEM|DEFAULT_ITEM, FUNCTION,
-        {groundwar_task}},    
-    {"Badgelandia", VERT_ITEM|DEFAULT_ITEM, FUNCTION,
+    {"TEST", VERT_ITEM, FUNCTION,
+        {hello_world_task}},
+    {"GroundWar", VERT_ITEM, FUNCTION,
+        {groundwar_task}},
+    {"Badgelandia", VERT_ITEM, FUNCTION,
         {badgelandia_task}},
-    {"Badgey Bird", VERT_ITEM|DEFAULT_ITEM, FUNCTION,
+    {"Badgey Bird", VERT_ITEM, FUNCTION,
         {badgey_bird_task}},
-    {"Screensavers", VERT_ITEM|DEFAULT_ITEM, FUNCTION,
+    {"Screensavers", VERT_ITEM, FUNCTION,
         {screensaver_task}},
-        
-    {"Conductor", VERT_ITEM|DEFAULT_ITEM, FUNCTION,
+    {"Conductor", VERT_ITEM, FUNCTION,
         {conductor_task}},
-    {"blinkenlite", VERT_ITEM|DEFAULT_ITEM, FUNCTION,
-        {blinkenlights_task}},        
-        
-        
-        
-    {"dice roll", VERT_ITEM|DEFAULT_ITEM, FUNCTION,
-        {dice_roll_task}},         
+    {"blinkenlite", VERT_ITEM, FUNCTION,
+        {blinkenlights_task}},
+    {"flash test", VERT_ITEM | DEFAULT_ITEM, FUNCTION,
+        {flash_test_task}},
+    {"dice roll", VERT_ITEM, FUNCTION,
+        {dice_roll_task}},
 
    //{"Arcade",       VERT_ITEM|DEFAULT_ITEM, MENU,
    //     {games_m}},
@@ -441,7 +440,7 @@ void returnToMenus(){
     notify_ret = xTaskNotify(xHandle,
                              1u,
                              eSetBits);
-    
+
     vTaskSuspend(NULL);
 }
 
@@ -463,15 +462,15 @@ void menu_and_manage_task(void *p_arg){
                             1u,
                             &xHandle);
 #else
-    
+
     xReturned = xTaskCreate((TaskFunction_t) boot_splash_task,
                             "exec_app",
                             256u, //may want to increase?
                             NULL,
                             1u,
                             &xHandle);
-#endif    
-    
+#endif
+
     for(;;){
         // No running task, display menu or something
         if(xHandle == NULL)

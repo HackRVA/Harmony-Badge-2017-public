@@ -40,6 +40,8 @@ typedef enum {
     BLANK
 } MENU_STYLE;
 
+typedef void (*menu_func)(void*);
+
 /** A menu item */
 struct menu_t {
     char name[16]; /**< menu item name / displayed text */
