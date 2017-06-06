@@ -183,9 +183,9 @@ struct menu_t *display_menu(struct menu_t *menu,
     {
         //case MAIN_MENU_WITH_TIME_DATE_STYLE:
         case MAIN_MENU_STYLE:
-            FbClear();
             FbBackgroundColor(MAIN_MENU_BKG_COLOR);
-
+            FbClear();
+            
             FbColor(GREEN);
             FbMove(2,5);
             FbRectangle(123, 120);
@@ -445,41 +445,52 @@ struct menu_t settings_m[] = {
         {NULL}},
 };
 
+struct menu_t gadgets_m[] = {
+
+        
+    {"Conductor", VERT_ITEM, TASK,
+        {conductor_task}},
+    {"blinkenlite", VERT_ITEM, TASK,
+        {blinkenlights_task}},        
+    {"dice roll", VERT_ITEM, TASK,
+        {dice_roll_task}},
+
+    {"Back", VERT_ITEM | LAST_ITEM| DEFAULT_ITEM, BACK,
+        {NULL}},
+} ;        
+
+struct menu_t games_m[] = {
+
+    {"GroundWar", VERT_ITEM, TASK,
+        {groundwar_task}},    
+    {"Badgelandia", VERT_ITEM, TASK,
+        {badgelandia_task}},
+    {"Badgey Bird", VERT_ITEM, TASK,
+        {badgey_bird_task}},
+
+    {"Back", VERT_ITEM | LAST_ITEM| DEFAULT_ITEM, BACK,
+        {NULL}},
+} ;
+
+
+
+
 struct menu_t main_m[] = {
 
     {"TEST", VERT_ITEM|DEFAULT_ITEM, TASK,
         {hello_world_task}},    
-    {"GroundWar", VERT_ITEM|DEFAULT_ITEM, TASK,
-        {groundwar_task}},    
-    {"Badgelandia", VERT_ITEM|DEFAULT_ITEM, TASK,
-        {badgelandia_task}},
-    {"Badgey Bird", VERT_ITEM|DEFAULT_ITEM, TASK,
-        {badgey_bird_task}},
-    {"Screensavers", VERT_ITEM|DEFAULT_ITEM, TASK,
+ 
+    {"Arcade",       VERT_ITEM|DEFAULT_ITEM, MENU,
+        {games_m}},
+    {"Gadgets",       VERT_ITEM, MENU,    {gadgets_m}},    
+       
+    {"Screensavers", VERT_ITEM, TASK,
         {screensaver_task}},
-        
-    {"Conductor", VERT_ITEM|DEFAULT_ITEM, TASK,
-        {conductor_task}},
-    {"blinkenlite", VERT_ITEM|DEFAULT_ITEM, TASK,
-        {blinkenlights_task}},        
-        
-    {"flash test", VERT_ITEM | DEFAULT_ITEM, TASK,
-        {flash_test_task}},        
-        
-    {"dice roll", VERT_ITEM|DEFAULT_ITEM, TASK,
-        {dice_roll_task}},         
-
-
-   //{"Arcade",       VERT_ITEM|DEFAULT_ITEM, MENU,
-   //     {games_m}},
-   //{"Transmitters",       VERT_ITEM, MENU,
-   //     {gadgets_m}},
-   //{"Schedule",    VERT_ITEM, MENU,
-   //     {schedule_main_m}},
    {"Settings",    VERT_ITEM, MENU,
         {settings_m}},
-   //{"Clear Message", VERT_ITEM|LAST_ITEM|HIDDEN_ITEM, FUNCTION,
-   //     {(struct menu_t *)clear_msg_cb}},
+    {"flash test", VERT_ITEM, TASK,
+        {flash_test_task}},         
+
    {"", VERT_ITEM|LAST_ITEM|HIDDEN_ITEM, BACK,
        {NULL}},
 } ;
@@ -498,7 +509,9 @@ void returnToMenus(){
 
     vTaskSuspend(NULL);
 }
-#define TIME_BEFORE_SLEEP 1000
+
+
+#define TIME_BEFORE_SLEEP 5000
 //#define LAUNCH_APP groundwar_task
 #define LAUNCH_APP boot_splash_task
 //#define QC_FIRST
@@ -641,8 +654,7 @@ void menu_and_manage_task(void *p_arg){
                     //vTaskSuspend(xHandle); // doesn't hurt to call suspend here too?
                     vTaskDelete(xHandle);
                     xHandle = NULL;
-                    prev_selected_menu = NULL;
-                     
+                    prev_selected_menu = NULL;   
                 }
             }
             // Add some extra delay  since don't need responsive menu
@@ -651,10 +663,13 @@ void menu_and_manage_task(void *p_arg){
         IRhandler();
 
         if(TIME_SINCE_LAST_INPUT > TIME_BEFORE_SLEEP){
-            led(100, 0, 0);
+            // go low power here?
+            //led(30, 30, 0);
         }
-        else
-            led(0,0,0);
+        else{
+             //led(0,0,0);
+        }
+           
         
         //Handle other events? Marshal messages?
 #ifdef DEBUG_PRINT_TO_CDC
