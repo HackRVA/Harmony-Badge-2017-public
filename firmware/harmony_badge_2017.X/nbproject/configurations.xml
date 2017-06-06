@@ -37,6 +37,7 @@
         <itemPath>../src/include/timer1_int.h</itemPath>
         <itemPath>../src/include/flash.h</itemPath>
         <itemPath>../src/include/settings.h</itemPath>
+        <itemPath>../src/include/flash_test.h</itemPath>
       </logicalFolder>
       <logicalFolder name="bsp" displayName="bsp" projectFiles="true">
       </logicalFolder>
@@ -177,6 +178,7 @@
           <itemPath>../src/badge_apps/blinkenlights.c</itemPath>
           <itemPath>../src/badge_apps/conductor.c</itemPath>
           <itemPath>../src/badge_apps/dice_roll.c</itemPath>
+          <itemPath>../src/badge_apps/flash_test.c</itemPath>
         </logicalFolder>
         <logicalFolder name="f1" displayName="system_config" projectFiles="true">
           <logicalFolder name="f1"
