@@ -7,5 +7,8 @@ void led(unsigned char r, unsigned char g, unsigned char b);
 void backlight(unsigned char bright) ;
 void timerInit();
 
+void beginNote(unsigned short freq);
+void endNote();
+
 #endif
 

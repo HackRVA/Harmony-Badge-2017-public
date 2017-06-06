@@ -35,8 +35,17 @@ void scale_points(short point_arr[][2],
                   unsigned int n_points,
                   float scale);
 
+unsigned char distance_between_coords(unsigned char x1, unsigned char y1,
+                                      unsigned char x2, unsigned y2);
+
 void rotate_points(short point_arr[][2],
                    unsigned int n_points,
                    float rotate_rads);
+
+
+void path_between_points(unsigned char *x0, unsigned char *y0,
+                         unsigned char x1, unsigned char y1);
+
+void badge_itoa(int value, unsigned char buffer[]);
 #endif	/* UTILS_H */
 

@@ -36,6 +36,7 @@
         <itemPath>../src/include/ir.h</itemPath>
         <itemPath>../src/include/timer1_int.h</itemPath>
         <itemPath>../src/include/flash.h</itemPath>
+        <itemPath>../src/include/settings.h</itemPath>
       </logicalFolder>
       <logicalFolder name="bsp" displayName="bsp" projectFiles="true">
       </logicalFolder>
@@ -218,6 +219,8 @@
         <itemPath>../src/timer1_int.c</itemPath>
         <itemPath>../src/debug.c</itemPath>
         <itemPath>../src/flash.c</itemPath>
+        <itemPath>../src/settings.c</itemPath>
+
       </logicalFolder>
       <logicalFolder name="bsp" displayName="bsp" projectFiles="true">
       </logicalFolder>

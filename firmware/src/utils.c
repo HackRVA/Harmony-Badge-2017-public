@@ -7,6 +7,7 @@
 
 #include "utils.h"
 #include <math.h> // for sin/cos, may want to approx instead
+#include <stdlib.h>
 
 #define IB1 1
 #define IB2 2
@@ -14,6 +15,8 @@
 #define IB18 131072
 
 #define MASK (IB1+IB2+IB5)
+
+const char hextab[]={"0123456789ABCDEF"};
 
 unsigned int irbit2(unsigned int iseed)
 {
@@ -27,7 +30,7 @@ unsigned int irbit2(unsigned int iseed)
 }
 
 unsigned int quick_rand(unsigned int seed){
-    return irbit2(seed ^ G_entropy_pool);
+    return irbit2(seed ^ G_entropy_pool ^ rand());
 }
 
 
@@ -50,6 +53,10 @@ unsigned char check_box_collision(unsigned char x1, unsigned char y1,
     return (x_check && y_check);
 }
 
+unsigned char distance_between_coords(unsigned char x1, unsigned char y1,
+                                      unsigned char x2, unsigned y2){
+    return sqrt(((x2 - x1)<< 1) + ((y2 - y1) << 1));
+}
 
 void rotate_points_to(short point_arr[][2],
                    unsigned int n_points, 
@@ -131,3 +138,55 @@ void equilateral_polygon_points(short point_arr[][2],
         point_arr[n][0] = (radius * COS(rads));
     }  
 }
+
+void path_between_points(unsigned char *x0, unsigned char *y0,
+                         unsigned char x1, unsigned char y1){
+    int dx, dy,
+    sx, sy,
+    err, e2;
+
+    //unsigned char x0, y0, x1, y1, i, j;
+    dx = abs(x1 - *x0);
+    dy = abs(y1 - *y0);
+    sx = *x0 < x1 ? 1: -1;
+    sy = *y0 < y1 ? 1: -1;
+    err = (dx > dy ? dx : -dy)/2;
+
+    e2 = err;
+    if (e2 > -dx) { err -= dy; *x0 += sx; }
+    if (e2 < dy) { err += dx; *y0 += sy; }
+
+}
+
+#define NOPE
+#ifdef NOPE
+// grabbed from online, so it's gotta be good:
+//char *itoa(int value)
+void badge_itoa(int value, unsigned char buffer[])
+{
+    //static char buffer[12];        // 12 bytes is big enough for an INT32
+    int original = value;        // save original value
+    unsigned char i = 0;
+
+    int c = sizeof(buffer)-1;
+
+    buffer[c] = 0;                // write trailing null in last byte of buffer
+
+    for(i=0; i<c; i++ )
+        buffer[i] = ' ';
+
+    if (value < 0)                 // if it's negative, note that and take the absolute value
+        value = -value;
+
+    do                             // write least significant digit of value that's left
+    {
+        buffer[--c] = (value % 10) + '0';
+        value /= 10;
+    } while (value);
+
+    if (original < 0)
+        buffer[--c] = '-';
+
+    //return &buffer[c];
+}
+#endif

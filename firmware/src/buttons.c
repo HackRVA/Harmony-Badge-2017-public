@@ -21,6 +21,7 @@ char G_touch_pct = 0;
 
 unsigned int G_entropy_pool = 961748927;
 unsigned int timestamp = 0;
+unsigned int last_input_timestamp = 0;
 
 void init_CTMU()
 {
@@ -59,14 +60,15 @@ void init_CTMU()
 void button_task(void* p_arg)
 {
     const unsigned char ButtonADCChannels[2] = {3,4};
-    const unsigned char n_averages = 64, log2_n_averages = 6;
+    const unsigned char n_averages = 8, log2_n_averages = 3;
     unsigned short int ButtonVavgADCs[2]={0,0};
+    
     
     unsigned short int VmeasADC; // Measured Voltages, 65536 = Full Scale
     unsigned long int ADC_Sum; // For averaging multiple ADC measurements
     unsigned char i = 0, chan_idx = 0;
     
-    TickType_t xDelay = 10 / portTICK_PERIOD_MS;
+    TickType_t xDelay = 5 / portTICK_PERIOD_MS;
 
     //Analog pins: AN3 (B1) is outside pad, AN4 (B2) is interior pad
     #define AN3 ButtonVavgADCs[0]
@@ -151,6 +153,8 @@ void button_task(void* p_arg)
                 G_touch_pct = 100;
             else if(G_touch_pct < 0)
                 G_touch_pct = 0;
+            
+            last_input_timestamp = timestamp;
         }
         else{
             G_up_touch_cnt = G_down_touch_cnt = G_middle_touch_cnt = G_touch_pct =0;
@@ -268,6 +272,10 @@ void button_task(void* p_arg)
         else{
             G_down_button_cnt = 0;
             REMOVE_FROM_MASK(G_pressed_button, DOWN_BTN_MASK);
+        }
+        
+        if(DOWN_BTN || UP_BTN || LEFT_BTN || RIGHT_BTN || (G_button_cnt > DEFAULT_BTN_DBC)){
+            last_input_timestamp = timestamp;
         }
 
         vTaskDelay(xDelay);
