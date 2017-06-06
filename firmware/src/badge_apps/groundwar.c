@@ -33,8 +33,8 @@ void enter_spectate_mode();
 void enter_build_mode();
 void exit_groundwar();
 
-short groundwar_points = 10;
-short groundwar_level_health = 100;
+short groundwar_points;
+short groundwar_level_health;
 
 struct menu_t groundwar_menu[] = {
     {"return", VERT_ITEM, FUNCTION, {(struct menu_t *)enter_spectate_mode}},
@@ -43,12 +43,14 @@ struct menu_t groundwar_menu[] = {
 };
 
 #define NUM_MINION_TYPES 4
+#define NUM_WAVES 5
 
 struct groundwar_level_t {
     // Max of 5 points
     short unit_path[6][2];
     unsigned char num_path_points;
-    unsigned char distribution_of_units[NUM_MINION_TYPES];
+    unsigned char current_wave;
+    unsigned char distribution_of_units[NUM_WAVES][NUM_MINION_TYPES];
 };
 
 enum groundwar_minion_type{
@@ -64,10 +66,10 @@ unsigned char minion_speeds[] = {
 };
 
 unsigned char minion_hp[] = {
-        1,
-        3,
-        7,
-        17
+        2,
+        12,
+        64,
+        150
 };
 
 struct groundwar_minion_t {
@@ -120,9 +122,11 @@ char selected_defense_idx = 0;
 
 // basic high-level app states
 enum groundwar_state {
-    INIT,
+    INIT_LEVEL,
+    INIT_WAVE,
     DRAW,
     STEP,
+    NEXT_WAVE,
     IO,
     SLEEP,
     EXIT
@@ -142,8 +146,9 @@ enum groundwar_game_state {
 #define RAND_NUM(s) rand()
 #endif
 
+#define WAVES_DISTRIBUTION lvl.distribution_of_units[lvl.current_wave]
 
-enum groundwar_state state = INIT;
+enum groundwar_state state = INIT_LEVEL;
 enum groundwar_game_state game_state = SPECTATING;
 
 void enter_spectate_mode(){
@@ -158,6 +163,7 @@ void exit_groundwar(){
     state=EXIT;
 }
 
+
 void init_minions(struct groundwar_minion_t minions[NUM_MINIONS],
                   struct groundwar_level_t lvl){
 
@@ -167,7 +173,8 @@ void init_minions(struct groundwar_minion_t minions[NUM_MINIONS],
     //for(i=0; i < NUM_MINIONS && type_idx < NUM_MINION_TYPES; i++){
         // If the minion object doesn't get touched, make sure it is default dead
         minions[i].current_hp = 0;
-        if(create_count < lvl.distribution_of_units[type_idx]){
+        //if(create_count < lvl.distribution_of_units[type_idx]){
+        if(create_count < WAVES_DISTRIBUTION[type_idx]){
             minions[i].type = type_idx;
             minions[i].current_hp = minion_hp[type_idx];
             minions[i].x = 7 + lvl.unit_path[0][0] +  (RAND_NUM(i) % 7) - (RAND_NUM(i+1) % 7);
@@ -177,7 +184,8 @@ void init_minions(struct groundwar_minion_t minions[NUM_MINIONS],
             create_count++;
             i++;
         }
-        else if(create_count >= lvl.distribution_of_units[type_idx]) {
+        //else if(create_count >= lvl.distribution_of_units[type_idx]) {
+        else if(create_count >= WAVES_DISTRIBUTION[type_idx]) {
             create_count = 0;
             type_idx++;
         }
@@ -190,18 +198,21 @@ void init_defenses(struct groundwar_defense_t defenses[MAX_DEFENSE_STRUCTURES]){
     unsigned char i = 0, type_idx=0, create_count = 0;
     for(i=0; i < MAX_DEFENSE_STRUCTURES; i++){
         defenses[i].type = UNUSED_DEFENSE;
-        defenses[i].x = 40;
-        defenses[i].y = 40;
+        defenses[i].x = 60;
+        defenses[i].y = 100;
         defenses[i].projectile.targeted_minion = DEFENSE_NOT_TARGETING;
         defenses[i].projectile.x = 40;
         defenses[i].projectile.y = 40;
     }
 }
 
-void groundwar_step(struct groundwar_minion_t minions[NUM_MINIONS],
+
+//void init_level_0(struct )
+
+unsigned char groundwar_step(struct groundwar_minion_t minions[NUM_MINIONS],
                     struct groundwar_defense_t defenses[MAX_DEFENSE_STRUCTURES],
                     struct groundwar_level_t lvl) {
-    unsigned char x1, y1, i, j;
+    unsigned char x1, y1, i, j, alive_count=0;
     static unsigned char step_cnt = 0;
 
     // draw our minions
@@ -209,6 +220,8 @@ void groundwar_step(struct groundwar_minion_t minions[NUM_MINIONS],
         if(minions[i].current_hp == 0){
             continue;
         }
+        alive_count++;
+
         //if(minions[i].type == TRIANGLE && ((step_cnt%minion_speeds[TRIANGLE]) == 0))
         if(((step_cnt%minion_speeds[minions[i].type]) != 0))
             continue;
@@ -217,7 +230,6 @@ void groundwar_step(struct groundwar_minion_t minions[NUM_MINIONS],
         y1 = lvl.unit_path[minions[i].point_heading][1];
         path_between_points(&minions[i].x, &minions[i].y,
                              x1, y1);
-
 
         if(RAND_NUM(i) %3){
             minions[i].x += RAND_NUM(i)%2 - RAND_NUM(i)%2;
@@ -242,6 +254,10 @@ void groundwar_step(struct groundwar_minion_t minions[NUM_MINIONS],
                 minions[i].point_heading++;
             }
         }
+    }
+    if(alive_count == 0){
+        state = NEXT_WAVE;
+        return 0;
     }
 
 #define DEFENSES_TARGET_IDX defenses[i].projectile.targeted_minion
@@ -283,7 +299,7 @@ void groundwar_step(struct groundwar_minion_t minions[NUM_MINIONS],
                 if(minions[DEFENSES_TARGET_IDX].current_hp <= defense_damage[defenses[i].type]) {
                     minions[DEFENSES_TARGET_IDX].type = UNUSED_MINION;
                     minions[DEFENSES_TARGET_IDX].current_hp = 0;
-                    groundwar_points += minion_hp[minions[DEFENSES_TARGET_IDX].type];
+                    groundwar_points += (short)minion_hp[minions[DEFENSES_TARGET_IDX].type]>>1;
                     setNote(50, 700);
                 }
                 else{
@@ -295,6 +311,7 @@ void groundwar_step(struct groundwar_minion_t minions[NUM_MINIONS],
     }
 
     step_cnt++;
+    return alive_count;
 }
 
 void groundwar_draw_defense(unsigned char x, unsigned char y,
@@ -430,6 +447,7 @@ void groundwar_draw(struct groundwar_minion_t minions[NUM_MINIONS],
     FbMove(30, 120);
     FbWriteLine(pt_str);
 
+
     if(game_state != BUILDING)
         return;
 
@@ -518,9 +536,17 @@ void groundwar_io(struct groundwar_defense_t defenses[MAX_DEFENSE_STRUCTURES],
 }
 
 
+#define SET_LVL_WAVE_DIST(wave_n, d, t, s, c) \
+lvl.distribution_of_units[wave_n][DOT] = d;\
+lvl.distribution_of_units[wave_n][TRIANGLE] = t;\
+lvl.distribution_of_units[wave_n][SQUARE] = s;\
+lvl.distribution_of_units[wave_n][CIRCLE] = c;\
+
 void groundwar_task(void* p_arg) {
     unsigned char cnt= 0;
     const TickType_t tick_rate = 5 / portTICK_PERIOD_MS;
+    unsigned char wave_num = 0, current_level = 3, unlocked_level = 0, alive_count=0;
+    unsigned char str[8];
 
     struct groundwar_minion_t groundwar_minions[NUM_MINIONS] = {0};
     struct groundwar_defense_t defenses[MAX_DEFENSE_STRUCTURES];
@@ -528,8 +554,15 @@ void groundwar_task(void* p_arg) {
     struct groundwar_level_t lvl = {
             .unit_path = {{10, 0}, {10, 30}, {70, 30}, {70, 90}, {110, 90}},
             .num_path_points = 5,
+            .current_wave = 0,
             //.distribution_of_units = {15, 4, 2, 1}
-            .distribution_of_units = {15, 0, 0, 0}
+            .distribution_of_units = {
+                    {0, 0, 0, 0},
+                    {0, 0, 0, 0},
+                    {0, 0, 0, 0},
+                    {0, 0, 0, 0},
+                    {0, 0, 0, 0},
+            }
     };
 
 #ifdef SDL_BADGE
@@ -539,16 +572,66 @@ void groundwar_task(void* p_arg) {
 #endif
     {
         switch (state){
-            case INIT:
-                init_minions(groundwar_minions, lvl);
+            case INIT_LEVEL:
+                lvl.current_wave = 0;
                 init_defenses(defenses);
+                selected_defense_idx = 0;
+                if(current_level == 0){
+                    groundwar_level_health = 100;
+                    groundwar_points = 10;
+                    SET_LVL_WAVE_DIST(0, 3, 0, 0, 0);
+                    SET_LVL_WAVE_DIST(1, 7, 0, 0, 0);
+                    SET_LVL_WAVE_DIST(2, 10, 1, 0, 0);
+                    SET_LVL_WAVE_DIST(3, 15, 2, 0, 0);
+                    SET_LVL_WAVE_DIST(4, 25, 3, 0, 0);
+                }
+                else if(current_level == 1){
+                    groundwar_level_health = 100;
+                    groundwar_points = 20;
+                    SET_LVL_WAVE_DIST(0, 5, 1, 0, 0);
+                    SET_LVL_WAVE_DIST(1, 10, 2, 0, 0);
+                    SET_LVL_WAVE_DIST(2, 12, 2, 0, 0);
+                    SET_LVL_WAVE_DIST(3, 25, 2, 0, 0);
+                    SET_LVL_WAVE_DIST(4, 25, 5, 0, 0);
+                }
+                else if(current_level == 2){
+                    groundwar_level_health = 100;
+                    groundwar_points = 20;
+                    SET_LVL_WAVE_DIST(0, 10, 2, 0, 0);
+                    SET_LVL_WAVE_DIST(1, 10, 3, 1, 0);
+                    SET_LVL_WAVE_DIST(2, 12, 4, 2, 0);
+                    SET_LVL_WAVE_DIST(3, 15, 4, 3, 0);
+                    SET_LVL_WAVE_DIST(4, 15, 5, 3, 0);
+                }
+                else if(current_level == 3){
+                    groundwar_level_health = 100;
+                    groundwar_points = 30;
+                    SET_LVL_WAVE_DIST(0, 10, 4, 1, 0);
+                    SET_LVL_WAVE_DIST(1, 10, 4, 2, 0);
+                    SET_LVL_WAVE_DIST(2, 12, 5, 4, 1);
+                    SET_LVL_WAVE_DIST(3, 15, 5, 5, 1);
+                    SET_LVL_WAVE_DIST(4, 15, 6, 5, 1);
+                }
+                else if(current_level == 4){
+                    groundwar_level_health = 100;
+                    groundwar_points = 40;
+                    SET_LVL_WAVE_DIST(0, 10, 6, 1, 1);
+                    SET_LVL_WAVE_DIST(1, 10, 7, 2, 2);
+                    SET_LVL_WAVE_DIST(2, 10, 9, 4, 2);
+                    SET_LVL_WAVE_DIST(3, 10, 11, 4, 3);
+                    SET_LVL_WAVE_DIST(4, 10, 13, 5, 5);
+                }                
                 // TEST BUILD
                 enter_build_mode();
-                defenses[0].type = SMALL;
-                defenses[0].x = 10;
-                defenses[0].y = 50;
-                selected_defense_idx = 1;
+                //defenses[0].type = SMALL;
+                //defenses[0].x = 10;
+                //defenses[0].y = 50;
+                //selected_defense_idx = 1;
 
+                //break;
+            case INIT_WAVE:
+                init_minions(groundwar_minions, lvl);
+                alive_count = 1;
                 state = DRAW;
                 break;
             case DRAW:
@@ -558,6 +641,20 @@ void groundwar_task(void* p_arg) {
                 }
                 else {
                     groundwar_draw(groundwar_minions, defenses, lvl);
+                    // Throw in level and wave number
+                    FbColor(WHITE);
+                    FbMove(50, 2);
+                    FbWriteLine("LVL:");
+                    badge_itoa((int)current_level, str);
+                    FbMove(70, 2);
+                    FbWriteLine(str);
+
+                    FbColor(WHITE);
+                    FbMove(98, 2);
+                    FbWriteLine("WV:");
+                    badge_itoa((int)lvl.current_wave, str);
+                    FbMove(105, 2);
+                    FbWriteLine(str);
                     state = IO;
                 }
 
@@ -576,18 +673,33 @@ void groundwar_task(void* p_arg) {
                     {
 #endif
                     if(game_state != MENUING)
-                        groundwar_step(groundwar_minions, defenses, lvl);
+                        alive_count = groundwar_step(groundwar_minions, defenses, lvl);
 
                     cnt = 0;
                 }
-                state = DRAW;
+                if(alive_count)
+                    state = DRAW;
+                else
+                    state = NEXT_WAVE;
                 break;
+            case NEXT_WAVE:
+                if(lvl.current_wave < NUM_WAVES - 1){
+                    lvl.current_wave++;
+                    state = INIT_WAVE;
+                }
+                else{
+                    current_level++;
+                    state = INIT_LEVEL;
+                    //TODO: next level
+                }
+                break;
+
             case SLEEP:
                 state = DRAW;
                 vTaskDelay(tick_rate);
                 break;
             case EXIT:
-                state = INIT;
+                state = INIT_LEVEL;
 #ifndef SDL_BADGE
                 returnToMenus();
 #else
