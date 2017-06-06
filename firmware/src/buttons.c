@@ -21,6 +21,7 @@ char G_touch_pct = 0;
 
 unsigned int G_entropy_pool = 961748927;
 unsigned int timestamp = 0;
+unsigned int last_input_timestamp = 0;
 
 void init_CTMU()
 {
@@ -59,14 +60,15 @@ void init_CTMU()
 void button_task(void* p_arg)
 {
     const unsigned char ButtonADCChannels[2] = {3,4};
-    const unsigned char n_averages = 64, log2_n_averages = 6;
+    const unsigned char n_averages = 4, log2_n_averages = 2;
     unsigned short int ButtonVavgADCs[2]={0,0};
+    
     
     unsigned short int VmeasADC; // Measured Voltages, 65536 = Full Scale
     unsigned long int ADC_Sum; // For averaging multiple ADC measurements
     unsigned char i = 0, chan_idx = 0;
     
-    TickType_t xDelay = 10 / portTICK_PERIOD_MS;
+    TickType_t xDelay = 5 / portTICK_PERIOD_MS;
 
     //Analog pins: AN3 (B1) is outside pad, AN4 (B2) is interior pad
     #define AN3 ButtonVavgADCs[0]
@@ -78,11 +80,17 @@ void button_task(void* p_arg)
     #define Y3 (-6000 + 2*AN3)
     #define TOUCH_PCT_CALC (char)((AN3*-3 + AN4*1 + 25043) >> 8)
 #endif
-#ifdef BADGE_2017
+#ifdef BADGE_2017_orig
     #define Y1 (28000 - 2*AN3)
     #define Y2 (  -1500 + 2*AN3)
     #define Y3 (-7500 + 2*AN3)
     #define TOUCH_PCT_CALC (char)((AN3*-3 + AN4*1 + 32934) >> 8)
+#endif
+#ifdef BADGE_2017
+    #define Y1 (28000 - 2*AN3)
+    #define Y2 (  -1500 + 2*AN3)
+    #define Y3 (-7500 + 2*AN3)
+    #define TOUCH_PCT_CALC (char)((AN3*-10 + AN4*1 + 121400) >> 10)
 #endif
 
     init_CTMU();
@@ -125,7 +133,9 @@ void button_task(void* p_arg)
                 ButtonVavgADCs[chan_idx] = ADC_Sum << (6-log2_n_averages); // Full scale = 2^10<<6 = 65536
 
             // May be mixing too often...
-            G_entropy_pool = (ADC_Sum ^ (G_entropy_pool)<<(0xF&timestamp));
+            G_entropy_pool = (ADC_Sum ^ 
+                    ((G_entropy_pool)<<(0xF&timestamp)) ^
+                    (timestamp));
             ADC_Sum = 0;
         }
         //---------
@@ -145,16 +155,20 @@ void button_task(void* p_arg)
             // Could just use this pct to detect buttons...
             G_touch_pct = TOUCH_PCT_CALC;
             
-            if(G_touch_pct > 100)
-                G_touch_pct = 100;
+            if(G_touch_pct >= 100)
+                G_touch_pct = 99;
             else if(G_touch_pct < 0)
                 G_touch_pct = 0;
+            
+            last_input_timestamp = timestamp;
         }
         else{
             G_up_touch_cnt = G_down_touch_cnt = G_middle_touch_cnt = G_touch_pct =0;
             REMOVE_FROM_MASK(G_pressed_button, ALL_TOUCH_MASK);
         }
 
+        //print_to_com1("HELLO");
+        //led(0, 50, 50);
 //#define PRINT_TOUCH_VALS
 #ifdef PRINT_TOUCH_VALS
         char words[8]={0};
@@ -266,6 +280,10 @@ void button_task(void* p_arg)
         else{
             G_down_button_cnt = 0;
             REMOVE_FROM_MASK(G_pressed_button, DOWN_BTN_MASK);
+        }
+        
+        if(DOWN_BTN || UP_BTN || LEFT_BTN || RIGHT_BTN || (G_button_cnt > DEFAULT_BTN_DBC)){
+            last_input_timestamp = timestamp;
         }
 
         vTaskDelay(xDelay);

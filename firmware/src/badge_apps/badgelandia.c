@@ -281,14 +281,6 @@ void badgelandia_task(void* p_arg){
                                     (short)goons[i].o.loc_y);
             }
 
-            //draw booster
-//            FbColor(YELLOW);
-//            equilateral_polygon_points(points, 2.0, 4,
-//                                       ship_rotation + .78534);
-//            FbPolygonFromPoints(points, 4,
-//                                (short)x - (short) (8.0*cos_rot),
-//                                (short)y - (short) (8.0*sin_rot));
-
             FbSwapBuffers();
             redraw = 0;
             player.ship.o.vel_x /= 1.2;

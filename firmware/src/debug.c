@@ -30,5 +30,8 @@ void debugChar(int level, unsigned char outChar)
 	}
    }
 }
+<<<<<<< HEAD
 
  
+=======
+>>>>>>> e5a7b429422e98a331f6208550a0806bf00f0d64

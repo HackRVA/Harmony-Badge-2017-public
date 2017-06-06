@@ -28,7 +28,8 @@ enum type {
     TEXT, /**< text to display */
     BACK, /**< return to previous menu */
     MENU, /**< sub menu type */
-    FUNCTION /**< c function */
+    FUNCTION, /**< c function */
+    TASK // FreeRTOS Task
 };
 
 /** Enum to specify a menu display style. */
@@ -39,6 +40,8 @@ typedef enum {
     WHITE_ON_BLACK,
     BLANK
 } MENU_STYLE;
+
+typedef void (*menu_func)(void*);
 
 /** A menu item */
 struct menu_t {
@@ -51,7 +54,8 @@ struct menu_t {
     union {
         const struct menu_t *menu;
         //void (*func)(struct menu_t *m); /**< An application callback function */
-        void (*func)(void* p_arg);
+        void (*func)();
+        void (*task)(void* p_arg);
         void *generic;
     } data; /**< extra data used to process menu item; depends on type */
 };

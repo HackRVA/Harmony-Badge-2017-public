@@ -24,6 +24,8 @@ extern unsigned char G_pressed_button;
 extern unsigned int G_entropy_pool;
 extern unsigned int timestamp;
 
+extern unsigned int timestamp;
+extern unsigned int last_input_timestamp;
 #define SOLO_BTN_MASK  1
 #define UP_BTN_MASK    2
 #define DOWN_BTN_MASK  4
@@ -41,7 +43,7 @@ extern unsigned int timestamp;
 #define REMOVE_FROM_MASK(V, MASK) (V &= (~MASK))
 #define CHECK_THEN_ADD_TO_MASK(V, MASK) (!IN_MASK(V, MASK) && ADD_TO_MASK(V, MASK))
 
-#define DEFAULT_BTN_DBC 2 
+#define DEFAULT_BTN_DBC 1
 // '*_CONSUME' macros return True once for each single
 // button press, no matter how long the button is held
 #define BUTTON_PRESSED_AND_CONSUME (G_button_cnt > DEFAULT_BTN_DBC && CHECK_THEN_ADD_TO_MASK(G_pressed_button, SOLO_BTN_MASK))
@@ -83,6 +85,8 @@ extern char G_touch_pct;
 #define DOWN_TOUCH DOWN_TOUCH_HOLD(DEFAULT_TOUCH_DBC)
 #define MIDDLE_TOUCH MIDDLE_TOUCH_HOLD(DEFAULT_TOUCH_DBC)
 #define UP_TOUCH UP_TOUCH_HOLD(DEFAULT_TOUCH_DBC)
+
+#define TIME_SINCE_LAST_INPUT (timestamp - last_input_timestamp)
 
 void clear_buttons();
 

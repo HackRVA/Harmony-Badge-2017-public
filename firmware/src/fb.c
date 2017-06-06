@@ -591,10 +591,11 @@ void FbPushRegion(unsigned int x, unsigned int y,
     G_Fb.pos.y = 0;
 }
 
-void FbPolygonFromPoints(short points[][2],
-                         unsigned char n_points, 
-                         short center_x,
-                         short center_y)
+void FbDrawVectors(short points[][2],
+                   unsigned char n_points,
+                   short center_x,
+                   short center_y,
+                   unsigned char connect_last_to_first)
 {
     unsigned char n = 0;
     short x0, y0, x1, y1;
@@ -604,30 +605,41 @@ void FbPolygonFromPoints(short points[][2],
         y0 = points[n][1] + center_y;
         x1 = points[n+1][0] + center_x;
         y1 = points[n+1][1] + center_y;
-        // Don't bother with the line if 
+        // Don't bother with the line if
         // either point is out of bounds
         if(!(
-            (x0 < 1) || (x0 > 131) 
-            || (x1 < 1) || (x1 > 131)
-            || (y0 < 1) || (y0 > 131)
-            || (y1 < 1) || (y1 > 131)
-                ))
+                (x0 < 1) || (x0 > 131)
+                || (x1 < 1) || (x1 > 131)
+                || (y0 < 1) || (y0 > 131)
+                || (y1 < 1) || (y1 > 131)
+        ))
             FbLine((unsigned char)x0, (unsigned char)y0,
                    (unsigned char)x1, (unsigned char)y1);
     }
 
-    x0 = points[n_points-1][0] + center_x;
-    y0 = points[n_points-1][1] + center_y;
-    x1 = points[0][0] + center_x;
-    y1 = points[0][1] + center_y;
+    if(connect_last_to_first){
+        x0 = points[n_points-1][0] + center_x;
+        y0 = points[n_points-1][1] + center_y;
+        x1 = points[0][0] + center_x;
+        y1 = points[0][1] + center_y;
 
-    if(!(
-        (x0 < 0) || (x0 > 132) 
-        || (x1 < 0) || (x1 > 132)
-        || (y0 < 0) || (y0 > 132)
-        || (y1 < 0) || (y1 > 132)
-            ))
-        FbLine((unsigned char)x0, (unsigned char)y0,
-               (unsigned char)x1, (unsigned char)y1);
-
+        if(!(
+                (x0 < 0) || (x0 > 132)
+                || (x1 < 0) || (x1 > 132)
+                || (y0 < 0) || (y0 > 132)
+                || (y1 < 0) || (y1 > 132)
+        ))
+            FbLine((unsigned char)x0, (unsigned char)y0,
+                   (unsigned char)x1, (unsigned char)y1);
+    }
 }
+
+void FbPolygonFromPoints(short points[][2],
+                         unsigned char n_points,
+                         short center_x,
+                         short center_y)
+{
+
+    FbDrawVectors(points, n_points, center_x, center_y, 1);
+}
+

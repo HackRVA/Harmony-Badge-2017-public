@@ -1,14 +1,22 @@
-#include "app.h"
-#include "queue.h"
 
 // badge
 #include "colors.h"
+#ifdef SDL_BADGE
+#define NULL 0
+#include "sdl_fb.h"
+#include "sdl_buttons.h"
+#else
+#include "app.h"
+#include "queue.h"
 #include "fb.h"
+#include "buttons.h"
 #include "rgb_led.h"
+#include "settings.h"
+#endif
 #include "badge_menu.h"
 #include "badge_apps.h"
-#include "buttons.h"
 #include "colors.h"
+#include "flash_test.h"
 
 struct menuStack_t {
    struct menu_t *selectedMenu;
@@ -60,6 +68,107 @@ struct menu_t *getSelectedMenuStack(unsigned char item) {
     return G_menuStack[G_menuCnt - item].selectedMenu;
 }
 
+#define PAGESIZE 8
+void genericMenu(struct menu_t *L_menu, MENU_STYLE style) {
+    static struct menu_t *L_currMenu = NULL; /* LOCAL not to be confused to much with menu()*/
+    static struct menu_t *L_selectedMenu = NULL; /* LOCAL ditto   "    "    */
+    static unsigned char L_menuCnt = 0; // index for G_menuStack
+    static struct menu_t * L_menuStack[4] = {0}; // track user traversing menus
+
+    if (L_menu == NULL) return; /* no thanks */
+
+    if (L_currMenu == NULL) {
+        L_menuCnt = 0;
+        L_menuStack[L_menuCnt] = L_menu;
+        L_currMenu = L_menu;
+        //L_selectedMenu = L_menu;
+        L_selectedMenu = NULL;
+        L_selectedMenu = display_menu(L_currMenu, L_selectedMenu, style);
+        return;
+    }
+
+    if (BUTTON_PRESSED_AND_CONSUME) {
+        switch (L_selectedMenu->type) {
+
+            case MORE: /* jump to next page of menu */
+                setNote(173, 2048); /* a */
+                L_currMenu += PAGESIZE;
+                L_selectedMenu = L_currMenu;
+                break;
+
+            case BACK: /* return from menu */
+                setNote(154, 2048); /* b */
+                if (L_menuCnt == 0) return; /* stack is empty, error or main menu */
+                L_menuCnt--;
+                L_currMenu = L_menuStack[L_menuCnt];
+                L_selectedMenu = L_currMenu;
+                L_selectedMenu = display_menu(L_currMenu, L_selectedMenu, style);
+                break;
+
+            case TEXT: /* maybe highlight if clicked?? */
+                setNote(145, 2048); /* c */
+                break;
+
+            case MENU: /* drills down into menu if clicked */
+                //setNote(129, 2048); /* d */
+                L_menuStack[L_menuCnt++] = L_currMenu; /* push onto stack  */
+                if (L_menuCnt == MAX_MENU_DEPTH) L_menuCnt--; /* too deep, undo */
+                L_currMenu = (struct menu_t *) L_selectedMenu->data.menu; /* go into this menu */
+                //L_selectedMenu = L_currMenu;
+                L_selectedMenu = NULL;
+                L_selectedMenu = display_menu(L_currMenu, L_selectedMenu, style);
+                break;
+
+            case FUNCTION: /* call the function pointer if clicked */
+                //Hack alert: the functino call may not returned
+                // now that we are using tasks, so zero some of these
+                // out before the call
+                L_currMenu = NULL;
+                setNote(115, 2048); /* e */
+                (*L_selectedMenu->data.func)(L_selectedMenu);
+
+                /* clean up for nex call back */
+                L_menu = NULL;
+                //L_currMenu = NULL;
+                L_selectedMenu = NULL;
+
+                L_menuCnt = 0;
+                L_menuStack[L_menuCnt] = NULL;
+                break;
+
+            default:
+                break;
+        }
+        // L_selectedMenu = display_menu(L_currMenu, L_selectedMenu);
+    } else if (UP_BTN_AND_CONSUME) /* handle slider/soft button clicks */ {
+        //setNote(109, 2048); /* f */
+
+        /* make sure not on first menu item */
+        if (L_selectedMenu > L_currMenu) {
+            L_selectedMenu--;
+
+            while ((L_selectedMenu->attrib & SKIP_ITEM)
+                   && L_selectedMenu > L_currMenu)
+                L_selectedMenu--;
+
+            L_selectedMenu = display_menu(L_currMenu, L_selectedMenu, style);
+        }
+    } else if (DOWN_BTN_AND_CONSUME) {
+        setNote(97, 2048); /* g */
+
+        /* make sure not on last menu item */
+        if (!(L_selectedMenu->attrib & LAST_ITEM)) {
+            L_selectedMenu++;
+
+            //Last item should never be a skipped item!!
+            while (L_selectedMenu->attrib & SKIP_ITEM)
+                L_selectedMenu++;
+
+            L_selectedMenu = display_menu(L_currMenu, L_selectedMenu, style);
+        }
+    }
+}
+
 struct menu_t *display_menu(struct menu_t *menu,
                             struct menu_t *selected,
                             MENU_STYLE style)
@@ -74,9 +183,9 @@ struct menu_t *display_menu(struct menu_t *menu,
     {
         //case MAIN_MENU_WITH_TIME_DATE_STYLE:
         case MAIN_MENU_STYLE:
-            FbClear();
             FbBackgroundColor(MAIN_MENU_BKG_COLOR);
-
+            FbClear();
+            
             FbColor(GREEN);
             FbMove(2,5);
             FbRectangle(123, 120);
@@ -288,9 +397,89 @@ struct menu_t *display_menu(struct menu_t *menu,
 
 
 
+
+void closeMenuAndReturn() {
+//    if (G_menuCnt == 0) return; /* stack is empty, error or main menu */
+//    G_menuCnt--;
+//    G_currMenu = G_menuStack[G_menuCnt].currMenu;
+//    G_selectedMenu = G_menuStack[G_menuCnt].selectedMenu;
+
+    //G_selectedMenu = display_menu(G_currMenu, G_selectedMenu, MAIN_MENU_STYLE);
+    //runningApp = NULL;
+}
+
+
+#ifndef SDL_BADGE
+extern struct menu_t myBadgeid_m[];
+extern struct menu_t peerBadgeid_m[];
+extern struct menu_t backlight_m[];
+extern struct menu_t rotate_m[];
+extern struct menu_t LEDlight_m[];
+extern struct menu_t buzzer_m[];
+struct menu_t settings_m[] = {
+    {"ping", VERT_ITEM, FUNCTION,
+        {(struct menu_t *)ping_cb}},
+    //{"peer badgeId", VERT_ITEM, MENU,
+    //    {(struct menu_t *) peerBadgeid_m}},
+    //{"time n date", VERT_ITEM , MENU,
+    //    {(struct menu_t *) timedate_m}},
+    {"rotate", VERT_ITEM, MENU,
+        {(struct menu_t *) rotate_m}},
+    {"backlight", VERT_ITEM, MENU,
+        {(struct menu_t *) backlight_m}},
+    {"led", VERT_ITEM, MENU,
+        {(struct menu_t *) LEDlight_m}}, /* coerce/cast to a menu_t data pointer */
+    {"buzzer", VERT_ITEM, MENU,
+        {(struct menu_t *) buzzer_m}},
+//    {"slider", VERT_ITEM, MENU,
+//        {(struct menu_t *) slider_m}},
+//    {"tests", VERT_ITEM, MENU,
+//        {(struct menu_t *) tests_m}},
+#ifdef IS_ADMIN
+        {"silence others", VERT_ITEM, FUNCTION,
+                {(struct menu_t *) silence_cb}},
+        {"full fucktard", VERT_ITEM, FUNCTION,
+                {(struct menu_t *) note_crazy_cb}},
+#endif
+    {"Back", VERT_ITEM | LAST_ITEM| DEFAULT_ITEM, BACK,
+        {NULL}},
+};
+
+struct menu_t gadgets_m[] = {
+
+        
+    {"Conductor", VERT_ITEM, TASK,
+        {conductor_task}},
+    {"blinkenlite", VERT_ITEM, TASK,
+        {blinkenlights_task}},        
+    {"dice roll", VERT_ITEM, TASK,
+        {dice_roll_task}},
+
+    {"Back", VERT_ITEM | LAST_ITEM| DEFAULT_ITEM, BACK,
+        {NULL}},
+} ;        
+
+struct menu_t games_m[] = {
+
+    {"GroundWar", VERT_ITEM, TASK,
+        {groundwar_task}},    
+    {"Badgelandia", VERT_ITEM, TASK,
+        {badgelandia_task}},
+    {"Badgey Bird", VERT_ITEM, TASK,
+        {badgey_bird_task}},
+
+    {"Back", VERT_ITEM | LAST_ITEM| DEFAULT_ITEM, BACK,
+        {NULL}},
+} ;
+
+
+
+
 struct menu_t main_m[] = {
-    {"TEST", VERT_ITEM|DEFAULT_ITEM, FUNCTION,
+
+    {"TEST", VERT_ITEM|DEFAULT_ITEM, TASK,
         {hello_world_task}},    
+<<<<<<< HEAD
 //    {"Badgelandia", VERT_ITEM|DEFAULT_ITEM, FUNCTION,
 //        {badgelandia_task}},
     {"Badgey Bird", VERT_ITEM|DEFAULT_ITEM, FUNCTION,
@@ -312,6 +501,20 @@ struct menu_t main_m[] = {
    //     {settings_m}},
    //{"Clear Message", VERT_ITEM|LAST_ITEM|HIDDEN_ITEM, FUNCTION,
    //     {(struct menu_t *)clear_msg_cb}},
+=======
+ 
+    {"Arcade",       VERT_ITEM|DEFAULT_ITEM, MENU,
+        {games_m}},
+    {"Gadgets",       VERT_ITEM, MENU,    {gadgets_m}},    
+       
+    {"Screensavers", VERT_ITEM, TASK,
+        {screensaver_task}},
+   {"Settings",    VERT_ITEM, MENU,
+        {settings_m}},
+    {"flash test", VERT_ITEM, TASK,
+        {flash_test_task}},         
+
+>>>>>>> e5a7b429422e98a331f6208550a0806bf00f0d64
    {"", VERT_ITEM|LAST_ITEM|HIDDEN_ITEM, BACK,
        {NULL}},
 } ;
@@ -327,19 +530,28 @@ void returnToMenus(){
     notify_ret = xTaskNotify(xHandle,
                              1u,
                              eSetBits);
-    
+
     vTaskSuspend(NULL);
 }
 
-#define QC_FIRST
+
+#define TIME_BEFORE_SLEEP 5000
+//#define LAUNCH_APP groundwar_task
+#define LAUNCH_APP boot_splash_task
+//#define LAUNCH_APP badge_tutorial_task
+#define RUN_TUTORIAL 
+//#define QC_FIRST
+//#define DO_BOOT_SPLASH
 //#define DEBUG_PRINT_TO_CDC
 void menu_and_manage_task(void *p_arg){
     TaskHandle_t xHandle = NULL;
     uint32_t ulNotifiedValue;
     BaseType_t xReturned;
     struct menu_t *prev_selected_menu = NULL;
+    
     G_currMenu = main_m;
     G_selectedMenu = &main_m[1];
+    
 #ifdef QC_FIRST
     xReturned = xTaskCreate((TaskFunction_t) hello_world_task,
                             "exec_app",
@@ -347,8 +559,38 @@ void menu_and_manage_task(void *p_arg){
                             NULL,
                             1u,
                             &xHandle);
-#endif
+#else
+
     
+    xReturned = xTaskCreate((TaskFunction_t) LAUNCH_APP,
+
+                            "exec_app",
+                            650u, //may want to increase?
+                            NULL,
+                            1u,
+                            &xHandle);
+#ifdef RUN_TUTORIAL
+    // Wait for splash app to finish
+    if (xTaskNotifyWait(0, 1u, &ulNotifiedValue, portMAX_DELAY)){
+        if(ulNotifiedValue & 0x01){
+            //vTaskSuspend(xHandle); // doesn't hurt to call suspend here too?
+            vTaskDelete(xHandle);
+            xHandle = NULL;
+            prev_selected_menu = NULL;   
+        }
+    }    
+    // TODO: Check flash for tutorial already complete. Allow access to tutorial in settings
+    
+    // Force tutorial
+    xReturned = xTaskCreate((TaskFunction_t) badge_tutorial_task,
+                            "exec_app",
+                            650u, //may want to increase?
+                            NULL,
+                            1u,
+                            &xHandle);    
+#endif
+
+#endif    
     for(;;){
         // No running task, display menu or something
         if(xHandle == NULL)
@@ -396,16 +638,18 @@ void menu_and_manage_task(void *p_arg){
                         G_selectedMenu = NULL;
                         break;
 
-                    case FUNCTION: /* call the function pointer if clicked */
-                        //setNote(115, 2048); /* e */
-                        //runningApp = G_selectedMenu->data.func;
-                        xReturned = xTaskCreate((TaskFunction_t) G_selectedMenu->data.func, //hello_world_task,
+                    case TASK: // Launch a task if clicked
+                        setNote(105, 2048);
+                        xReturned = xTaskCreate((TaskFunction_t) G_selectedMenu->data.task, 
                                                 "exec_app",
-                                                512u, //may want to increase?
+                                                650u, //may want to increase?
                                                 NULL,
                                                 1u,
-                                                &xHandle);
-                        //(*selectedMenu->data.func)();
+                                                &xHandle);                        
+                        break;
+                    case FUNCTION: /* call the function pointer if clicked */
+                        setNote(115, 2048); /* e */
+                        (*G_selectedMenu->data.func)();
                         break;
                     default:
                         break;
@@ -450,17 +694,28 @@ void menu_and_manage_task(void *p_arg){
         // Manage a running task
         else if(xHandle !=NULL){
             // TODO: Might be able to let task kill itself
-            if (xTaskNotifyWait(0, 1u, &ulNotifiedValue, 10 / portTICK_PERIOD_MS)){
+            if (xTaskNotifyWait(0, 1u, &ulNotifiedValue, 50 / portTICK_PERIOD_MS)){
                 if(ulNotifiedValue & 0x01){
                     //vTaskSuspend(xHandle); // doesn't hurt to call suspend here too?
                     vTaskDelete(xHandle);
                     xHandle = NULL;
-                    prev_selected_menu = NULL;
+                    prev_selected_menu = NULL;   
                 }
             }
+            // Add some extra delay  since don't need responsive menu
+            //vTaskDelay(50 / portTICK_PERIOD_MS);
         }
         IRhandler();
 
+        if(TIME_SINCE_LAST_INPUT > TIME_BEFORE_SLEEP){
+            // go low power here?
+            //led(30, 30, 0);
+        }
+        else{
+             //led(0,0,0);
+        }
+           
+        
         //Handle other events? Marshal messages?
 #ifdef DEBUG_PRINT_TO_CDC
         // TODO: this will have a conflict in the notify field with the kill signal
@@ -468,8 +723,9 @@ void menu_and_manage_task(void *p_arg){
         vTaskDelay(200 / portTICK_PERIOD_MS);
 #else
         // Doesn't need to be too responsive
-        vTaskDelay(50 / portTICK_PERIOD_MS);
+        vTaskDelay(5 / portTICK_PERIOD_MS);
 #endif
 
     }
 }
+#endif

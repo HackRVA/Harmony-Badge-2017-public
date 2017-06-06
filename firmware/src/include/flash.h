@@ -16,8 +16,8 @@ struct sysData_t {
    char sekrits[8];
    char achievements[8];
 
-   /* 
-      prefs 
+   /*
+      prefs
    */
    char ledBrightness;  /* 1 byte */
    char backlight;      /* 1 byte */
@@ -26,6 +26,7 @@ struct sysData_t {
 extern struct sysData_t G_sysData;
 extern const unsigned short flashedBadgeId; /* overrides what is stored in sysData*/
 extern unsigned short G_peerBadgeId; /* who we are talking to */
+extern unsigned int *G_flashAddr; /* starter point w/in G_flashStart array */
 
 #define FLASHSIZE 1024
 

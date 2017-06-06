@@ -488,8 +488,6 @@ void USBDevice_Task(void* p_arg)
 
 void APP_Initialize ( void )
 {
-
-
     /* badgy badge badge */
     SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_OUTPUT, PORT_CHANNEL_C, PORTS_BIT_POS_0); // red
     SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_OUTPUT, PORT_CHANNEL_B, PORTS_BIT_POS_3); // green
@@ -511,22 +509,22 @@ void APP_Initialize ( void )
     SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_INPUT, PORT_CHANNEL_A, PORTS_BIT_POS_0);  //right
     SYS_PORTS_PinDirectionSelect(PORTS_ID_0, SYS_PORTS_DIRECTION_INPUT, PORT_CHANNEL_A, PORTS_BIT_POS_1);  //down
 
-    CFGCONbits.JTAGEN = 0;                                      
-//    ANSELA = 0x00;                                              
+    CFGCONbits.JTAGEN = 0;
+//    ANSELA = 0x00;
 //    ANSELB = 0x00;
-//    ANSELC = 0x00;                                              
+//    ANSELC = 0x00;
 //    TRISA = 0;
 //    LATA = 0;
 //    TRISB = 0;
 //    LATB = 0;
-//    TRISC = 0;                                                  
-//    LATC = 0;   
+//    TRISC = 0;
+//    LATC = 0;
 
     TRISAbits.TRISA9 = 0;       // piezo == output should be handled above
     LATAbits.LATA9 = 0;      // piezo init off
     CNPUAbits.CNPUA9 = 0;    // RA9  pull up == off
-    CNPDAbits.CNPDA9 = 0;    /* pulldown == off */    
-    
+    CNPDAbits.CNPDA9 = 0;    /* pulldown == off */
+
     CNPUCbits.CNPUC3 = 1; // pullup == on
     CNPUBbits.CNPUB14 = 1; //pullup == on
     CNPUBbits.CNPUB15 = 1; // pullup == on
@@ -545,7 +543,7 @@ void APP_Initialize ( void )
     led(0, 0, 1);
     FbInit();
     led(0, 0, 0);
-    
+
     cdc_write_buffer_lock = xSemaphoreCreateMutex();
     if(cdc_write_buffer_lock == NULL)
     {
@@ -570,8 +568,9 @@ void APP_Initialize ( void )
     appData.appCOMPortObjects[1].getLineCodingData.bDataBits = 8;
     appData.appCOMPortObjects[1].getLineCodingData.bParityType = 0;
     appData.appCOMPortObjects[1].getLineCodingData.bCharFormat = 0;
-    
-   
+
+    flashInit();
+    flashErasePage();
 }
 
 void print_to_com1(uint8_t buffer[APP_WRITE_BUFFER_SIZE]){
@@ -610,8 +609,8 @@ void print_to_com1(uint8_t buffer[APP_WRITE_BUFFER_SIZE]){
                           100 / portTICK_PERIOD_MS) // Timeout for block is 100ms
                           == pdFALSE)
         led(1, 0, 0);
-    
-    
+
+
     // If bit 2 wasn't set, then we may have caught a different notify
     // should consider how to share the mailbox - only use for expected events?
     if(ulNotifiedValue != 2)
@@ -717,7 +716,7 @@ void APP_Tasks ( void )
 {
     BaseType_t errStatus;
     timerInit();
-    
+
     errStatus = xTaskCreate((TaskFunction_t) USBDevice_Task,
             "USB_AttachTask",
             USBDEVICETASK_SIZE,
@@ -726,7 +725,7 @@ void APP_Tasks ( void )
             NULL);
 
     if(errStatus != pdTRUE){
-        red(1);
+        red(100);
         while(1);
     }
 
@@ -738,12 +737,13 @@ void APP_Tasks ( void )
             NULL);
 
     if(errStatus != pdTRUE){
-        red(1);
+        red(100);
         while(1);
     }
     setNote(100, 1024);
     // Wait for for things (USB) to be ready? easier debugging
     vTaskDelay(1000 / portTICK_PERIOD_MS);
+    led(0,0,0);
     //test_task(NULL);
     menu_and_manage_task(NULL);
 }
