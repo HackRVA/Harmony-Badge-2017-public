@@ -495,8 +495,8 @@ void returnToMenus(){
     vTaskSuspend(NULL);
 }
 #define TIME_BEFORE_SLEEP 1000
-#define LAUNCH_APP groundwar_task
-//#define LAUNCH_APP boot_splash_task
+//#define LAUNCH_APP groundwar_task
+#define LAUNCH_APP boot_splash_task
 //#define QC_FIRST
 //#define DO_BOOT_SPLASH
 //#define DEBUG_PRINT_TO_CDC
