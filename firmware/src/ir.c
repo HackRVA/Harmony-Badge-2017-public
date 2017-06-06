@@ -110,9 +110,9 @@ void IRhandler()
         unsigned char *tmp, tmpstr[16];
         extern unsigned char hextab[];
 
-        if (IRpacketsIn[IRpacketInCurr].p.address < IR_LASTADRESS) /* basic sanity check before we call unknown handlers */
+        if (IRpacketsIn[IRpacketInCurr].p.address < IR_LASTADRESS) { /* basic sanity check before we call unknown handlers */
             IRcallbacks[ IRpacketsIn[IRpacketInCurr].p.address].handler( IRpacketsIn[IRpacketInCurr].p );
-
+        }
         IRpacketInCurr++;
         IRpacketInCurr %= MAXPACKETQUEUE;
     }
@@ -321,7 +321,7 @@ extern void draw_ir_udraw(struct IRpacket_t p);//from udraw.c
 void ir_udraw(struct IRpacket_t p)
 {
     draw_ir_udraw(p);
-    DEBUGSTRLVL(DNOISE, "ir_udraw");
+    //DEBUGSTRLVL(DNOISE, "ir_udraw");
 }
 
 //QC APP

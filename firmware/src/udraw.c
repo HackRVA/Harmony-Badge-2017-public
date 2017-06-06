@@ -13,8 +13,10 @@
 #include "ir.h"
 
 //ir bit masks
-#define FIRST_PKT 0b111111111           //used to indicate a packet is first packet
+#define FIRST_PKT 0b111010101           //used to indicate a packet is first packet
 #define BG_ID_MASK 0b011111111          //used to store data in pkt.p.badgeId
+#define BG_ID_OUT 0b011111111           //used to retrieve data in pkt.p.badgeId
+#define SET_HIGH_BIT 0b100000000        //set high bit on badge ID
 
 //bit masks 32bit should change with pixel bit type
 #define EMPTY_MASK 0b00000000000000000000000000000000 //black line
@@ -65,7 +67,7 @@ union half_pkt {
 };
 
 union line_byte_index {                 //union for breaking up image buffer data
-    unsigned char bytes[4];
+    uint8_t bytes[4];
     uint32_t line;
 };
 
@@ -389,21 +391,29 @@ void draw_cursor(struct _cursor pos) {
 }
 
 unsigned char draw_is_empty(struct _image_buffer img_buf, unsigned char line) {
-    uint32_t is_empty=0;
-    is_empty = img_buf.red[line] | img_buf.green[line] | img_buf.blue[line];
-    return ((is_empty)? 0 : 1);
+    if((img_buf.red[line] == WHITE_MASK) &&
+       (img_buf.green[line] == WHITE_MASK) &&
+       (img_buf.blue[line] == WHITE_MASK)) {
+        return 1;
+    }
+    else {
+        return 0;
+    }
 }
 
 unsigned char draw_get_first_line(struct _image_buffer img_buf) {
     unsigned char first_line = 0;
-    while(draw_is_empty(img_buf,first_line)&&first_line<PIX_WIDTH) {
+    while(draw_is_empty(img_buf,first_line)&&first_line<=PIX_NUM) {
         first_line++;
+    }
+    if(first_line > PIX_NUM) {
+        first_line = 0;
     }
     return first_line;
 }
 
 unsigned char draw_get_last_line(struct _image_buffer img_buf) {
-    unsigned char last_line = PIX_WIDTH;
+    unsigned char last_line = PIX_NUM;
     while(draw_is_empty(img_buf,last_line)&&last_line>0){
         last_line--;
     }
@@ -420,6 +430,8 @@ union half_pkt draw_send_first_pkt(struct _image_buffer img_buf) {
     draw_pkt.p.address = IR_UDRAW;
     draw_pkt.p.data = hpkt.bits16;
     IRqueueSend(draw_pkt);
+    //draw_ir_udraw(draw_pkt.p);
+    return hpkt;
 }
 
 void draw_send_packet(struct _image_buffer img_buf, unsigned char byte, unsigned char vert_index) {
@@ -430,26 +442,36 @@ void draw_send_packet(struct _image_buffer img_buf, unsigned char byte, unsigned
     hpkt.bits8.lower = line.bytes[byte];
     line.line = img_buf.green[vert_index];
     hpkt.bits8.upper = line.bytes[byte];
-    line.line = img_buf.red[vert_index];
+    line.line = img_buf.blue[vert_index];
     draw_pkt.p.data = hpkt.bits16;
     draw_pkt.p.badgeId = (BG_ID_MASK)&(line.bytes[byte]);
+    draw_pkt.p.badgeId |= SET_HIGH_BIT;
     draw_pkt.p.command = IR_WRITE;
     draw_pkt.p.address = IR_UDRAW;
     IRqueueSend(draw_pkt);
+    //draw_ir_udraw(draw_pkt.p);
 }
 
 void draw_send_image(struct _image_buffer img_buf) {
+    const TickType_t draw_tick_rate = 40 / portTICK_PERIOD_MS;
     union half_pkt hpkt;
     hpkt = draw_send_first_pkt(img_buf);
+    vTaskDelay(draw_tick_rate);
     unsigned char byte_index;
+    if(hpkt.bits16 == 0) {
+        return;
+    }
     for(hpkt.bits8.lower;hpkt.bits8.lower<=hpkt.bits8.upper;hpkt.bits8.lower++) {
         for(byte_index=0;byte_index<PIX_BYTES;byte_index++) {
             draw_send_packet(img_buf,byte_index,hpkt.bits8.lower);
+            vTaskDelay(draw_tick_rate);
+            setNote(109, 800);
         }
     }
 }
 
 void draw_ir_udraw(struct IRpacket_t p) {
+    
     static union half_pkt first_last;
     static unsigned char byteIndx = 0;
     union half_pkt hpkt;
@@ -459,34 +481,36 @@ void draw_ir_udraw(struct IRpacket_t p) {
         unsigned char j;
         for(j=0;j<PIX_NUM;j++) {
             //clear ir buffer
-            ir_in_buffer.blue[j]=WHITE_MASK;
-            ir_in_buffer.green[j]=WHITE_MASK;
-            ir_in_buffer.red[j]=WHITE_MASK;
+            ir_in_buffer.blue[j]=EMPTY_MASK;
+            ir_in_buffer.green[j]=EMPTY_MASK;
+            ir_in_buffer.red[j]=EMPTY_MASK;
         }
         first_last.bits16 = p.data;
+        setNote(109, 800);
+        blue(0b11111111);
     }
+
     else {
+
         hpkt.bits16 = p.data;
         line.bytes[byteIndx] = hpkt.bits8.lower;
         ir_in_buffer.red[first_last.bits8.lower] |= line.line;
         line.bytes[byteIndx] = hpkt.bits8.upper;
         ir_in_buffer.green[first_last.bits8.lower] |= line.line;
-        line.bytes[byteIndx] = p.badgeId & BG_ID_MASK;
+        line.bytes[byteIndx] = p.badgeId & BG_ID_OUT;
         ir_in_buffer.blue[first_last.bits8.lower] |= line.line;
      
         if(byteIndx == (PIX_BYTES-1)) {
             byteIndx = 0;
+            first_last.bits8.lower++;
         }
         else {
-            byteIndx++;
+            byteIndx++;       
         }
         
         if(first_last.bits8.lower == first_last.bits8.upper) {
             image_received = 1;
             first_last.bits16 = 0;
-        }
-        else {
-            first_last.bits8.lower++;
         }
     }
 }
