@@ -44,119 +44,58 @@
       <logicalFolder name="f1" displayName="framework" projectFiles="true">
         <logicalFolder name="f1" displayName="driver" projectFiles="true">
           <logicalFolder name="f1" displayName="tmr" projectFiles="true">
-            <itemPath></itemPath>
           </logicalFolder>
           <logicalFolder name="f2" displayName="usb" projectFiles="true">
             <logicalFolder name="f2" displayName="usbfs" projectFiles="true">
               <logicalFolder name="f1" displayName="src" projectFiles="true">
-                <itemPath></itemPath>
-                <itemPath></itemPath>
               </logicalFolder>
-              <itemPath></itemPath>
-              <itemPath></itemPath>
-              <itemPath></itemPath>
             </logicalFolder>
             <logicalFolder name="f1" displayName="usbhs" projectFiles="true">
-              <itemPath></itemPath>
             </logicalFolder>
-            <itemPath></itemPath>
           </logicalFolder>
-          <itemPath></itemPath>
         </logicalFolder>
         <logicalFolder name="f3" displayName="gfx" projectFiles="true">
-          <itemPath></itemPath>
         </logicalFolder>
         <logicalFolder name="f4" displayName="osal" projectFiles="true">
           <logicalFolder name="f1" displayName="src" projectFiles="true">
-            <itemPath></itemPath>
-            <itemPath></itemPath>
-            <itemPath></itemPath>
           </logicalFolder>
-          <itemPath></itemPath>
-          <itemPath></itemPath>
         </logicalFolder>
         <logicalFolder name="f5" displayName="peripheral" projectFiles="true">
-          <itemPath></itemPath>
-          <itemPath></itemPath>
-          <itemPath></itemPath>
         </logicalFolder>
         <logicalFolder name="f2" displayName="system" projectFiles="true">
           <logicalFolder name="f1" displayName="clk" projectFiles="true">
-            <itemPath></itemPath>
-            <itemPath></itemPath>
           </logicalFolder>
           <logicalFolder name="f3" displayName="common" projectFiles="true">
-             <itemPath></itemPath>
-            <itemPath></itemPath>
-            <itemPath></itemPath>
-            <itemPath></itemPath>
           </logicalFolder>
           <logicalFolder name="f4" displayName="debug" projectFiles="true">
-              <itemPath></itemPath>
           </logicalFolder>
           <logicalFolder name="f2" displayName="devcon" projectFiles="true">
             <logicalFolder name="f1" displayName="src" projectFiles="true">
-                <itemPath></itemPath>
             </logicalFolder>
-            <itemPath></itemPath>
-            <itemPath></itemPath>
           </logicalFolder>
           <logicalFolder name="f6" displayName="int" projectFiles="true">
             <logicalFolder name="f1" displayName="src" projectFiles="true">
-                <itemPath></itemPath>
             </logicalFolder>
-            <itemPath></itemPath>
-            <itemPath></itemPath>
           </logicalFolder>
           <logicalFolder name="f7" displayName="ports" projectFiles="true">
-              <itemPath></itemPath>
           </logicalFolder>
           <logicalFolder name="f5" displayName="tmr" projectFiles="true">
-            <itemPath></itemPath>
           </logicalFolder>
-          <itemPath></itemPath>
         </logicalFolder>
         <logicalFolder name="f6" displayName="usb" projectFiles="true">
           <logicalFolder name="f1" displayName="src" projectFiles="true">
-              <itemPath></itemPath>
-              <itemPath></itemPath>
-              <itemPath></itemPath>
           </logicalFolder>
-          <itemPath></itemPath>
-          <itemPath></itemPath>
-          <itemPath></itemPath>
-          <itemPath></itemPath>
-          <itemPath></itemPath>
-          <itemPath></itemPath>
         </logicalFolder>
       </logicalFolder>
       <logicalFolder name="FreeRTOS" displayName="FreeRTOS" projectFiles="true">
         <logicalFolder name="portable" displayName="portable" projectFiles="true">
           <logicalFolder name="MPLAB" displayName="MPLAB" projectFiles="true">
             <logicalFolder name="f1" displayName="PIC32MX" projectFiles="true">
-                <itemPath></itemPath>
-                <itemPath></itemPath>
             </logicalFolder>
             <logicalFolder name="f2" displayName="PIC32MZ" projectFiles="true">
-              <itemPath></itemPath>
-              <itemPath></itemPath>
             </logicalFolder>
           </logicalFolder>
         </logicalFolder>
-        <itemPath></itemPath>
-        <itemPath></itemPath>
-        <itemPath></itemPath>
-        <itemPath></itemPath>
-        <itemPath></itemPath>
-        <itemPath></itemPath>
-        <itemPath></itemPath>
-        <itemPath></itemPath>
-        <itemPath></itemPath>
-        <itemPath></itemPath>
-        <itemPath></itemPath>
-        <itemPath></itemPath>
-        <itemPath></itemPath>
-        <itemPath></itemPath>
       </logicalFolder>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
@@ -179,6 +118,7 @@
           <itemPath>../src/badge_apps/conductor.c</itemPath>
           <itemPath>../src/badge_apps/dice_roll.c</itemPath>
           <itemPath>../src/badge_apps/flash_test.c</itemPath>
+          <itemPath>../src/badge_apps/badge_tutorial.c</itemPath>
         </logicalFolder>
         <logicalFolder name="f1" displayName="system_config" projectFiles="true">
           <logicalFolder name="f1"
@@ -222,7 +162,6 @@
         <itemPath>../src/debug.c</itemPath>
         <itemPath>../src/flash.c</itemPath>
         <itemPath>../src/settings.c</itemPath>
-
       </logicalFolder>
       <logicalFolder name="bsp" displayName="bsp" projectFiles="true">
       </logicalFolder>
@@ -231,7 +170,6 @@
           <logicalFolder name="f1" displayName="tmr" projectFiles="true">
             <logicalFolder name="f1" displayName="src" projectFiles="true">
               <logicalFolder name="f1" displayName="dynamic" projectFiles="true">
-                <itemPath></itemPath>
               </logicalFolder>
             </logicalFolder>
           </logicalFolder>
@@ -239,16 +177,12 @@
             <logicalFolder name="f1" displayName="usbfs" projectFiles="true">
               <logicalFolder name="f1" displayName="src" projectFiles="true">
                 <logicalFolder name="f1" displayName="dynamic" projectFiles="true">
-                    <itemPath></itemPath>
-                    <itemPath></itemPath>
                 </logicalFolder>
               </logicalFolder>
             </logicalFolder>
             <logicalFolder name="f2" displayName="usbhs" projectFiles="true">
               <logicalFolder name="f1" displayName="src" projectFiles="true">
                 <logicalFolder name="f1" displayName="dynamic" projectFiles="true">
-                  <itemPath></itemPath>
-                  <itemPath></itemPath>
                 </logicalFolder>
               </logicalFolder>
             </logicalFolder>
@@ -256,35 +190,25 @@
         </logicalFolder>
         <logicalFolder name="f1" displayName="osal" projectFiles="true">
           <logicalFolder name="f1" displayName="src" projectFiles="true">
-              <itemPath></itemPath>
           </logicalFolder>
         </logicalFolder>
         <logicalFolder name="system" displayName="system" projectFiles="true">
           <logicalFolder name="devcon" displayName="devcon" projectFiles="true">
             <logicalFolder name="src" displayName="src" projectFiles="true">
-              <itemPath></itemPath>
-              <itemPath></itemPath>
-              <itemPath></itemPath>
-              <itemPath></itemPath>
             </logicalFolder>
           </logicalFolder>
           <logicalFolder name="f1" displayName="int" projectFiles="true">
             <logicalFolder name="f1" displayName="src" projectFiles="true">
-                <itemPath></itemPath>
             </logicalFolder>
           </logicalFolder>
           <logicalFolder name="f3" displayName="tmr" projectFiles="true">
             <logicalFolder name="f1" displayName="src" projectFiles="true">
-              <itemPath></itemPath>
             </logicalFolder>
           </logicalFolder>
         </logicalFolder>
         <logicalFolder name="f2" displayName="usb" projectFiles="true">
           <logicalFolder name="f1" displayName="src" projectFiles="true">
             <logicalFolder name="f1" displayName="dynamic" projectFiles="true">
-                <itemPath></itemPath>
-                <itemPath></itemPath>
-                <itemPath></itemPath>
             </logicalFolder>
           </logicalFolder>
         </logicalFolder>
@@ -292,25 +216,14 @@
       <logicalFolder name="FreeRTOS" displayName="FreeRTOS" projectFiles="true">
         <logicalFolder name="portable" displayName="portable" projectFiles="true">
           <logicalFolder name="f1" displayName="MemMang" projectFiles="true">
-              <itemPath></itemPath>
           </logicalFolder>
           <logicalFolder name="MPLAB" displayName="MPLAB" projectFiles="true">
             <logicalFolder name="f1" displayName="PIC32MX" projectFiles="true">
-                <itemPath></itemPath>
-                <itemPath></itemPath>
             </logicalFolder>
             <logicalFolder name="f2" displayName="PIC32MZ" projectFiles="true">
-              <itemPath></itemPath>
-              <itemPath></itemPath>
             </logicalFolder>
           </logicalFolder>
         </logicalFolder>
-        <itemPath></itemPath>
-        <itemPath></itemPath>
-        <itemPath></itemPath>
-        <itemPath></itemPath>
-        <itemPath></itemPath>
-        <itemPath></itemPath>
       </logicalFolder>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
@@ -323,6 +236,7 @@
     <Elem>../src</Elem>
     <Elem>../src/system_config/pic32mx_usb_badge_int_dyn</Elem>
     <Elem>../src/pic32mx_usb_badge_int_dyn</Elem>
+    <Elem>../../../../../microchip/harmony/v1_09</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
@@ -334,13 +248,13 @@
         <targetPluginBoard></targetPluginBoard>
         <platformTool>PICkit3PlatformTool</platformTool>
         <languageToolchain>XC32</languageToolchain>
-        <languageToolchainVersion></languageToolchainVersion>
+        <languageToolchainVersion>1.42</languageToolchainVersion>
         <platform>2</platform>
       </toolsSet>
       <compileType>
         <linkerTool>
           <linkerLibItems>
-              <linkerLibFileItem></linkerLibFileItem>
+            <linkerLibFileItem></linkerLibFileItem>
           </linkerLibItems>
         </linkerTool>
         <archiverTool>
@@ -362,230 +276,6 @@
         <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
         <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
       </makeCustomizationType>
-      <item path="../../../../../../framework/driver/driver.h"
-            ex="true"
-            overriding="false">
-        <C32>
-        </C32>
-        <C32-AR>
-        </C32-AR>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32CPP>
-        </C32CPP>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../../../../../../framework/driver/tmr/drv_tmr.h"
-            ex="true"
-            overriding="false">
-        <C32>
-        </C32>
-        <C32-AR>
-        </C32-AR>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32CPP>
-        </C32CPP>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../../../../../../framework/driver/tmr/src/dynamic/drv_tmr.c"
-            ex="true"
-            overriding="false">
-        <C32>
-        </C32>
-        <C32-AR>
-        </C32-AR>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32CPP>
-        </C32CPP>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../../../../../../framework/driver/usb/usbhs/src/dynamic/drv_usbhs.c"
-            ex="true"
-            overriding="false">
-        <C32>
-        </C32>
-        <C32-AR>
-        </C32-AR>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32CPP>
-        </C32CPP>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../../../../../../framework/driver/usb/usbhs/src/dynamic/drv_usbhs_device.c"
-            ex="true"
-            overriding="false">
-        <C32>
-        </C32>
-        <C32-AR>
-        </C32-AR>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32CPP>
-        </C32CPP>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../../../../../../framework/system/devcon/src/sys_devcon_cache.h"
-            ex="true"
-            overriding="false">
-        <C32>
-        </C32>
-        <C32-AR>
-        </C32-AR>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32CPP>
-        </C32CPP>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../../../../../../framework/system/devcon/src/sys_devcon_cache_pic32mz.S"
-            ex="true"
-            overriding="false">
-        <C32>
-        </C32>
-        <C32-AR>
-        </C32-AR>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32CPP>
-        </C32CPP>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../../../../../../framework/system/devcon/src/sys_devcon_pic32mz.c"
-            ex="true"
-            overriding="false">
-        <C32>
-        </C32>
-        <C32-AR>
-        </C32-AR>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32CPP>
-        </C32CPP>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../../../../../../framework/system/tmr/src/sys_tmr.c"
-            ex="true"
-            overriding="false">
-        <C32>
-        </C32>
-        <C32-AR>
-        </C32-AR>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32CPP>
-        </C32CPP>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../../../../../../framework/system/tmr/sys_tmr.h"
-            ex="true"
-            overriding="false">
-        <C32>
-        </C32>
-        <C32-AR>
-        </C32-AR>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32CPP>
-        </C32CPP>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../../../../../../third_party/rtos/FreeRTOS/Source/portable/MPLAB/PIC32MZ/ISR_Support.h"
-            ex="true"
-            overriding="false">
-        <C32>
-        </C32>
-        <C32-AR>
-        </C32-AR>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32CPP>
-        </C32CPP>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../../../../../../third_party/rtos/FreeRTOS/Source/portable/MPLAB/PIC32MZ/port.c"
-            ex="true"
-            overriding="false">
-        <C32>
-        </C32>
-        <C32-AR>
-        </C32-AR>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32CPP>
-        </C32CPP>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../../../../../../third_party/rtos/FreeRTOS/Source/portable/MPLAB/PIC32MZ/port_asm.S"
-            ex="true"
-            overriding="false">
-        <C32>
-        </C32>
-        <C32-AR>
-        </C32-AR>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32CPP>
-        </C32CPP>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../../../../../../third_party/rtos/FreeRTOS/Source/portable/MPLAB/PIC32MZ/portmacro.h"
-            ex="true"
-            overriding="false">
-        <C32>
-        </C32>
-        <C32-AR>
-        </C32-AR>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32CPP>
-        </C32CPP>
-        <C32Global>
-        </C32Global>
-      </item>
       <C32>
         <property key="additional-warnings" value="true"/>
         <property key="addresss-attribute-use" value="false"/>
@@ -604,7 +294,8 @@
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
         <property key="pre-instruction-scheduling" value="default"/>
-        <property key="preprocessor-macros" value="__XC;_DISABLE_OPENADC10_CONFIGPORT_WARNING;_SUPPRESS_PLIB_WARNING"/>
+        <property key="preprocessor-macros"
+                  value="__XC;_DISABLE_OPENADC10_CONFIGPORT_WARNING;_SUPPRESS_PLIB_WARNING"/>
         <property key="strict-ansi" value="false"/>
         <property key="support-ansi" value="false"/>
         <property key="toplevel-reordering" value=""/>
@@ -703,7 +394,7 @@
         <property key="use-indirect-calls" value="false"/>
       </C32CPP>
       <C32Global>
-          <property key="common-include-directories" value="../src/include;../src/assets"/>
+        <property key="common-include-directories" value="../src/include;../src/assets"/>
         <property key="gp-relative-option" value=""/>
         <property key="legacy-libc" value="false"/>
         <property key="relaxed-math" value="false"/>

@@ -45,7 +45,6 @@ void ping_cb(){
     if(BUTTON_PRESSED_AND_CONSUME){
         blue(0);
         num_pinged = 0;
-        //returnToMenus();
     }
 }
 
@@ -167,8 +166,6 @@ void rotate_cb(struct menu_t *h) {
     }
 
     LCDReset();
-
-    closeMenuAndReturn();
 };
 
 const struct menu_t rotate_m[] = {
@@ -202,8 +199,6 @@ void LEDlight_cb(struct menu_t *h) {
     red(G_red_pwm);
     green(G_green_pwm);
     blue(G_blue_pwm);
-
-    closeMenuAndReturn();
 }
 
 
@@ -236,7 +231,6 @@ void buzzer_config_cb()
     strcpy(dstMenu->name, selectedMenu->name);
 
     G_mute = selectedMenu->attrib & 0x1;
-    closeMenuAndReturn();
 }
 
 struct menu_t buzzer_config_m[] = {

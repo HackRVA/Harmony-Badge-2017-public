@@ -60,7 +60,7 @@ void init_CTMU()
 void button_task(void* p_arg)
 {
     const unsigned char ButtonADCChannels[2] = {3,4};
-    const unsigned char n_averages = 8, log2_n_averages = 3;
+    const unsigned char n_averages = 4, log2_n_averages = 2;
     unsigned short int ButtonVavgADCs[2]={0,0};
     
     
@@ -80,11 +80,17 @@ void button_task(void* p_arg)
     #define Y3 (-6000 + 2*AN3)
     #define TOUCH_PCT_CALC (char)((AN3*-3 + AN4*1 + 25043) >> 8)
 #endif
-#ifdef BADGE_2017
+#ifdef BADGE_2017_orig
     #define Y1 (28000 - 2*AN3)
     #define Y2 (  -1500 + 2*AN3)
     #define Y3 (-7500 + 2*AN3)
     #define TOUCH_PCT_CALC (char)((AN3*-3 + AN4*1 + 32934) >> 8)
+#endif
+#ifdef BADGE_2017
+    #define Y1 (28000 - 2*AN3)
+    #define Y2 (  -1500 + 2*AN3)
+    #define Y3 (-7500 + 2*AN3)
+    #define TOUCH_PCT_CALC (char)((AN3*-10 + AN4*1 + 121400) >> 10)
 #endif
 
     init_CTMU();
@@ -149,8 +155,8 @@ void button_task(void* p_arg)
             // Could just use this pct to detect buttons...
             G_touch_pct = TOUCH_PCT_CALC;
             
-            if(G_touch_pct > 100)
-                G_touch_pct = 100;
+            if(G_touch_pct >= 100)
+                G_touch_pct = 99;
             else if(G_touch_pct < 0)
                 G_touch_pct = 0;
             
@@ -161,6 +167,8 @@ void button_task(void* p_arg)
             REMOVE_FROM_MASK(G_pressed_button, ALL_TOUCH_MASK);
         }
 
+        //print_to_com1("HELLO");
+        //led(0, 50, 50);
 //#define PRINT_TOUCH_VALS
 #ifdef PRINT_TOUCH_VALS
         char words[8]={0};

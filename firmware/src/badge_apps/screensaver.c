@@ -3,13 +3,13 @@
 #ifndef SDL_BADGE
 #include "app.h"
 #include "fb.h"
-#include "assetList.h"
 #include "buttons.h"
 #else
 #include "sdl_fb.h"
 #include "sdl_buttons.h"
 #endif
 #include "utils.h"
+#include "assetList.h"
 
 void random_dots(void* p_arg){
     unsigned int cnt = 0, x, y;
@@ -107,6 +107,60 @@ void create_flier(struct gof_cell_t cell_grid[][GRID_DIM],
     cell_grid[x+1][y].is_active = 1;
 }
 
+void update_gof_grid(struct gof_cell_t cell_grid[GRID_DIM][GRID_DIM],
+                     unsigned short cell_color){
+    unsigned char i=0, j=0;
+    FbColor(cell_color);
+    // Don't use full range so we
+    // dont have to do boundary checks
+    for(i=1; i < (GRID_DIM - 1); i++) {
+        for(j=1; j < (GRID_DIM - 1); j++){
+            if(cell_grid[i][j].is_active){
+
+                cell_grid[i][j+1].neighbors += 1;
+                cell_grid[i+1][j+1].neighbors += 1;
+                cell_grid[i+1][j].neighbors += 1;
+                cell_grid[i+1][j-1].neighbors += 1;
+
+                cell_grid[i][j-1].neighbors += 1;
+                cell_grid[i-1][j-1].neighbors += 1;
+                cell_grid[i-1][j].neighbors += 1;
+                cell_grid[i-1][j+1].neighbors += 1;
+            }
+        }
+    }
+    for(i=1; i < (GRID_DIM - 1); i++) {
+        for(j=1; j < (GRID_DIM - 1); j++){
+            if((cell_grid[i][j].neighbors > 1)
+               && (cell_grid[i][j].neighbors < 4)
+                    && (cell_grid[i][j].is_active)){
+                    cell_grid[i][j].is_active = 1;
+            }
+            else if( (cell_grid[i][j].neighbors == 3)
+                     && (!cell_grid[i][j].is_active) ){
+                cell_grid[i][j].is_active = 1;
+            }
+            else if((cell_grid[i][j].neighbors >= 4)){
+                cell_grid[i][j].is_active = 0;
+            }
+            else if((cell_grid[i][j].neighbors <= 1)){
+                cell_grid[i][j].is_active = 0;
+            }
+
+           if(cell_grid[i][j].is_active && cell_color != 0){
+                FbMove(i*GRID_CELL_DIM,
+                       j*GRID_CELL_DIM);
+
+                FbFilledRectangle(GRID_CELL_DIM,
+                                  GRID_CELL_DIM);
+            }
+            //printf("%d, ", cell_grid[i][j]);
+            cell_grid[i][j].neighbors = 0;
+        }
+    }
+
+}
+
 
 void game_of_life_task(void* p_arg)
 {
@@ -160,61 +214,35 @@ For a space that is 'empty' or 'unpopulated'
 
         vTaskDelay(tick_rate);
 
-        // Don't use full range so we
-        // dont have to do boundary checks
-        for(i=1; i < (GRID_DIM - 1); i++) {
-            for(j=1; j < (GRID_DIM - 1); j++){
-                if(cell_grid[i][j].is_active){
-
-                    cell_grid[i][j+1].neighbors += 1;
-                    cell_grid[i+1][j+1].neighbors += 1;
-                    cell_grid[i+1][j].neighbors += 1;
-                    cell_grid[i+1][j-1].neighbors += 1;
-
-                    cell_grid[i][j-1].neighbors += 1;
-                    cell_grid[i-1][j-1].neighbors += 1;
-                    cell_grid[i-1][j].neighbors += 1;
-                    cell_grid[i-1][j+1].neighbors += 1;
-                }
-            }
-        }
-
-        for(i=1; i < (GRID_DIM - 1); i++) {
-            for(j=1; j < (GRID_DIM - 1); j++){
-
-
-                if((cell_grid[i][j].neighbors > 1)
-                   && (cell_grid[i][j].neighbors < 4)
-                        && (cell_grid[i][j].is_active)){
-                        cell_grid[i][j].is_active = 1;
-                }
-                else if( (cell_grid[i][j].neighbors == 3)
-                         && (!cell_grid[i][j].is_active) ){
-                    cell_grid[i][j].is_active = 1;
-                }
-                else if((cell_grid[i][j].neighbors >= 4)){
-                    cell_grid[i][j].is_active = 0;
-                }
-                else if((cell_grid[i][j].neighbors <= 1)){
-                    cell_grid[i][j].is_active = 0;
-                }
-
-               if(cell_grid[i][j].is_active){
-                    FbMove(i*GRID_CELL_DIM,
-                           j*GRID_CELL_DIM);
-
-                    FbFilledRectangle(GRID_CELL_DIM,
-                                      GRID_CELL_DIM);
-                }
-                //printf("%d, ", cell_grid[i][j]);
-                cell_grid[i][j].neighbors = 0;
-            }
-        }
+        update_gof_grid(cell_grid, YELLOW);
 
         if(BUTTON_PRESSED_AND_CONSUME)
             return;     
     }
 
+}
+
+void about_the_bird(void* p_arg){
+
+    const TickType_t tick_rate = 10 / portTICK_PERIOD_MS;
+    unsigned char cnt=0, x, y;
+    FbBackgroundColor(CYAN);
+    FbClear();
+    //while(!BUTTON_PRESSED_AND_CONSUME){
+    for(;;){
+        x = quick_rand(cnt++)%110;
+        y = quick_rand(cnt++)%110;
+        FbMove(x, y);
+        FbTransparentIndex(3);
+        FbImage(BADGEY_BIRD, 0);
+        FbPushBuffer();
+        vTaskDelay(tick_rate);
+        if(BUTTON_PRESSED_AND_CONSUME) {
+            FbBackgroundColor(BLACK);
+            FbClear();
+            return;
+        }
+    }
 }
 
 void screensaver_task(void* p_arg)
@@ -227,6 +255,7 @@ void screensaver_task(void* p_arg)
     for(;;)
 #endif
     {
+        about_the_bird(NULL);
         game_of_life_task(NULL);
         spirals_task(NULL);
         random_dots(NULL);
