@@ -11,11 +11,11 @@
 #include "fb.h"
 #include "buttons.h"
 #include "rgb_led.h"
+#include "settings.h"
 #endif
 #include "badge_menu.h"
 #include "badge_apps.h"
 #include "colors.h"
-#include "settings.h"
 
 struct menuStack_t {
    struct menu_t *selectedMenu;
@@ -395,6 +395,26 @@ struct menu_t *display_menu(struct menu_t *menu,
 }
 
 
+
+
+void closeMenuAndReturn() {
+//    if (G_menuCnt == 0) return; /* stack is empty, error or main menu */
+//    G_menuCnt--;
+//    G_currMenu = G_menuStack[G_menuCnt].currMenu;
+//    G_selectedMenu = G_menuStack[G_menuCnt].selectedMenu;
+
+    //G_selectedMenu = display_menu(G_currMenu, G_selectedMenu, MAIN_MENU_STYLE);
+    //runningApp = NULL;
+}
+
+
+#ifndef SDL_BADGE
+extern struct menu_t myBadgeid_m[];
+extern struct menu_t peerBadgeid_m[];
+extern struct menu_t backlight_m[];
+extern struct menu_t rotate_m[];
+extern struct menu_t LEDlight_m[];
+extern struct menu_t buzzer_m[];
 struct menu_t settings_m[] = {
     {"ping", VERT_ITEM, FUNCTION,
         {(struct menu_t *)ping_cb}},
@@ -424,19 +444,6 @@ struct menu_t settings_m[] = {
         {NULL}},
 };
 
-
-void closeMenuAndReturn() {
-//    if (G_menuCnt == 0) return; /* stack is empty, error or main menu */
-//    G_menuCnt--;
-//    G_currMenu = G_menuStack[G_menuCnt].currMenu;
-//    G_selectedMenu = G_menuStack[G_menuCnt].selectedMenu;
-
-    //G_selectedMenu = display_menu(G_currMenu, G_selectedMenu, MAIN_MENU_STYLE);
-    //runningApp = NULL;
-}
-
-
-#ifndef SDL_BADGE
 struct menu_t main_m[] = {
     {"TEST", VERT_ITEM|DEFAULT_ITEM, TASK,
         {hello_world_task}},    
