@@ -26,6 +26,16 @@ void draw_1(){
     FbFilledRectangle(DOT_SQUARE_SIZE, DOT_SQUARE_SIZE);
 }
 
+void draw_2(){
+    FbMove(DICE_X, DICE_Y);
+    FbColor(WHITE);
+    FbFilledRectangle(DICE_SQUARE_SIZE, DICE_SQUARE_SIZE);
+    
+    FbMove(DICE_X + DICE_SQUARE_SIZE/2, DICE_Y + DICE_SQUARE_SIZE/2);
+    FbColor(BLACK);
+    FbFilledRectangle(DOT_SQUARE_SIZE, DOT_SQUARE_SIZE);
+}
+
 #define ANY_DPAD (UP_BTN_AND_CONSUME || DOWN_BTN_AND_CONSUME || LEFT_BTN_AND_CONSUME || RIGHT_BTN_AND_CONSUME)
 #define SPLASH_SHIFT_DOWN 85
 void dice_roll_task(void* p_arg) {
@@ -46,10 +56,17 @@ void dice_roll_task(void* p_arg) {
                 break;
             case SHAKE:
                 dice_value = (rand()%6) +1;
-                if(dice_value == 1){
-                    
+                switch (dice_value){
+                    case 1:
+                        draw_1();
+                        break;
+                    case 2:
+                        draw_2();
+                        break;
+                        
                 }
-                draw_1();
+         
+                
                 FbSwapBuffers();
                 
                 if(BUTTON_PRESSED_AND_CONSUME)

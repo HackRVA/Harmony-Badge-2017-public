@@ -10,7 +10,7 @@
 
 rtccTime G_time ;
 rtccDate G_date ;
-
+unsigned short G_peerBadgeId=0;
 
 unsigned char IRpacketInCurr = 0;
 unsigned char IRpacketInNext = 0;
