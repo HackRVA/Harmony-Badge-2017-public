@@ -514,6 +514,8 @@ void returnToMenus(){
 #define TIME_BEFORE_SLEEP 5000
 //#define LAUNCH_APP groundwar_task
 #define LAUNCH_APP boot_splash_task
+//#define LAUNCH_APP badge_tutorial_task
+#define RUN_TUTORIAL 
 //#define QC_FIRST
 //#define DO_BOOT_SPLASH
 //#define DEBUG_PRINT_TO_CDC
@@ -543,7 +545,26 @@ void menu_and_manage_task(void *p_arg){
                             NULL,
                             1u,
                             &xHandle);
-
+#ifdef RUN_TUTORIAL
+    // Wait for splash app to finish
+    if (xTaskNotifyWait(0, 1u, &ulNotifiedValue, portMAX_DELAY)){
+        if(ulNotifiedValue & 0x01){
+            //vTaskSuspend(xHandle); // doesn't hurt to call suspend here too?
+            vTaskDelete(xHandle);
+            xHandle = NULL;
+            prev_selected_menu = NULL;   
+        }
+    }    
+    // TODO: Check flash for tutorial already complete. Allow access to tutorial in settings
+    
+    // Force tutorial
+    xReturned = xTaskCreate((TaskFunction_t) badge_tutorial_task,
+                            "exec_app",
+                            650u, //may want to increase?
+                            NULL,
+                            1u,
+                            &xHandle);    
+#endif
 
 #endif    
     for(;;){
