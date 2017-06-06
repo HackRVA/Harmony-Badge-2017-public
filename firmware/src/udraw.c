@@ -13,7 +13,7 @@
 #include "ir.h"
 
 //ir bit masks
-#define FIRST_PKT 0b111010101           //used to indicate a packet is first packet
+#define FIRST_PKT 0b101010101           //used to indicate a packet is first packet
 #define BG_ID_MASK 0b011111111          //used to store data in pkt.p.badgeId
 #define BG_ID_OUT 0b011111111           //used to retrieve data in pkt.p.badgeId
 #define SET_HIGH_BIT 0b100000000        //set high bit on badge ID
@@ -453,7 +453,7 @@ void draw_send_packet(struct _image_buffer img_buf, unsigned char byte, unsigned
 }
 
 void draw_send_image(struct _image_buffer img_buf) {
-    const TickType_t draw_tick_rate = 40 / portTICK_PERIOD_MS;
+    const TickType_t draw_tick_rate = 60 / portTICK_PERIOD_MS;
     union half_pkt hpkt;
     hpkt = draw_send_first_pkt(img_buf);
     vTaskDelay(draw_tick_rate);
