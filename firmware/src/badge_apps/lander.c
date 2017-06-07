@@ -555,7 +555,7 @@ void lander_draw_alien(){
 //  - fuel pickups
 //  - badge invaders flyby (one that takes fuel)
 void lander_draw(){
-    FbBackgroundColor(CYAN);
+    FbBackgroundColor(BLACK);
     FbClear();
     lander_draw_ship();
     lander_draw_fuel_bar();

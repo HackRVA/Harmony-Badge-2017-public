@@ -406,79 +406,6 @@ extern struct menu_t LEDlight_m[];
 extern struct menu_t buzzer_m[];
 extern const struct menu_t sch_main_m[];
 
-struct menu_t settings_m[] = {
-    {"QC", VERT_ITEM, TASK,
-        {hello_world_task}},       
-    
-    {"tutorial", VERT_ITEM, TASK,
-        {(struct menu_t *)badge_tutorial_task}},
-        
-    {"ping", VERT_ITEM, FUNCTION,
-        {(struct menu_t *)ping_cb}},
-    {"backlight", VERT_ITEM, MENU,
-        {(struct menu_t *) backlight_m}},
-    {"led", VERT_ITEM, MENU,
-        {(struct menu_t *) LEDlight_m}}, /* coerce/cast to a menu_t data pointer */
-    {"buzzer", VERT_ITEM, MENU,
-        {(struct menu_t *) buzzer_m}},
-//    {"slider", VERT_ITEM, MENU,
-//        {(struct menu_t *) slider_m}},
-//    {"tests", VERT_ITEM, MENU,
-//        {(struct menu_t *) tests_m}},
-#ifdef IS_ADMIN
-        {"silence others", VERT_ITEM, TASK,
-                {(struct menu_t *) silence_task}},
-        {"full fucktard", VERT_ITEM, TASK,
-                {(struct menu_t *) note_crazy_task}},
-#endif
-    {"Back", VERT_ITEM | LAST_ITEM| DEFAULT_ITEM, BACK,
-        {NULL}},
-};
-
-struct menu_t gadgets_m[] = {    
-    //{"Conductor", VERT_ITEM, TASK,
-      //  {conductor_task}},
-    //{"blinkenlite", VERT_ITEM, TASK,
-      //  {blinkenlights_task}},        
-    //{"dice roll", VERT_ITEM, TASK,
-      //  {dice_roll_task}},
-    {"u draw", VERT_ITEM, TASK,
-        {udraw_task}},
-    {"Back", VERT_ITEM | LAST_ITEM| DEFAULT_ITEM, BACK,
-        {NULL}},
-} ;        
-
-struct menu_t games_m[] = {
-
-//    {"GroundWar", VERT_ITEM, TASK,
-//        {groundwar_task}},    
-    {"Badgelandia", VERT_ITEM, TASK,
-        {badgelandia_task}},
-    {"Badgey Bird", VERT_ITEM, TASK,
-        {badgey_bird_task}},
-    {"Lander", VERT_ITEM, TASK,
-        {badge_lander_task}},
-    //{"Star Shooter", VERT_ITEM, TASK,
-      //  {star_shooter_task}},
-    {"Back", VERT_ITEM | LAST_ITEM| DEFAULT_ITEM, BACK,
-        {NULL}},
-} ;
-
-
-
-
-struct menu_t main_m[] = {
-    {"Arcade",       VERT_ITEM|DEFAULT_ITEM, MENU,
-        {games_m}},
-    {"Gadgets",       VERT_ITEM, MENU,    {gadgets_m}},
-
-	{"Schedule", VERT_ITEM, MENU,
-        {sch_main_m}},
-    {"Settings",    VERT_ITEM, MENU,
-        {settings_m}},
-    {"", VERT_ITEM|LAST_ITEM|HIDDEN_ITEM, BACK,
-        {NULL}},
-} ;
 
 
 void returnToMenus(){
@@ -496,8 +423,93 @@ void returnToMenus(){
 }
 
 
+//struct menu_t settings_m[] = {
+////    {"QC", VERT_ITEM, TASK,
+////        {hello_world_task}},
+////    {"tutorial", VERT_ITEM, TASK,
+////        {(struct menu_t *)badge_tutorial_task}},
+////    {"ping", VERT_ITEM, FUNCTION,
+////        {(struct menu_t *)ping_cb}},
+//    {"backlight", VERT_ITEM, MENU,
+//        {(struct menu_t *) backlight_m}},
+////    {"led", VERT_ITEM, MENU,
+////        {(struct menu_t *) LEDlight_m}}, /* coerce/cast to a menu_t data pointer */
+//    {"buzzer", VERT_ITEM, MENU,
+//        {(struct menu_t *) buzzer_m}},
+//#ifdef IS_ADMIN
+//        {"silence others", VERT_ITEM, TASK,
+//                {(struct menu_t *) silence_task}},
+//        {"full fucktard", VERT_ITEM, TASK,
+//                {(struct menu_t *) note_crazy_task}},
+//#endif
+//    {"Back", VERT_ITEM | LAST_ITEM| DEFAULT_ITEM, BACK,
+//        {NULL}},
+//};
+//
+//struct menu_t gadgets_m[] = {    
+////    {"Conductor", VERT_ITEM, TASK,
+////        {conductor_task}},
+////    {"blinkenlite", VERT_ITEM, TASK,
+////        {blinkenlights_task}},        
+////    {"dice roll", VERT_ITEM, TASK,
+////        {dice_roll_task}},
+//    {"u draw", VERT_ITEM, TASK,
+//        {udraw_task}},
+//    {"Back", VERT_ITEM | LAST_ITEM| DEFAULT_ITEM, BACK,
+//        {NULL}},
+//} ;        
+//
+//struct menu_t games_m[] = {
+////    {"GroundWar", VERT_ITEM, TASK,
+////        {groundwar_task}},    
+////    {"Badgelandia", VERT_ITEM, TASK,
+////        {badgelandia_task}},
+////    {"Badgey Bird", VERT_ITEM, TASK,
+////        {badgey_bird_task}},
+//    {"Lander", VERT_ITEM, TASK,
+//        {badge_lander_task}},
+//    {"Star Shooter", VERT_ITEM, TASK,
+//        {star_shooter_task}},
+//    {"Back", VERT_ITEM | LAST_ITEM| DEFAULT_ITEM, BACK,
+//        {NULL}},
+//} ;
+
+
+struct menu_t main_m[] = {
+//    {"Arcade",       VERT_ITEM|DEFAULT_ITEM, MENU,
+//        {games_m}},
+    {"GroundWar", VERT_ITEM, TASK,
+        {groundwar_task}},        
+//    {"Lander", VERT_ITEM, TASK,
+//        {badge_lander_task}},
+    {"Star Shooter", VERT_ITEM, TASK,
+        {star_shooter_task}},    
+    {"u draw", VERT_ITEM, TASK,
+        {udraw_task}},
+    {"Conductor", VERT_ITEM, TASK,
+        {conductor_task}},
+    {"blinkenlite", VERT_ITEM, TASK,
+        {blinkenlights_task}},        
+//    {"dice roll", VERT_ITEM, TASK,
+//        {dice_roll_task}},        
+
+
+    {"Schedule", VERT_ITEM|DEFAULT_ITEM, MENU,
+        {sch_main_m}},
+    {"backlight", VERT_ITEM, MENU,
+        {(struct menu_t *) backlight_m}},
+//    {"led", VERT_ITEM, MENU,
+//        {(struct menu_t *) LEDlight_m}}, /* coerce/cast to a menu_t data pointer */
+    {"buzzer", VERT_ITEM, MENU,
+        {(struct menu_t *) buzzer_m}},        
+
+    {"", VERT_ITEM|LAST_ITEM|HIDDEN_ITEM, BACK,
+        {NULL}},
+};
+
+
 #define TIME_BETWEEN_SCREENSAVER 2000
-#define TIME_BEFORE_SLEEP 3000
+#define TIME_BEFORE_SLEEP 30000
 //#define LAUNCH_APP groundwar_task
 #define LAUNCH_APP boot_splash_task
 //#define LAUNCH_APP badge_tutorial_task
@@ -514,15 +526,19 @@ enum badge_idle_state{
     WAKEUP
 };
 
+extern unsigned char stop_screensaver;
+
 void menu_and_manage_task(void *p_arg){
-    extern unsigned char stop_screensaver;
-    stop_screensaver = 0;
-    unsigned char idle_state = AWAKE;
+
+#ifndef DONT_BLANK_MENU
     unsigned int sleep_timestamp = 0, screensaver_timestamp=0;
     TaskHandle_t xHandle = NULL;
-    uint32_t ulNotifiedValue;
-    BaseType_t xReturned;
+    uint32_t ulNotifiedValue = 0;
+    BaseType_t xReturned = 0;
     struct menu_t *prev_selected_menu = NULL;
+    unsigned char idle_state = AWAKE;
+    //led(100, 0, 0);
+    stop_screensaver = 0;
     
     G_currMenu = main_m;
     G_selectedMenu = &main_m[1];
@@ -550,7 +566,8 @@ void menu_and_manage_task(void *p_arg){
             //vTaskSuspend(xHandle); // doesn't hurt to call suspend here too?
             vTaskDelete(xHandle);
             xHandle = NULL;
-            prev_selected_menu = NULL;   
+            prev_selected_menu = NULL;
+            vTaskDelay(15 / portTICK_PERIOD_MS);
         }
     }    
     // TODO: Check flash for tutorial already complete. Allow access to tutorial in settings
@@ -558,15 +575,14 @@ void menu_and_manage_task(void *p_arg){
     // Force tutorial
     xReturned = xTaskCreate((TaskFunction_t) badge_tutorial_task,
                             "exec_app",
-                            650u, //may want to increase?
+                            450u, //may want to increase?
                             NULL,
                             1u,
                             &xHandle);    
 #endif
 
-#endif    
+#endif
     for(;;){
-        
         switch(idle_state){
             case AWAKE:
                 // If enough time has past, turn off stuff and go to low power state
@@ -594,7 +610,7 @@ void menu_and_manage_task(void *p_arg){
                 stop_screensaver = 0;
                 xReturned = xTaskCreate((TaskFunction_t) random_screen_saver,
                                         "exec_app",
-                                        250u, //may want to increase?
+                                        350u, //may want to increase?
                                         NULL,
                                         1u,
                                         &xHandle);
@@ -611,6 +627,7 @@ void menu_and_manage_task(void *p_arg){
                         vTaskSuspend(xHandle);
                         vTaskDelete(xHandle);
                         xHandle = NULL;
+                        vTaskDelay(15 / portTICK_PERIOD_MS);
                         // RETURN to low power
                         idle_state = ENTER_SLEEP;
                     }
@@ -618,8 +635,6 @@ void menu_and_manage_task(void *p_arg){
                 // Check if the user has provided any IO
                 else if(DOWN_BTN_AND_CONSUME || UP_BTN_AND_CONSUME 
                         || LEFT_BTN_AND_CONSUME || RIGHT_BTN_AND_CONSUME){
-
-                    
                     //vTaskDelay(15 / portTICK_PERIOD_MS);
                     stop_screensaver = 1;
                     // screensaver must end
@@ -628,6 +643,7 @@ void menu_and_manage_task(void *p_arg){
                             vTaskSuspend(xHandle);
                             vTaskDelete(xHandle);
                             xHandle = NULL;
+                            vTaskDelay(15 / portTICK_PERIOD_MS);
                             // RETURN to low power
                             idle_state = ENTER_SLEEP;
                         }
@@ -644,6 +660,7 @@ void menu_and_manage_task(void *p_arg){
                             vTaskSuspend(xHandle);
                             vTaskDelete(xHandle);
                             xHandle = NULL;
+                            vTaskDelay(15 / portTICK_PERIOD_MS);
                             // RETURN to low power
                             idle_state = ENTER_SLEEP;
                         }
@@ -804,5 +821,6 @@ void menu_and_manage_task(void *p_arg){
             }
         }
     }
+#endif
 }
 #endif

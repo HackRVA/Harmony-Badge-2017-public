@@ -36,7 +36,6 @@ void matrix(){
     led(0, 0, 0);
 }
 
-
 //const unsigned char badgetip_more_you_know = 
 void just_the_badge_tips(void* p_arg){
     unsigned char badgetips_header[] = "--Badge Tip--";
@@ -53,7 +52,6 @@ void just_the_badge_tips(void* p_arg){
         FbColor(GREEN);
         FbMove(12, 4);
         FbWriteLine(badgetips_header);
-
 
         FbColor(YELLOW);
         switch(tipnum){
@@ -193,11 +191,11 @@ void just_the_badge_tips(void* p_arg){
                 break;
             case 18:
                 FbMove(2, 20);
-                FbWriteLine("The badge is a");
+                FbWriteLine("Bitches love");
                 FbMove(2, 30);
-                FbWriteLine("dish best served ");
-                FbMove(2, 40);
-                FbWriteLine("cold.");
+                FbWriteLine("badges. Woof.");
+                //FbMove(2, 40);
+                //FbWriteLine("");
                 break;
         }
 
@@ -415,6 +413,19 @@ struct gof_cell_t{
 #define DECR_NEIGHBORS(VAL) VAL == ? (VAL++) : 2
 void create_flier(struct gof_cell_t cell_grid[][GRID_DIM],
                   unsigned char x, unsigned char y){
+    if(x < 1){
+        x = 1;
+    }
+    else if(x > 90){
+        x = 80;
+    }
+    
+    if(y < 1){
+        y = 1;
+    }
+    else if(y > 90){
+        y = 80;
+    }
     cell_grid[x][y+2].is_active = 1;
     cell_grid[x+1][y+2].is_active = 1;
     cell_grid[x+2][y+2].is_active = 1;
@@ -428,8 +439,8 @@ void update_gof_grid(struct gof_cell_t cell_grid[GRID_DIM][GRID_DIM],
     FbColor(cell_color);
     // Don't use full range so we
     // dont have to do boundary checks
-    for(i=1; i < (GRID_DIM - 1); i++) {
-        for(j=1; j < (GRID_DIM - 1); j++){
+    for(i=2; i < (GRID_DIM - 2); i++) {
+        for(j=2; j < (GRID_DIM - 2); j++){
             if(cell_grid[i][j].is_active){
 
                 cell_grid[i][j+1].neighbors += 1;
@@ -444,8 +455,9 @@ void update_gof_grid(struct gof_cell_t cell_grid[GRID_DIM][GRID_DIM],
             }
         }
     }
-    for(i=1; i < (GRID_DIM - 1); i++) {
-        for(j=1; j < (GRID_DIM - 1); j++){
+    
+    for(i=2; i < (GRID_DIM - 2); i++) {
+        for(j=2; j < (GRID_DIM - 2); j++){
             if((cell_grid[i][j].neighbors > 1)
                && (cell_grid[i][j].neighbors < 4)
                     && (cell_grid[i][j].is_active)){
@@ -469,7 +481,6 @@ void update_gof_grid(struct gof_cell_t cell_grid[GRID_DIM][GRID_DIM],
                 FbFilledRectangle(GRID_CELL_DIM,
                                   GRID_CELL_DIM);
             }
-            //printf("%d, ", cell_grid[i][j]);
             cell_grid[i][j].neighbors = 0;
         }
     }
@@ -487,21 +498,22 @@ void game_of_life_task(void* p_arg)
     FbBackgroundColor(GREY1);
     FbClear();
     
-    create_flier(cell_grid, 
-                    10 + (quick_rand(66)%30), 10 + (quick_rand(66)%30));
-    create_flier(cell_grid, 
-                    10 + (quick_rand(66)%30), 10 + (quick_rand(66)%30));
+    for(i=0; i< 5; i++){
+        create_flier(cell_grid, 
+                        10 + ((unsigned char)(quick_rand(i)%50)),
+                        11 + ((unsigned char)(quick_rand(i)%50)));
+    }
 
+    if(stop_screensaver)
+        led(100, 0, 0);
     FbClear();
     
-    //for(;;)
     while(!stop_screensaver)
     {
         if(redraw){
             FbColor(YELLOW);
             for(i=0; i < GRID_DIM; i++){
                 for(j=0; j < GRID_DIM; j++){
-                    
 /*
  For a space that is 'populated':
     Each cell with one or no neighbors dies, as if by solitude.
@@ -537,8 +549,8 @@ For a space that is 'empty' or 'unpopulated'
 
         update_gof_grid(cell_grid, YELLOW);
 
-        if(BUTTON_PRESSED_AND_CONSUME)
-            return;     
+//        if(BUTTON_PRESSED_AND_CONSUME)
+//            return;     
     }
 
 }
@@ -589,27 +601,27 @@ void screensaver_task(void* p_arg)
 
 #define NUM_SCREEN_SAVERS 8
 void random_screen_saver(void* p_arg){
-    unsigned char rnd = quick_rand(42)%NUM_SCREEN_SAVERS;
+    unsigned char rnd = 2;//quick_rand(42)%NUM_SCREEN_SAVERS;
     
     switch(rnd){
         case 0:
             about_the_bird(NULL);
             break;
         case 1:
-            game_of_life_task(NULL);
-            break;            
+            //game_of_life_task(NULL);
+            //break;            
         case 2:
             spirals_task(NULL);
             break;       
         case 3:
             random_dots(NULL);  
-            break;       
+            break;     
         case 4:
-            just_the_badge_tips(NULL);
-            break;                   
+            //just_the_badge_tips(NULL);
+            //break;                   
         case 5:
-            for_president(NULL);
-            break;
+//            for_president(NULL);
+//            break;
         case 6:
             carzy_tunnel_animator(NULL);
             break;
