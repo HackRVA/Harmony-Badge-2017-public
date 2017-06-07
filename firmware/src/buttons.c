@@ -60,7 +60,7 @@ void init_CTMU()
 void button_task(void* p_arg)
 {
     const unsigned char ButtonADCChannels[2] = {3,4};
-    const unsigned char n_averages = 4, log2_n_averages = 2;
+    const unsigned char n_averages = 16, log2_n_averages = 4;
     unsigned short int ButtonVavgADCs[2]={0,0};
     
     
@@ -87,7 +87,7 @@ void button_task(void* p_arg)
     #define TOUCH_PCT_CALC (char)((AN3*-3 + AN4*1 + 32934) >> 8)
 #endif
 #ifdef BADGE_2017
-    #define Y1 (28000 - 2*AN3)
+    #define Y1 (20000 - 1*AN3)
     #define Y2 (  -1500 + 2*AN3)
     #define Y3 (-7500 + 2*AN3)
     #define TOUCH_PCT_CALC (char)((AN3*-10 + AN4*1 + 121400) >> 10)
@@ -144,12 +144,22 @@ void button_task(void* p_arg)
         {                        
             if((AN4 < Y3) && (G_down_touch_cnt < 255))
                 G_down_touch_cnt++;
+            else{
+                G_down_touch_cnt = 0;
+            }
+                
             
             if((AN4 < Y2) && (AN4 > Y3) && (G_middle_touch_cnt < 255))
                 G_middle_touch_cnt++;
+            else{
+                G_middle_touch_cnt = 0;
+            }
             
             if((AN4 > Y2) && (G_up_touch_cnt < 255))
                 G_up_touch_cnt++;
+            else{
+                G_up_touch_cnt = 0;
+            }
             
             // TODO: This cast may cause problems
             // Could just use this pct to detect buttons...

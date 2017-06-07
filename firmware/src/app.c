@@ -571,6 +571,9 @@ void APP_Initialize ( void )
 
     flashInit();
     flashErasePage();
+    
+    G_sysData.backlight = 224;
+    G_sysData.ledBrightness = 2;
 }
 
 void print_to_com1(uint8_t buffer[APP_WRITE_BUFFER_SIZE]){
@@ -680,7 +683,8 @@ void print_high_water_marks(){
     print_to_com1("----\n\r\0");
 }
 
-
+//#define TASK_UNDER_TEST hello_world_task
+#define TASK_UNDER_TEST button_task
 void test_task(void* p_arg)
 {
     TaskHandle_t xHandle = NULL;
@@ -688,7 +692,7 @@ void test_task(void* p_arg)
 
 
     // Swap out 'hello_world_task' for task function needing testing
-    xReturned = xTaskCreate((TaskFunction_t) hello_world_task,
+    xReturned = xTaskCreate((TaskFunction_t) TASK_UNDER_TEST,
             "exec_app",
             256u,
             NULL,
@@ -745,6 +749,7 @@ void APP_Tasks ( void )
     vTaskDelay(1000 / portTICK_PERIOD_MS);
     led(0,0,0);
     //test_task(NULL);
+    //button_task(NULL);
     menu_and_manage_task(NULL);
 }
 

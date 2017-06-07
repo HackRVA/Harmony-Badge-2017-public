@@ -11,10 +11,14 @@
 #include "utils.h"
 #include "assetList.h"
 
+unsigned char stop_screensaver = 0;
 void random_dots(void* p_arg){
     unsigned int cnt = 0, x, y;
+    FbBackgroundColor(MAGENTA);
+    FbClear();
 
-    for(;;)
+    //for(;;)
+    while(!stop_screensaver)
     {
         cnt++;
         if(cnt < 50)
@@ -55,10 +59,13 @@ void spirals_task(void* p_arg){
     unsigned char n_edges = 3, i=0;
     const TickType_t tick_rate = 10 / portTICK_PERIOD_MS;
     float rads[NUM_POLYS] = {0.0}, rad_scale=.001;
+    FbBackgroundColor(GREY1);
+    FbClear();    
     FbColor(GREEN);
-    for(;;)
+    //for(;;)
+    while(!stop_screensaver)
     {
-        for(rad_scale=0.001; rad_scale < 0.05; rad_scale += 0.0001)
+        for(rad_scale=0.001; rad_scale < 0.05 && !stop_screensaver; rad_scale += 0.0001)
         {
             for(i=0; i<NUM_POLYS; i++){
 
@@ -78,7 +85,6 @@ void spirals_task(void* p_arg){
             if(BUTTON_PRESSED_AND_CONSUME)
                 return;            
         }
-
     }
 }
 
@@ -169,12 +175,16 @@ void game_of_life_task(void* p_arg)
     //unsigned char grid[GRID_DIM][GRID_DIM] = {0};
     struct gof_cell_t cell_grid[GRID_DIM][GRID_DIM] = {{0}};
 
+    FbBackgroundColor(GREY1);
+    FbClear();
+    
     create_flier(cell_grid, 1, 1);
     create_flier(cell_grid, 6, 1);
 
     FbClear();
     
-    for(;;)
+    //for(;;)
+    while(!stop_screensaver)
     {
         if(redraw){
             FbColor(YELLOW);
@@ -229,7 +239,8 @@ void about_the_bird(void* p_arg){
     FbBackgroundColor(CYAN);
     FbClear();
     //while(!BUTTON_PRESSED_AND_CONSUME){
-    for(;;){
+    //for(;;)
+    while(!stop_screensaver){
         x = quick_rand(cnt++)%110;
         y = quick_rand(cnt++)%110;
         FbMove(x, y);
@@ -263,4 +274,24 @@ void screensaver_task(void* p_arg)
         returnToMenus();
 #endif
     }
+}
+
+void random_screen_saver(void* p_arg){
+    unsigned char rnd = quick_rand(42)%100;
+    
+    if(rnd < 60){
+        if(rnd%2)
+            about_the_bird(NULL);
+        else
+            game_of_life_task(NULL);
+    }
+    else{
+        if(rnd%2)
+            spirals_task(NULL);
+        else
+            random_dots(NULL);        
+    }
+#ifndef SDL_BADGE
+    returnToMenus();
+#endif
 }

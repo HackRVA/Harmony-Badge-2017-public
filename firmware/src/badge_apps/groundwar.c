@@ -128,6 +128,7 @@ enum groundwar_state {
     STEP,
     NEXT_WAVE,
     IO,
+    GAME_OVER,
     SLEEP,
     EXIT
 };
@@ -162,7 +163,6 @@ void enter_build_mode(){
 void exit_groundwar(){
     state=EXIT;
 }
-
 
 void init_minions(struct groundwar_minion_t minions[NUM_MINIONS],
                   struct groundwar_level_t lvl){
@@ -266,7 +266,6 @@ unsigned char groundwar_step(struct groundwar_minion_t minions[NUM_MINIONS],
         if(defenses[i].type == UNUSED_DEFENSE)
             continue;
 
-
         if(defenses[i].projectile.targeted_minion == DEFENSE_NOT_TARGETING){
             //TODO:find front minion within range
             for(j=0; j<NUM_MINIONS; j++){
@@ -283,10 +282,8 @@ unsigned char groundwar_step(struct groundwar_minion_t minions[NUM_MINIONS],
         else if(minions[defenses[i].projectile.targeted_minion].type == UNUSED_MINION
                     || minions[defenses[i].projectile.targeted_minion].current_hp == 0){
                 defenses[i].projectile.targeted_minion = DEFENSE_NOT_TARGETING;
-            }
+        }
         else{
-
-
             path_between_points(&defenses[i].projectile.x,
                                 &defenses[i].projectile.y,
                                 minions[DEFENSES_TARGET_IDX].x, minions[DEFENSES_TARGET_IDX].y);
@@ -297,9 +294,9 @@ unsigned char groundwar_step(struct groundwar_minion_t minions[NUM_MINIONS],
             {
 
                 if(minions[DEFENSES_TARGET_IDX].current_hp <= defense_damage[defenses[i].type]) {
+                    groundwar_points += (unsigned short)minion_hp[minions[DEFENSES_TARGET_IDX].type]>>1;
                     minions[DEFENSES_TARGET_IDX].type = UNUSED_MINION;
                     minions[DEFENSES_TARGET_IDX].current_hp = 0;
-                    groundwar_points += (short)minion_hp[minions[DEFENSES_TARGET_IDX].type]>>1;
                     setNote(50, 700);
                 }
                 else{
@@ -328,16 +325,57 @@ void groundwar_draw_defense(unsigned char x, unsigned char y,
             }
             // Draw stem
             FbMove(x-1, y-5);
-            FbColor(GREEN);
+            FbColor(MAGENTA);
             FbFilledRectangle(3, 10);
 
+            FbColor(GREY16);
             FbMove(x-4, y-5);
             FbFilledRectangle(10, 3);
 
             break;
         case MEDIUM:
+            if(with_placement_outline){
+                FbColor(WHITE);
+                FbMove(x-6, y-6);
+                FbRectangle(11, 11);
+            }
+            FbColor(MAGENTA);
+            FbMove(x-3, y-5);
+            FbFilledRectangle(6, 2);
+
+            FbColor(GREEN);
+            FbMove(x-1, y-5);
+            FbFilledRectangle(2, 5);
+
+            FbColor(GREY16);
+            FbMove(x-5, y);
+            FbFilledRectangle(10, 5);
+
             break;
         case LARGE:
+
+            if(with_placement_outline){
+                FbColor(WHITE);
+                FbMove(x-6, y-6);
+                FbRectangle(12, 11);
+            }
+            FbColor(MAGENTA);
+            FbMove(x-5, y-5);
+            FbFilledRectangle(11, 5);
+
+            FbColor(GREEN);
+            FbMove(x-5, y);
+            FbFilledRectangle(2, 5);
+
+            FbMove(x-1, y);
+            FbFilledRectangle(1, 5);
+
+            FbMove(x+1, y);
+            FbFilledRectangle(1, 5);
+
+            FbMove(x+4, y);
+            FbFilledRectangle(2, 5);
+
             break;
     }
 
@@ -348,12 +386,6 @@ void groundwar_draw(struct groundwar_minion_t minions[NUM_MINIONS],
                     struct groundwar_level_t lvl){
     unsigned char i = 0;
     short shared_vertices[8][2] = {0};
-    static unsigned char place_x = 40, place_y = 40;
-    //unsigned char lvl_health[] = {
-    //        '0' + (groundwar_level_health/100) % 10,
-    //        '0' + (groundwar_level_health/10) % 10,
-    //        '0' + (groundwar_level_health) % 10,
-    //        0};
     unsigned char pt_str[6] = {' ', ' ', ' ', ' ', ' ', ' '};
 
     FbColor(WHITE);
@@ -440,10 +472,6 @@ void groundwar_draw(struct groundwar_minion_t minions[NUM_MINIONS],
     FbWriteLine("PTS:");
     badge_itoa((int)groundwar_points, pt_str);
 
-    //pt_str[0] = '0' + (groundwar_points/100) % 10;
-    //pt_str[1] ='0' + (groundwar_points/10) % 10;
-    //pt_str[2] = '0' + (groundwar_points) % 10;
-    //pt_str[3] = 0;
     FbMove(30, 120);
     FbWriteLine(pt_str);
 
@@ -474,6 +502,7 @@ void groundwar_draw(struct groundwar_minion_t minions[NUM_MINIONS],
 void groundwar_io(struct groundwar_defense_t defenses[MAX_DEFENSE_STRUCTURES],
                   struct groundwar_level_t lvl){
 
+    unsigned char i=0, is_colliding = 0;
     short defense_cost[] = {10, 35, 55};
 #define selected_defense defenses[selected_defense_idx]
     // main button brings up menu and is used to select items in the menu?
@@ -503,21 +532,34 @@ void groundwar_io(struct groundwar_defense_t defenses[MAX_DEFENSE_STRUCTURES],
             }
 
             if(selected_defense.type == UNUSED_DEFENSE)
-                selected_defense.type = SMALL;
+                selected_defense.type = MEDIUM;
 
             if(UP_TOUCH_AND_CONSUME){
                 if(selected_defense.type == LARGE)
                     selected_defense.type = SMALL;
                 else {
-                    selected_defense.type = (selected_defense.type++);
-
+                    selected_defense.type = (selected_defense.type+1);
+                    setNote(88, 512);
                 }
             }
 
             if(DOWN_TOUCH_AND_CONSUME){
 
+                for(i=0; i< MAX_DEFENSE_STRUCTURES && defenses[i].type != UNUSED_DEFENSE; i++){
 
-                if(groundwar_points >= defense_cost[selected_defense.type]) {
+                    // don't compare to self!
+                    if(i == selected_defense_idx) continue;
+
+                    is_colliding |= check_box_collision(selected_defense.x,
+                                                        selected_defense.y,
+                                                        10, 10,
+                                                        defenses[i].x, defenses[i].y,
+                                                        10, 10);
+                }
+
+                if(!is_colliding &&
+                        (groundwar_points >= defense_cost[selected_defense.type]))
+                {
                     groundwar_points -= defense_cost[selected_defense.type];
                     selected_defense_idx++;
                     selected_defense.x = defenses[selected_defense_idx - 1].x - 5;
@@ -528,8 +570,6 @@ void groundwar_io(struct groundwar_defense_t defenses[MAX_DEFENSE_STRUCTURES],
                 else{
                     setNote(90, 756);
                 }
-
-
             }
         }
     }
@@ -545,7 +585,7 @@ lvl.distribution_of_units[wave_n][CIRCLE] = c;\
 void groundwar_task(void* p_arg) {
     unsigned char cnt= 0;
     const TickType_t tick_rate = 5 / portTICK_PERIOD_MS;
-    unsigned char wave_num = 0, current_level = 3, unlocked_level = 0, alive_count=0;
+    unsigned char wave_num = 0, current_level = 0, unlocked_level = 0, alive_count=0;
     unsigned char str[8];
 
     struct groundwar_minion_t groundwar_minions[NUM_MINIONS] = {0};
@@ -606,7 +646,7 @@ void groundwar_task(void* p_arg) {
                 else if(current_level == 3){
                     groundwar_level_health = 100;
                     groundwar_points = 30;
-                    SET_LVL_WAVE_DIST(0, 10, 4, 1, 0);
+                    SET_LVL_WAVE_DIST(0, 0, 4, 1, 0);
                     SET_LVL_WAVE_DIST(1, 10, 4, 2, 0);
                     SET_LVL_WAVE_DIST(2, 12, 5, 4, 1);
                     SET_LVL_WAVE_DIST(3, 15, 5, 5, 1);
@@ -623,10 +663,10 @@ void groundwar_task(void* p_arg) {
                 }                
                 // TEST BUILD
                 enter_build_mode();
-                //defenses[0].type = SMALL;
-                //defenses[0].x = 10;
-                //defenses[0].y = 50;
-                //selected_defense_idx = 1;
+                defenses[0].type = LARGE;
+                defenses[0].x = 10;
+                defenses[0].y = 50;
+                selected_defense_idx = 1;
 
                 //break;
             case INIT_WAVE:
@@ -677,6 +717,9 @@ void groundwar_task(void* p_arg) {
 
                     cnt = 0;
                 }
+                if(groundwar_level_health == 0){
+                    state = GAME_OVER;
+                }
                 if(alive_count)
                     state = DRAW;
                 else
@@ -692,6 +735,14 @@ void groundwar_task(void* p_arg) {
                     state = INIT_LEVEL;
                     //TODO: next level
                 }
+                break;
+            case GAME_OVER:
+                FbMove(60, 50);
+                FbColor(RED);
+                FbWriteLine("GAME OVER!");
+                FbPushBuffer();
+                vTaskDelay(5000/portTICK_PERIOD_MS);
+                state = EXIT;
                 break;
 
             case SLEEP:

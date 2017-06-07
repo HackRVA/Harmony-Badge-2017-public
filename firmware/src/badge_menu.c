@@ -12,6 +12,8 @@
 #include "buttons.h"
 #include "rgb_led.h"
 #include "settings.h"
+#include "timer1_int.h"
+#include "flash.h"
 #endif
 #include "badge_menu.h"
 #include "badge_apps.h"
@@ -416,25 +418,22 @@ extern struct menu_t backlight_m[];
 extern struct menu_t rotate_m[];
 extern struct menu_t LEDlight_m[];
 extern struct menu_t buzzer_m[];
+
 struct menu_t settings_m[] = {
-    //{"ping", VERT_ITEM, FUNCTION,
-      //  {(struct menu_t *)ping_cb}},
-    //{"peer badgeId", VERT_ITEM, MENU,
-    //    {(struct menu_t *) peerBadgeid_m}},
-    //{"time n date", VERT_ITEM , MENU,
-    //    {(struct menu_t *) timedate_m}},
-    //{"rotate", VERT_ITEM, MENU,
-      //  {(struct menu_t *) rotate_m}},
-    //{"backlight", VERT_ITEM, MENU,
-      //  {(struct menu_t *) backlight_m}},
-    //{"led", VERT_ITEM, MENU,
-      //  {(struct menu_t *) LEDlight_m}}, /* coerce/cast to a menu_t data pointer */
-    //{"buzzer", VERT_ITEM, MENU,
-      //  {(struct menu_t *) buzzer_m}},
-//    {"slider", VERT_ITEM, MENU,
-//        {(struct menu_t *) slider_m}},
-//    {"tests", VERT_ITEM, MENU,
-//        {(struct menu_t *) tests_m}},
+    {"QC", VERT_ITEM, TASK,
+        {hello_world_task}},       
+    
+    {"tutorial", VERT_ITEM, TASK,
+        {(struct menu_t *)badge_tutorial_task}},
+        
+    {"ping", VERT_ITEM, FUNCTION,
+        {(struct menu_t *)ping_cb}},
+    {"backlight", VERT_ITEM, MENU,
+        {(struct menu_t *) backlight_m}},
+    {"led", VERT_ITEM, MENU,
+        {(struct menu_t *) LEDlight_m}}, /* coerce/cast to a menu_t data pointer */
+    {"buzzer", VERT_ITEM, MENU,
+        {(struct menu_t *) buzzer_m}},
 #ifdef IS_ADMIN
         {"silence others", VERT_ITEM, FUNCTION,
                 {(struct menu_t *) silence_cb}},
@@ -476,21 +475,13 @@ struct menu_t games_m[] = {
 
 
 struct menu_t main_m[] = {
-
-    //{"TEST", VERT_ITEM|DEFAULT_ITEM, TASK,
-      //  {hello_world_task}},    
- 
     {"Arcade",       VERT_ITEM|DEFAULT_ITEM, MENU,
         {games_m}},
     {"Gadgets",       VERT_ITEM, MENU,    {gadgets_m}},    
-       
-    //{"Screensavers", VERT_ITEM, TASK,
-      //  {screensaver_task}},
-   //{"Settings",    VERT_ITEM, MENU,
-     //   {settings_m}},
-    //{"flash test", VERT_ITEM, TASK,
-      //  {flash_test_task}},         
-
+           {"Screensavers", VERT_ITEM, TASK,
+        {screensaver_task}},
+   {"Settings",    VERT_ITEM, MENU,
+        {settings_m}},
    {"", VERT_ITEM|LAST_ITEM|HIDDEN_ITEM, BACK,
        {NULL}},
 } ;
@@ -511,15 +502,29 @@ void returnToMenus(){
 }
 
 
-#define TIME_BEFORE_SLEEP 5000
+#define TIME_BETWEEN_SCREENSAVER 2000
+#define TIME_BEFORE_SLEEP 3000
 //#define LAUNCH_APP groundwar_task
 #define LAUNCH_APP boot_splash_task
 //#define LAUNCH_APP badge_tutorial_task
-#define RUN_TUTORIAL 
+//#define RUN_TUTORIAL 
 //#define QC_FIRST
 //#define DO_BOOT_SPLASH
 //#define DEBUG_PRINT_TO_CDC
+enum badge_idle_state{
+    AWAKE,
+    ENTER_SLEEP,
+    LOW_POWER_SLEEP,
+    SCREENSAVER,
+    WAIT_FOR_SCREENSAVER,
+    WAKEUP
+};
+
 void menu_and_manage_task(void *p_arg){
+    extern unsigned char stop_screensaver;
+    stop_screensaver = 0;
+    unsigned char idle_state = AWAKE;
+    unsigned int sleep_timestamp = 0, screensaver_timestamp=0;
     TaskHandle_t xHandle = NULL;
     uint32_t ulNotifiedValue;
     BaseType_t xReturned;
@@ -539,7 +544,6 @@ void menu_and_manage_task(void *p_arg){
 
     
     xReturned = xTaskCreate((TaskFunction_t) LAUNCH_APP,
-
                             "exec_app",
                             650u, //may want to increase?
                             NULL,
@@ -568,8 +572,123 @@ void menu_and_manage_task(void *p_arg){
 
 #endif    
     for(;;){
-        // No running task, display menu or something
-        if(xHandle == NULL)
+        
+        switch(idle_state){
+            case AWAKE:
+                // If enough time has past, turn off stuff and go to low power state
+                if(TIME_SINCE_LAST_INPUT > TIME_BEFORE_SLEEP && xHandle == NULL){
+                    idle_state = ENTER_SLEEP;
+                }
+                break;
+            case ENTER_SLEEP:
+                backlight(0);
+                
+                sleep_timestamp = timestamp;
+                idle_state = LOW_POWER_SLEEP;
+                break;
+            case LOW_POWER_SLEEP:
+                if(TIME_SINCE_LAST_INPUT < TIME_BEFORE_SLEEP){
+                    idle_state = WAKEUP;
+                }
+                else if((timestamp - sleep_timestamp) > TIME_BETWEEN_SCREENSAVER){
+                    idle_state = SCREENSAVER;
+                }
+                break;
+            case SCREENSAVER:
+                // Turn screen back on so we can see the screensaver!
+                backlight(G_sysData.backlight);
+                stop_screensaver = 0;
+                xReturned = xTaskCreate((TaskFunction_t) random_screen_saver,
+                                        "exec_app",
+                                        650u, //may want to increase?
+                                        NULL,
+                                        1u,
+                                        &xHandle);
+
+                screensaver_timestamp = timestamp;
+
+                idle_state = WAIT_FOR_SCREENSAVER;
+                
+                break;
+            case WAIT_FOR_SCREENSAVER:
+                // Check if the screen saver is ending itself
+                if (xTaskNotifyWait(0, 1u, &ulNotifiedValue, 50 / portTICK_PERIOD_MS)){
+                    if(ulNotifiedValue & 0x01){
+                        vTaskSuspend(xHandle);
+                        vTaskDelete(xHandle);
+                        xHandle = NULL;
+                        // RETURN to low power
+                        idle_state = ENTER_SLEEP;
+                    }
+                }
+                // Check if the user has provided any IO
+                else if(DOWN_BTN_AND_CONSUME || UP_BTN_AND_CONSUME 
+                        || LEFT_BTN_AND_CONSUME || RIGHT_BTN_AND_CONSUME){
+
+                    
+                    //vTaskDelay(15 / portTICK_PERIOD_MS);
+                    stop_screensaver = 1;
+                    // screensaver must end
+                    if (xTaskNotifyWait(0, 1u, &ulNotifiedValue, portMAX_DELAY)){
+                        if(ulNotifiedValue & 0x01){
+                            vTaskSuspend(xHandle);
+                            vTaskDelete(xHandle);
+                            xHandle = NULL;
+                            // RETURN to low power
+                            idle_state = ENTER_SLEEP;
+                        }
+                    }                    
+                    
+                    idle_state = WAKEUP;
+                }
+                // Screen saver has been running long enough...KILL!
+                else if((timestamp - screensaver_timestamp) > TIME_BETWEEN_SCREENSAVER){
+                    stop_screensaver = 1;
+                    // screensaver must end
+                    if (xTaskNotifyWait(0, 1u, &ulNotifiedValue, portMAX_DELAY)){
+                        if(ulNotifiedValue & 0x01){
+                            vTaskSuspend(xHandle);
+                            vTaskDelete(xHandle);
+                            xHandle = NULL;
+                            // RETURN to low power
+                            idle_state = ENTER_SLEEP;
+                        }
+                    }       
+
+                    // RETURN to low power
+                    idle_state = ENTER_SLEEP;
+                }
+                break;
+            case WAKEUP:
+                // turn on backlight and go to awake mode
+                backlight(G_sysData.backlight);
+                G_selectedMenu = display_menu(G_currMenu,
+                              G_selectedMenu,
+                              MAIN_MENU_STYLE);
+                prev_selected_menu = G_selectedMenu;
+                FbSwapBuffers();                
+                setNote(90, 512);
+                
+                idle_state = AWAKE;
+                break;
+          }
+        
+        IRhandler();
+
+        //Handle other events? Marshal messages?
+#ifdef DEBUG_PRINT_TO_CDC
+        // TODO: this will have a conflict in the notify field with the kill signal
+        print_high_water_marks();
+        vTaskDelay(200 / portTICK_PERIOD_MS);
+#else
+        // Doesn't need to be too responsive
+        vTaskDelay(5 / portTICK_PERIOD_MS);
+#endif        
+        if(idle_state != AWAKE)
+            continue;
+        
+        // No running task and badge is awake -> display menu or something
+        if(xHandle == NULL && idle_state == AWAKE)
         {
            //led(30, 30, 0);
             // Only redraw when we must
@@ -668,7 +787,7 @@ void menu_and_manage_task(void *p_arg){
             }
         }
         // Manage a running task
-        else if(xHandle !=NULL){
+        else if(xHandle !=NULL  && idle_state == AWAKE){
             // TODO: Might be able to let task kill itself
             if (xTaskNotifyWait(0, 1u, &ulNotifiedValue, 50 / portTICK_PERIOD_MS)){
                 if(ulNotifiedValue & 0x01){
@@ -678,30 +797,7 @@ void menu_and_manage_task(void *p_arg){
                     prev_selected_menu = NULL;   
                 }
             }
-            // Add some extra delay  since don't need responsive menu
-            //vTaskDelay(50 / portTICK_PERIOD_MS);
         }
-        IRhandler();
-
-        if(TIME_SINCE_LAST_INPUT > TIME_BEFORE_SLEEP){
-            // go low power here?
-            //led(30, 30, 0);
-        }
-        else{
-             //led(0,0,0);
-        }
-           
-        
-        //Handle other events? Marshal messages?
-#ifdef DEBUG_PRINT_TO_CDC
-        // TODO: this will have a conflict in the notify field with the kill signal
-        print_high_water_marks();
-        vTaskDelay(200 / portTICK_PERIOD_MS);
-#else
-        // Doesn't need to be too responsive
-        vTaskDelay(5 / portTICK_PERIOD_MS);
-#endif
-
     }
 }
 #endif
