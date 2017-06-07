@@ -683,8 +683,12 @@ void print_high_water_marks(){
     print_to_com1("----\n\r\0");
 }
 
+//#define TASK_UNDER_TEST badge_tutorial_task
+#define TASK_UNDER_TEST menu_and_manage_task
+//#define TASK_UNDER_TEST groundwar_task
+//#define TASK_UNDER_TEST badgelandia_task
 //#define TASK_UNDER_TEST hello_world_task
-#define TASK_UNDER_TEST button_task
+//#define TASK_UNDER_TEST button_task
 void test_task(void* p_arg)
 {
     TaskHandle_t xHandle = NULL;
@@ -694,14 +698,18 @@ void test_task(void* p_arg)
     // Swap out 'hello_world_task' for task function needing testing
     xReturned = xTaskCreate((TaskFunction_t) TASK_UNDER_TEST,
             "exec_app",
-            256u,
+            500u,
             NULL,
             1u,
             &xHandle);
+    if(xReturned != pdTRUE){
+        red(100);
+        while(1);
+    }    
 
     for(;;)
     {
-        //print_high_water_marks();
+        print_high_water_marks();
         vTaskDelay(200 / portTICK_PERIOD_MS);
     }
 
@@ -735,7 +743,7 @@ void APP_Tasks ( void )
 
     errStatus = xTaskCreate((TaskFunction_t) button_task,
             "button_task",
-            256u,
+            200u,
             NULL,
             2u,
             NULL);
@@ -751,6 +759,7 @@ void APP_Tasks ( void )
     //test_task(NULL);
     //button_task(NULL);
     menu_and_manage_task(NULL);
+    //new_menu_and_manage_task(NULL);
 }
 
 
