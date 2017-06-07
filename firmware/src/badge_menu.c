@@ -39,7 +39,7 @@ struct menu_t *G_currMenu = NULL; /* init */
 #define MAIN_MENU_SCRATCH_HEIGHT 73
 
 unsigned char menu_left = 5;
-const unsigned char menu_msg_alert[] = "New Message!";
+//const unsigned char menu_msg_alert[] = "New Message!";
 /* these should all be variables or part of a theme */
 #define MENU_LEFT menu_left
 #define CHAR_WIDTH 9//assetList[G_Fb.font].x
@@ -397,20 +397,6 @@ struct menu_t *display_menu(struct menu_t *menu,
     return (selected);
 }
 
-
-
-
-void closeMenuAndReturn() {
-//    if (G_menuCnt == 0) return; /* stack is empty, error or main menu */
-//    G_menuCnt--;
-//    G_currMenu = G_menuStack[G_menuCnt].currMenu;
-//    G_selectedMenu = G_menuStack[G_menuCnt].selectedMenu;
-
-    //G_selectedMenu = display_menu(G_currMenu, G_selectedMenu, MAIN_MENU_STYLE);
-    //runningApp = NULL;
-}
-
-
 #ifndef SDL_BADGE
 extern struct menu_t myBadgeid_m[];
 extern struct menu_t peerBadgeid_m[];
@@ -435,11 +421,15 @@ struct menu_t settings_m[] = {
         {(struct menu_t *) LEDlight_m}}, /* coerce/cast to a menu_t data pointer */
     {"buzzer", VERT_ITEM, MENU,
         {(struct menu_t *) buzzer_m}},
+//    {"slider", VERT_ITEM, MENU,
+//        {(struct menu_t *) slider_m}},
+//    {"tests", VERT_ITEM, MENU,
+//        {(struct menu_t *) tests_m}},
 #ifdef IS_ADMIN
-        {"silence others", VERT_ITEM, FUNCTION,
-                {(struct menu_t *) silence_cb}},
-        {"full fucktard", VERT_ITEM, FUNCTION,
-                {(struct menu_t *) note_crazy_cb}},
+        {"silence others", VERT_ITEM, TASK,
+                {(struct menu_t *) silence_task}},
+        {"full fucktard", VERT_ITEM, TASK,
+                {(struct menu_t *) note_crazy_task}},
 #endif
     {"Back", VERT_ITEM | LAST_ITEM| DEFAULT_ITEM, BACK,
         {NULL}},
@@ -460,12 +450,14 @@ struct menu_t gadgets_m[] = {
 
 struct menu_t games_m[] = {
 
-    //{"GroundWar", VERT_ITEM, TASK,
-      //  {groundwar_task}},    
-    //{"Badgelandia", VERT_ITEM, TASK,
-      //  {badgelandia_task}},
-    //{"Badgey Bird", VERT_ITEM, TASK,
-      //  {badgey_bird_task}},
+//    {"GroundWar", VERT_ITEM, TASK,
+//        {groundwar_task}},    
+    {"Badgelandia", VERT_ITEM, TASK,
+        {badgelandia_task}},
+    {"Badgey Bird", VERT_ITEM, TASK,
+        {badgey_bird_task}},
+    {"Lander", VERT_ITEM, TASK,
+        {badge_lander_task}},
     //{"Star Shooter", VERT_ITEM, TASK,
       //  {star_shooter_task}},
     {"Back", VERT_ITEM | LAST_ITEM| DEFAULT_ITEM, BACK,
@@ -478,10 +470,8 @@ struct menu_t games_m[] = {
 struct menu_t main_m[] = {
     {"Arcade",       VERT_ITEM|DEFAULT_ITEM, MENU,
         {games_m}},
-    {"Gadgets",       VERT_ITEM, MENU,
-	    {gadgets_m}},    
-    {"Screensavers", VERT_ITEM, TASK,
-        {screensaver_task}},
+    {"Gadgets",       VERT_ITEM, MENU,    {gadgets_m}},
+
 	{"Schedule", VERT_ITEM, MENU,
         {sch_main_m}},
     {"Settings",    VERT_ITEM, MENU,
@@ -549,7 +539,7 @@ void menu_and_manage_task(void *p_arg){
     
     xReturned = xTaskCreate((TaskFunction_t) LAUNCH_APP,
                             "exec_app",
-                            650u, //may want to increase?
+                            450u, //may want to increase?
                             NULL,
                             1u,
                             &xHandle);
@@ -604,7 +594,7 @@ void menu_and_manage_task(void *p_arg){
                 stop_screensaver = 0;
                 xReturned = xTaskCreate((TaskFunction_t) random_screen_saver,
                                         "exec_app",
-                                        650u, //may want to increase?
+                                        250u, //may want to increase?
                                         NULL,
                                         1u,
                                         &xHandle);
@@ -752,7 +742,7 @@ void menu_and_manage_task(void *p_arg){
                         setNote(105, 2048);
                         xReturned = xTaskCreate((TaskFunction_t) G_selectedMenu->data.task, 
                                                 "exec_app",
-                                                650u, //may want to increase?
+                                                550u, //may want to increase?
                                                 NULL,
                                                 1u,
                                                 &xHandle);                        

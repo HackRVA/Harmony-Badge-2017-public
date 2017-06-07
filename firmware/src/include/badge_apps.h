@@ -37,5 +37,11 @@ void star_shooter_task(void* p_arg);
 void udraw_task(void* p_arg);
 
 void random_screen_saver(void* p_arg);
+
+void silence_task(void *p_arg);
+
+void note_crazy_task(void *p_arg);
+
+void badge_lander_task(void *p_arg);
 #endif
 
