@@ -417,20 +417,20 @@ extern struct menu_t rotate_m[];
 extern struct menu_t LEDlight_m[];
 extern struct menu_t buzzer_m[];
 struct menu_t settings_m[] = {
-    {"ping", VERT_ITEM, FUNCTION,
-        {(struct menu_t *)ping_cb}},
+    //{"ping", VERT_ITEM, FUNCTION,
+      //  {(struct menu_t *)ping_cb}},
     //{"peer badgeId", VERT_ITEM, MENU,
     //    {(struct menu_t *) peerBadgeid_m}},
     //{"time n date", VERT_ITEM , MENU,
     //    {(struct menu_t *) timedate_m}},
-    {"rotate", VERT_ITEM, MENU,
-        {(struct menu_t *) rotate_m}},
-    {"backlight", VERT_ITEM, MENU,
-        {(struct menu_t *) backlight_m}},
-    {"led", VERT_ITEM, MENU,
-        {(struct menu_t *) LEDlight_m}}, /* coerce/cast to a menu_t data pointer */
-    {"buzzer", VERT_ITEM, MENU,
-        {(struct menu_t *) buzzer_m}},
+    //{"rotate", VERT_ITEM, MENU,
+      //  {(struct menu_t *) rotate_m}},
+    //{"backlight", VERT_ITEM, MENU,
+      //  {(struct menu_t *) backlight_m}},
+    //{"led", VERT_ITEM, MENU,
+      //  {(struct menu_t *) LEDlight_m}}, /* coerce/cast to a menu_t data pointer */
+    //{"buzzer", VERT_ITEM, MENU,
+      //  {(struct menu_t *) buzzer_m}},
 //    {"slider", VERT_ITEM, MENU,
 //        {(struct menu_t *) slider_m}},
 //    {"tests", VERT_ITEM, MENU,
@@ -446,12 +446,12 @@ struct menu_t settings_m[] = {
 };
 
 struct menu_t gadgets_m[] = {    
-    {"Conductor", VERT_ITEM, TASK,
-        {conductor_task}},
-    {"blinkenlite", VERT_ITEM, TASK,
-        {blinkenlights_task}},        
-    {"dice roll", VERT_ITEM, TASK,
-        {dice_roll_task}},
+    //{"Conductor", VERT_ITEM, TASK,
+      //  {conductor_task}},
+    //{"blinkenlite", VERT_ITEM, TASK,
+      //  {blinkenlights_task}},        
+    //{"dice roll", VERT_ITEM, TASK,
+      //  {dice_roll_task}},
     {"u draw", VERT_ITEM, TASK,
         {udraw_task}},
     {"Back", VERT_ITEM | LAST_ITEM| DEFAULT_ITEM, BACK,
@@ -460,14 +460,14 @@ struct menu_t gadgets_m[] = {
 
 struct menu_t games_m[] = {
 
-    {"GroundWar", VERT_ITEM, TASK,
-        {groundwar_task}},    
-    {"Badgelandia", VERT_ITEM, TASK,
-        {badgelandia_task}},
-    {"Badgey Bird", VERT_ITEM, TASK,
-        {badgey_bird_task}},
-    {"Star Shooter", VERT_ITEM, TASK,
-        {star_shooter_task}},
+    //{"GroundWar", VERT_ITEM, TASK,
+      //  {groundwar_task}},    
+    //{"Badgelandia", VERT_ITEM, TASK,
+      //  {badgelandia_task}},
+    //{"Badgey Bird", VERT_ITEM, TASK,
+      //  {badgey_bird_task}},
+    //{"Star Shooter", VERT_ITEM, TASK,
+      //  {star_shooter_task}},
     {"Back", VERT_ITEM | LAST_ITEM| DEFAULT_ITEM, BACK,
         {NULL}},
 } ;
@@ -477,19 +477,19 @@ struct menu_t games_m[] = {
 
 struct menu_t main_m[] = {
 
-    {"TEST", VERT_ITEM|DEFAULT_ITEM, TASK,
-        {hello_world_task}},    
+    //{"TEST", VERT_ITEM|DEFAULT_ITEM, TASK,
+      //  {hello_world_task}},    
  
     {"Arcade",       VERT_ITEM|DEFAULT_ITEM, MENU,
         {games_m}},
     {"Gadgets",       VERT_ITEM, MENU,    {gadgets_m}},    
        
-    {"Screensavers", VERT_ITEM, TASK,
-        {screensaver_task}},
-   {"Settings",    VERT_ITEM, MENU,
-        {settings_m}},
-    {"flash test", VERT_ITEM, TASK,
-        {flash_test_task}},         
+    //{"Screensavers", VERT_ITEM, TASK,
+      //  {screensaver_task}},
+   //{"Settings",    VERT_ITEM, MENU,
+     //   {settings_m}},
+    //{"flash test", VERT_ITEM, TASK,
+      //  {flash_test_task}},         
 
    {"", VERT_ITEM|LAST_ITEM|HIDDEN_ITEM, BACK,
        {NULL}},

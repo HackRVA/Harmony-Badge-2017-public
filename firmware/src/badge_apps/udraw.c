@@ -55,6 +55,14 @@ enum {                                  //drop down menu control enum
     DRAW_DROP_DOWN_RIGHT,
 };
 
+enum {
+    DRAW_INIT,
+    DRAW_RENDER,
+    DRAW_GET_INPUT,
+    DRAW_EXIT,
+    DRAW_PROCESS,
+};
+
 //App IR send structs
 struct short_halfs {                    //used to access halves of 16bits
     unsigned char upper;
@@ -89,7 +97,7 @@ struct _draw_state {
     struct _cursor cursor;              //cursor pos struct
     unsigned char color;                //current draw color
     unsigned char on_off;               //drawing on or off true or false
-    void (*state)(void);                //current app state function
+    unsigned char state;                //current app state function
 };
 
 //public global vars
@@ -130,7 +138,7 @@ void draw_write_pixel_data(PIX_NUM_WIDE * vert_index,unsigned const char horz_in
 void draw_remove_pixel_data(PIX_NUM_WIDE * vert_index,unsigned const char horz_index);
 
 //Game control variables
-struct _draw_state draw_state = {{0,0},0,DRAW_BLACK, DRAW_OFF,draw_init};
+struct _draw_state draw_state = {{0,0},DRAW_BLACK, DRAW_OFF,DRAW_INIT};
 struct _image_buffer image_buffer;
 struct _image_buffer ir_in_buffer;
 
@@ -138,11 +146,29 @@ struct _image_buffer ir_in_buffer;
 void udraw_task(void *p_arg){
     static unsigned char init = 1;
     if(init) {
-        draw_state.state = draw_init;
+        draw_state.state = DRAW_INIT;
         init=0;
     }
     for(;;) {
-        draw_state.state();
+        switch(draw_state.state) {
+            case DRAW_INIT:
+                draw_init();
+                break;
+            case DRAW_RENDER:
+                draw_render();
+                break;
+            case DRAW_GET_INPUT:
+                draw_get_input();
+                break;
+            case DRAW_EXIT:
+                draw_exit();
+                break;
+            case DRAW_PROCESS:
+                draw_process();
+                break;
+            default:
+                draw_exit();
+        }
     } 
 }
 
@@ -161,7 +187,7 @@ void draw_init(void) {
         ir_in_buffer.green[j]=WHITE_MASK;
         ir_in_buffer.red[j]=WHITE_MASK;
     }
-    draw_state.state = draw_render;
+    draw_state.state = DRAW_RENDER;
     draw_state.color = DRAW_BLACK;
     draw_state.cursor.x = 0;
     draw_state.cursor.y = 0;
@@ -184,7 +210,7 @@ void draw_render(void) {
     if(show_drop_down != DRAW_DROP_DOWN_OFF) {
         draw_drop_down();
     }
-    draw_state.state = draw_get_input;
+    draw_state.state = DRAW_GET_INPUT;
     FbSwapBuffers();
 }
 
@@ -213,11 +239,11 @@ void draw_drop_down(void) {
 
 //get inputs and set data accordingly
 void draw_get_input(void) {
-    draw_state.state = draw_process;
+    draw_state.state = DRAW_PROCESS;
     if(BUTTON_PRESSED_AND_CONSUME) {
         switch(show_drop_down) {
             case DRAW_DROP_DOWN_OFF:
-                draw_state.state = draw_exit;
+                draw_state.state = DRAW_EXIT;
                 break;
             case DRAW_DROP_DOWN_LEFT:
                 draw_send_image(image_buffer);
@@ -227,7 +253,7 @@ void draw_get_input(void) {
                 image_received = 0;
                 break;
             default:
-                draw_state.state = draw_exit;
+                draw_state.state = DRAW_EXIT;
                 break;
         }
     }
@@ -287,7 +313,7 @@ void draw_get_input(void) {
 
 //process data based on what changed in draw_get_input
 void draw_process() {
-    draw_state.state = draw_render;
+    draw_state.state = DRAW_RENDER;
     if(draw_state.cursor.moved && (draw_state.on_off == DRAW_ON)) {
         draw_write_pixel(&image_buffer,draw_state);
     }
@@ -295,7 +321,7 @@ void draw_process() {
 
 //sets function pointer and returns to menus
 void draw_exit(void) {
-    draw_state.state = draw_render;
+    draw_state.state = DRAW_RENDER;
     returnToMenus();
 }
 

@@ -108,7 +108,7 @@ struct _ss_player ss_ai;
 struct _ss_stars ss_stars;
 struct _ss_torp_map ss_torp_map;
 
-void star_shooter_task(void *p_arg){
+void star_shooter_task(void* p_arg){
     static unsigned char init = 1;
     if(init) {
         game.game_state = ss_init;
