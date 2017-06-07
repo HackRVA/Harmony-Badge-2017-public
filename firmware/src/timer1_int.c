@@ -121,7 +121,7 @@ void __ISR(_TIMER_2_VECTOR, IPL2SOFT) Timer2Handler(void)
 		   G_IRerror = 0;
 		}
 
-		/* if packet is not for us don't keep it*/ 
+		/* if packet is not for us don't keep it */
 		if ((IRpacketsIn[IRpacketInNext].p.badgeId == 0) 
 		 | (IRpacketsIn[IRpacketInNext].p.badgeId == G_sysData.badgeId)
          | (IRpacketsIn[IRpacketInNext].p.badgeId > 447)

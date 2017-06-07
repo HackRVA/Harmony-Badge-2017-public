@@ -445,16 +445,15 @@ struct menu_t settings_m[] = {
         {NULL}},
 };
 
-struct menu_t gadgets_m[] = {
-
-        
+struct menu_t gadgets_m[] = {    
     {"Conductor", VERT_ITEM, TASK,
         {conductor_task}},
     {"blinkenlite", VERT_ITEM, TASK,
         {blinkenlights_task}},        
     {"dice roll", VERT_ITEM, TASK,
         {dice_roll_task}},
-
+    {"u draw", VERT_ITEM, TASK,
+        {udraw_task}},
     {"Back", VERT_ITEM | LAST_ITEM| DEFAULT_ITEM, BACK,
         {NULL}},
 } ;        
@@ -467,7 +466,8 @@ struct menu_t games_m[] = {
         {badgelandia_task}},
     {"Badgey Bird", VERT_ITEM, TASK,
         {badgey_bird_task}},
-
+    {"Star Shooter", VERT_ITEM, TASK,
+        {star_shooter_task}},
     {"Back", VERT_ITEM | LAST_ITEM| DEFAULT_ITEM, BACK,
         {NULL}},
 } ;
@@ -479,29 +479,6 @@ struct menu_t main_m[] = {
 
     {"TEST", VERT_ITEM|DEFAULT_ITEM, TASK,
         {hello_world_task}},    
-<<<<<<< HEAD
-//    {"Badgelandia", VERT_ITEM|DEFAULT_ITEM, FUNCTION,
-//        {badgelandia_task}},
-    {"Badgey Bird", VERT_ITEM|DEFAULT_ITEM, FUNCTION,
-        {badgey_bird_task}},
-//    {"Screensavers", VERT_ITEM|DEFAULT_ITEM, FUNCTION,
-//        {screensaver_task}},
-    {"U Draw", VERT_ITEM|DEFAULT_ITEM, FUNCTION,
-        {udraw_task}},
-    {"Star Shooter", VERT_ITEM|DEFAULT_ITEM, FUNCTION,
-        {star_shooter_task}},
-
-   //{"Arcade",       VERT_ITEM|DEFAULT_ITEM, MENU,
-   //     {games_m}},
-   //{"Transmitters",       VERT_ITEM, MENU,
-   //     {gadgets_m}},
-   //{"Schedule",    VERT_ITEM, MENU,
-   //     {schedule_main_m}},
-   //{"Settings",    VERT_ITEM, MENU,
-   //     {settings_m}},
-   //{"Clear Message", VERT_ITEM|LAST_ITEM|HIDDEN_ITEM, FUNCTION,
-   //     {(struct menu_t *)clear_msg_cb}},
-=======
  
     {"Arcade",       VERT_ITEM|DEFAULT_ITEM, MENU,
         {games_m}},
@@ -514,7 +491,6 @@ struct menu_t main_m[] = {
     {"flash test", VERT_ITEM, TASK,
         {flash_test_task}},         
 
->>>>>>> e5a7b429422e98a331f6208550a0806bf00f0d64
    {"", VERT_ITEM|LAST_ITEM|HIDDEN_ITEM, BACK,
        {NULL}},
 } ;

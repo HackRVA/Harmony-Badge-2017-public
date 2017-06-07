@@ -3,7 +3,7 @@
 #include "colors.h"
 #include "flash.h"
 #include "ir.h"
-#include "include/debug.h"
+#include "debug.h"
 
 //extern rtccTime G_time ;
 //extern rtccDate G_date ;
@@ -56,7 +56,7 @@ struct IRcallback_t IRcallbacks[] = {
 	{ ir_livetext },	/* stream text screen */
 	{ ir_liveled },	/* stream rgb to LED */
 
-    { ir_udraw },
+    { ir_udraw},
 	{ ir_app0 },
 	{ ir_app1 },
 	{ ir_app2 },
@@ -76,9 +76,9 @@ void IRqueueSend(union IRpacket_u pkt)
 {
     /* make sure not full */
     if ( ((IRpacketOutNext+1) % MAXPACKETQUEUE) != IRpacketOutCurr) {
-        IRpacketsOut[IRpacketOutNext].v = pkt.v;
-        IRpacketOutNext++;
-        IRpacketOutNext %= MAXPACKETQUEUE;
+	IRpacketsOut[IRpacketOutNext].v = pkt.v;
+	IRpacketOutNext++;
+	IRpacketOutNext %= MAXPACKETQUEUE;
     }
 }
 
@@ -110,9 +110,9 @@ void IRhandler()
         unsigned char *tmp, tmpstr[16];
         extern unsigned char hextab[];
 
-        if (IRpacketsIn[IRpacketInCurr].p.address < IR_LASTADRESS) { /* basic sanity check before we call unknown handlers */
+        if (IRpacketsIn[IRpacketInCurr].p.address < IR_LASTADRESS) /* basic sanity check before we call unknown handlers */
             IRcallbacks[ IRpacketsIn[IRpacketInCurr].p.address].handler( IRpacketsIn[IRpacketInCurr].p );
-        }
+
         IRpacketInCurr++;
         IRpacketInCurr %= MAXPACKETQUEUE;
     }

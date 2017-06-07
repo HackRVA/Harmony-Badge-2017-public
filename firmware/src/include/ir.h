@@ -73,7 +73,7 @@ enum {
 	/* special */
 	IR_CODE,		/* code to jump to */
 	IR_FORTHCODE,	/* forth code to run */
-    IR_DRAW_UNLOCKABLE,
+        IR_DRAW_UNLOCKABLE,
 	IR_ASSET,		/* set current asset */
         IR_PING,
         //IR_PING_RESP,

@@ -24,11 +24,6 @@ void screensaver_task(void* p_arg);
 
 void boot_splash_task(void *p_arg);
 
-<<<<<<< HEAD
-void star_shooter_task(void *p_arg);
-
-void udraw_task(void *p_arg);
-=======
 void blinkenlights_task(void *args);
 
 void conductor_task(void *args);
@@ -36,6 +31,9 @@ void conductor_task(void *args);
 void dice_roll_task(void* p_arg);
 
 void badge_tutorial_task(void* p_arg);
->>>>>>> e5a7b429422e98a331f6208550a0806bf00f0d64
+
+void star_shooter_task(void *p_arg);
+
+void udraw_task(void *p_arg);
 #endif
 
