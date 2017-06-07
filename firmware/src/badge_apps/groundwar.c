@@ -128,6 +128,7 @@ enum groundwar_state {
     STEP,
     NEXT_WAVE,
     IO,
+    GAME_OVER,
     SLEEP,
     EXIT
 };
@@ -584,7 +585,7 @@ lvl.distribution_of_units[wave_n][CIRCLE] = c;\
 void groundwar_task(void* p_arg) {
     unsigned char cnt= 0;
     const TickType_t tick_rate = 5 / portTICK_PERIOD_MS;
-    unsigned char wave_num = 0, current_level = 3, unlocked_level = 0, alive_count=0;
+    unsigned char wave_num = 0, current_level = 0, unlocked_level = 0, alive_count=0;
     unsigned char str[8];
 
     struct groundwar_minion_t groundwar_minions[NUM_MINIONS] = {0};
@@ -716,6 +717,9 @@ void groundwar_task(void* p_arg) {
 
                     cnt = 0;
                 }
+                if(groundwar_level_health == 0){
+                    state = GAME_OVER
+                }
                 if(alive_count)
                     state = DRAW;
                 else
@@ -731,6 +735,14 @@ void groundwar_task(void* p_arg) {
                     state = INIT_LEVEL;
                     //TODO: next level
                 }
+                break;
+            case GAME_OVER:
+                FbMove(60, 50);
+                FbColor(RED);
+                FbWriteLine("GAME OVER!");
+                FbPushBuffer();
+                vTaskDelay(5000/portTICK_PERIOD_MS);
+                state = EXIT;
                 break;
 
             case SLEEP:
