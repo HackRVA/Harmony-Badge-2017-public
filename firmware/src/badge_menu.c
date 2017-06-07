@@ -25,7 +25,7 @@ struct menuStack_t {
    struct menu_t *currMenu;
 };
 
-#define MAX_MENU_DEPTH 8
+#define MAX_MENU_DEPTH 10
 static unsigned char G_menuCnt=0; // index for G_menuStack
 
 struct menuStack_t G_menuStack[MAX_MENU_DEPTH] = { {0,0} }; // track user traversing menus
@@ -418,6 +418,7 @@ extern struct menu_t backlight_m[];
 extern struct menu_t rotate_m[];
 extern struct menu_t LEDlight_m[];
 extern struct menu_t buzzer_m[];
+extern const struct menu_t sch_main_m[];
 
 struct menu_t settings_m[] = {
     {"QC", VERT_ITEM, TASK,
@@ -477,13 +478,16 @@ struct menu_t games_m[] = {
 struct menu_t main_m[] = {
     {"Arcade",       VERT_ITEM|DEFAULT_ITEM, MENU,
         {games_m}},
-    {"Gadgets",       VERT_ITEM, MENU,    {gadgets_m}},    
-           {"Screensavers", VERT_ITEM, TASK,
+    {"Gadgets",       VERT_ITEM, MENU,
+	    {gadgets_m}},    
+    {"Screensavers", VERT_ITEM, TASK,
         {screensaver_task}},
-   {"Settings",    VERT_ITEM, MENU,
+	{"Schedule", VERT_ITEM, MENU,
+        {sch_main_m}},
+    {"Settings",    VERT_ITEM, MENU,
         {settings_m}},
-   {"", VERT_ITEM|LAST_ITEM|HIDDEN_ITEM, BACK,
-       {NULL}},
+    {"", VERT_ITEM|LAST_ITEM|HIDDEN_ITEM, BACK,
+        {NULL}},
 } ;
 
 
@@ -726,6 +730,17 @@ void menu_and_manage_task(void *p_arg){
                         //setNote(129, 2048); /* d */
                         G_menuStack[G_menuCnt].currMenu = G_currMenu; /* push onto stack  */
                         G_menuStack[G_menuCnt].selectedMenu = G_selectedMenu;
+                        G_menuCnt++;
+                        if (G_menuCnt == MAX_MENU_DEPTH) G_menuCnt--; /* too deep, undo */
+                        G_currMenu = (struct menu_t *) G_selectedMenu->data.menu; /* go into this menu */
+                        //selectedMenu = G_currMenu;
+                        G_selectedMenu = NULL;
+                        break;
+						
+					case SMENU: /* Special case of MENU for schedule nav */
+                        //setNote(129, 2048); /* d */
+                        G_menuStack[G_menuCnt].currMenu = G_currMenu; /* push onto stack  */
+                        G_menuStack[G_menuCnt].selectedMenu = NULL; /* Reset Cursor */
                         G_menuCnt++;
                         if (G_menuCnt == MAX_MENU_DEPTH) G_menuCnt--; /* too deep, undo */
                         G_currMenu = (struct menu_t *) G_selectedMenu->data.menu; /* go into this menu */
