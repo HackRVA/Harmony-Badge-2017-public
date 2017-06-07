@@ -25,7 +25,7 @@ struct menuStack_t {
    struct menu_t *currMenu;
 };
 
-#define MAX_MENU_DEPTH 8
+#define MAX_MENU_DEPTH 10
 static unsigned char G_menuCnt=0; // index for G_menuStack
 
 struct menuStack_t G_menuStack[MAX_MENU_DEPTH] = { {0,0} }; // track user traversing menus
@@ -418,9 +418,9 @@ extern struct menu_t backlight_m[];
 extern struct menu_t rotate_m[];
 extern struct menu_t LEDlight_m[];
 extern struct menu_t buzzer_m[];
-struct menu_t settings_m[] = {
-    
+extern const struct menu_t sch_main_m[];
 
+struct menu_t settings_m[] = {
     {"QC", VERT_ITEM, TASK,
         {hello_world_task}},       
     
@@ -429,22 +429,12 @@ struct menu_t settings_m[] = {
         
     {"ping", VERT_ITEM, FUNCTION,
         {(struct menu_t *)ping_cb}},
-    //{"peer badgeId", VERT_ITEM, MENU,
-    //    {(struct menu_t *) peerBadgeid_m}},
-    //{"time n date", VERT_ITEM , MENU,
-    //    {(struct menu_t *) timedate_m}},
-//    {"rotate", VERT_ITEM, MENU,
-//        {(struct menu_t *) rotate_m}},
     {"backlight", VERT_ITEM, MENU,
         {(struct menu_t *) backlight_m}},
     {"led", VERT_ITEM, MENU,
         {(struct menu_t *) LEDlight_m}}, /* coerce/cast to a menu_t data pointer */
     {"buzzer", VERT_ITEM, MENU,
         {(struct menu_t *) buzzer_m}},
-//    {"slider", VERT_ITEM, MENU,
-//        {(struct menu_t *) slider_m}},
-//    {"tests", VERT_ITEM, MENU,
-//        {(struct menu_t *) tests_m}},
 #ifdef IS_ADMIN
         {"silence others", VERT_ITEM, FUNCTION,
                 {(struct menu_t *) silence_cb}},
@@ -455,29 +445,29 @@ struct menu_t settings_m[] = {
         {NULL}},
 };
 
-struct menu_t gadgets_m[] = {
-
-        
-    {"Conductor", VERT_ITEM, TASK,
-        {conductor_task}},
-    {"blinkenlite", VERT_ITEM, TASK,
-        {blinkenlights_task}},        
-    {"dice roll", VERT_ITEM, TASK,
-        {dice_roll_task}},
-
+struct menu_t gadgets_m[] = {    
+    //{"Conductor", VERT_ITEM, TASK,
+      //  {conductor_task}},
+    //{"blinkenlite", VERT_ITEM, TASK,
+      //  {blinkenlights_task}},        
+    //{"dice roll", VERT_ITEM, TASK,
+      //  {dice_roll_task}},
+    {"u draw", VERT_ITEM, TASK,
+        {udraw_task}},
     {"Back", VERT_ITEM | LAST_ITEM| DEFAULT_ITEM, BACK,
         {NULL}},
 } ;        
 
 struct menu_t games_m[] = {
 
-    {"GroundWar", VERT_ITEM, TASK,
-        {groundwar_task}},    
-    {"Badgelandia", VERT_ITEM, TASK,
-        {badgelandia_task}},
-    {"Badgey Bird", VERT_ITEM, TASK,
-        {badgey_bird_task}},
-
+    //{"GroundWar", VERT_ITEM, TASK,
+      //  {groundwar_task}},    
+    //{"Badgelandia", VERT_ITEM, TASK,
+      //  {badgelandia_task}},
+    //{"Badgey Bird", VERT_ITEM, TASK,
+      //  {badgey_bird_task}},
+    //{"Star Shooter", VERT_ITEM, TASK,
+      //  {star_shooter_task}},
     {"Back", VERT_ITEM | LAST_ITEM| DEFAULT_ITEM, BACK,
         {NULL}},
 } ;
@@ -486,19 +476,18 @@ struct menu_t games_m[] = {
 
 
 struct menu_t main_m[] = {
- 
- 
     {"Arcade",       VERT_ITEM|DEFAULT_ITEM, MENU,
         {games_m}},
-    {"Gadgets",       VERT_ITEM, MENU,    {gadgets_m}},    
-       
+    {"Gadgets",       VERT_ITEM, MENU,
+	    {gadgets_m}},    
     {"Screensavers", VERT_ITEM, TASK,
         {screensaver_task}},
-   {"Settings",    VERT_ITEM, MENU,
-        {settings_m}},        
-
-   {"", VERT_ITEM|LAST_ITEM|HIDDEN_ITEM, BACK,
-       {NULL}},
+	{"Schedule", VERT_ITEM, MENU,
+        {sch_main_m}},
+    {"Settings",    VERT_ITEM, MENU,
+        {settings_m}},
+    {"", VERT_ITEM|LAST_ITEM|HIDDEN_ITEM, BACK,
+        {NULL}},
 } ;
 
 
@@ -741,6 +730,17 @@ void menu_and_manage_task(void *p_arg){
                         //setNote(129, 2048); /* d */
                         G_menuStack[G_menuCnt].currMenu = G_currMenu; /* push onto stack  */
                         G_menuStack[G_menuCnt].selectedMenu = G_selectedMenu;
+                        G_menuCnt++;
+                        if (G_menuCnt == MAX_MENU_DEPTH) G_menuCnt--; /* too deep, undo */
+                        G_currMenu = (struct menu_t *) G_selectedMenu->data.menu; /* go into this menu */
+                        //selectedMenu = G_currMenu;
+                        G_selectedMenu = NULL;
+                        break;
+						
+					case SMENU: /* Special case of MENU for schedule nav */
+                        //setNote(129, 2048); /* d */
+                        G_menuStack[G_menuCnt].currMenu = G_currMenu; /* push onto stack  */
+                        G_menuStack[G_menuCnt].selectedMenu = NULL; /* Reset Cursor */
                         G_menuCnt++;
                         if (G_menuCnt == MAX_MENU_DEPTH) G_menuCnt--; /* too deep, undo */
                         G_currMenu = (struct menu_t *) G_selectedMenu->data.menu; /* go into this menu */

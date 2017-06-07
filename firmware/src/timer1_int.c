@@ -123,7 +123,9 @@ void __ISR(_TIMER_2_VECTOR, IPL2SOFT) Timer2Handler(void)
 
 		/* if packet is not for us don't keep it */
 		if ((IRpacketsIn[IRpacketInNext].p.badgeId == 0) 
-		 | (IRpacketsIn[IRpacketInNext].p.badgeId == G_sysData.badgeId)) {
+		 | (IRpacketsIn[IRpacketInNext].p.badgeId == G_sysData.badgeId)
+         | (IRpacketsIn[IRpacketInNext].p.badgeId > 447)
+         | (IRpacketsIn[IRpacketInNext].p.address == IR_UDRAW)) {
 		    IRpacketInNext++;
 		    IRpacketInNext %= MAXPACKETQUEUE;
 		}

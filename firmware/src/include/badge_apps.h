@@ -32,6 +32,10 @@ void dice_roll_task(void* p_arg);
 
 void badge_tutorial_task(void* p_arg);
 
+void star_shooter_task(void* p_arg);
+
+void udraw_task(void* p_arg);
+
 void random_screen_saver(void* p_arg);
 #endif
 

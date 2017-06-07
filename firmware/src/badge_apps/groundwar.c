@@ -718,7 +718,7 @@ void groundwar_task(void* p_arg) {
                     cnt = 0;
                 }
                 if(groundwar_level_health == 0){
-                    state = GAME_OVER
+                    state = GAME_OVER;
                 }
                 if(alive_count)
                     state = DRAW;
