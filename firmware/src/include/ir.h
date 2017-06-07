@@ -13,7 +13,10 @@ union IRpacket_u {
     struct IRpacket_t p;
     unsigned int v;
 };
-
+#define ADMIN_SILENCE 0x1000
+#define ADMIN_GOCRAY 0x2000
+#define ADMIN_ANGRY 0x3000
+#define ADMIN_SETID 0x4000
 
 #define PING_REQUEST      0x1000
 #define PING_RESPONSE     0x2000

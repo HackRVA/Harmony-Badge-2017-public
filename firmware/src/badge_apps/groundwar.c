@@ -88,6 +88,8 @@ enum groundwar_defense_type{
     UNUSED_DEFENSE
 };
 
+
+short defense_cost[] = {10, 35, 55};
 unsigned char defense_damage[] = {
         1,
         3,
@@ -95,16 +97,11 @@ unsigned char defense_damage[] = {
 };
 
 unsigned char defense_range[] = {
-        6,
-        10,
-        20
+        23,
+        30,
+        60
 };
 
-unsigned char defense_cooldown[] = {
-        2,
-        5,
-        13
-};
 
 #define MAX_DEFENSE_STRUCTURES 30
 #define DEFENSE_NOT_TARGETING 255
@@ -198,8 +195,8 @@ void init_defenses(struct groundwar_defense_t defenses[MAX_DEFENSE_STRUCTURES]){
     unsigned char i = 0, type_idx=0, create_count = 0;
     for(i=0; i < MAX_DEFENSE_STRUCTURES; i++){
         defenses[i].type = UNUSED_DEFENSE;
-        defenses[i].x = 60;
-        defenses[i].y = 100;
+        defenses[i].x = 40;
+        defenses[i].y = 50;
         defenses[i].projectile.targeted_minion = DEFENSE_NOT_TARGETING;
         defenses[i].projectile.x = 40;
         defenses[i].projectile.y = 40;
@@ -261,7 +258,7 @@ unsigned char groundwar_step(struct groundwar_minion_t minions[NUM_MINIONS],
     }
 
 #define DEFENSES_TARGET_IDX defenses[i].projectile.targeted_minion
-    for(i=0; i < MAX_DEFENSE_STRUCTURES; i++){
+    for(i=0; i < MAX_DEFENSE_STRUCTURES && i < selected_defense_idx; i++){
 
         if(defenses[i].type == UNUSED_DEFENSE)
             continue;
@@ -491,6 +488,16 @@ void groundwar_draw(struct groundwar_minion_t minions[NUM_MINIONS],
 //    FbCharacter('U');
 //    FbMove(121, 120);
 //    FbCharacter('T');
+    FbMove(1, 110);
+    if(defense_cost[defenses[selected_defense_idx].type] <= groundwar_points){
+        FbColor(WHITE);
+    } else
+        FbColor(YELLOW);
+    FbWriteLine("Cost:");
+
+    badge_itoa((int)defense_cost[defenses[selected_defense_idx].type], pt_str);
+    FbWriteLine(pt_str);
+
     groundwar_draw_defense(defenses[selected_defense_idx].x,
                            defenses[selected_defense_idx].y,
                            defenses[selected_defense_idx].type, 1);
@@ -503,7 +510,6 @@ void groundwar_io(struct groundwar_defense_t defenses[MAX_DEFENSE_STRUCTURES],
                   struct groundwar_level_t lvl){
 
     unsigned char i=0, is_colliding = 0;
-    short defense_cost[] = {10, 35, 55};
 #define selected_defense defenses[selected_defense_idx]
     // main button brings up menu and is used to select items in the menu?
     if(game_state != MENUING){
@@ -618,7 +624,7 @@ void groundwar_task(void* p_arg) {
                 selected_defense_idx = 0;
                 if(current_level == 0){
                     groundwar_level_health = 100;
-                    groundwar_points = 10;
+                    groundwar_points = 15;
                     SET_LVL_WAVE_DIST(0, 3, 0, 0, 0);
                     SET_LVL_WAVE_DIST(1, 7, 0, 0, 0);
                     SET_LVL_WAVE_DIST(2, 10, 1, 0, 0);
@@ -646,7 +652,7 @@ void groundwar_task(void* p_arg) {
                 else if(current_level == 3){
                     groundwar_level_health = 100;
                     groundwar_points = 30;
-                    SET_LVL_WAVE_DIST(0, 0, 4, 1, 0);
+                    SET_LVL_WAVE_DIST(0, 10, 4, 1, 0);
                     SET_LVL_WAVE_DIST(1, 10, 4, 2, 0);
                     SET_LVL_WAVE_DIST(2, 12, 5, 4, 1);
                     SET_LVL_WAVE_DIST(3, 15, 5, 5, 1);
@@ -662,11 +668,11 @@ void groundwar_task(void* p_arg) {
                     SET_LVL_WAVE_DIST(4, 10, 13, 5, 5);
                 }                
                 // TEST BUILD
-                enter_build_mode();
-                defenses[0].type = LARGE;
-                defenses[0].x = 10;
-                defenses[0].y = 50;
-                selected_defense_idx = 1;
+                //enter_build_mode();
+//                defenses[0].type = LARGE;
+//                defenses[0].x = 10;
+//                defenses[0].y = 50;
+//                selected_defense_idx = 1;
 
                 //break;
             case INIT_WAVE:
@@ -718,9 +724,9 @@ void groundwar_task(void* p_arg) {
                     cnt = 0;
                 }
                 if(groundwar_level_health == 0){
-                    state = GAME_OVER
+                    state = GAME_OVER;
                 }
-                if(alive_count)
+                else if(alive_count)
                     state = DRAW;
                 else
                     state = NEXT_WAVE;
@@ -737,7 +743,7 @@ void groundwar_task(void* p_arg) {
                 }
                 break;
             case GAME_OVER:
-                FbMove(60, 50);
+                FbMove(10, 60);
                 FbColor(RED);
                 FbWriteLine("GAME OVER!");
                 FbPushBuffer();
