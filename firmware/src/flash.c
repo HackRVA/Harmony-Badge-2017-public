@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "flash.h"
 
-const unsigned short flashedBadgeId = 0x2; /* MAGIC value for script. It will be replaced by awk script in final flashing */
+const unsigned short flashedBadgeId = 0xefbe; /* MAGIC value for script. It will be replaced by awk script in final flashing */
 
 /*
 
