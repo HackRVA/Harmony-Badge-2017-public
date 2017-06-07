@@ -536,6 +536,8 @@ enum badge_idle_state{
 };
 
 void menu_and_manage_task(void *p_arg){
+    extern unsigned char stop_screensaver;
+    stop_screensaver = 0;
     unsigned char idle_state = AWAKE;
     unsigned int sleep_timestamp = 0, screensaver_timestamp=0;
     TaskHandle_t xHandle = NULL;
@@ -557,7 +559,6 @@ void menu_and_manage_task(void *p_arg){
 
     
     xReturned = xTaskCreate((TaskFunction_t) LAUNCH_APP,
-
                             "exec_app",
                             650u, //may want to increase?
                             NULL,
@@ -596,6 +597,7 @@ void menu_and_manage_task(void *p_arg){
                 break;
             case ENTER_SLEEP:
                 backlight(0);
+                
                 sleep_timestamp = timestamp;
                 idle_state = LOW_POWER_SLEEP;
                 break;
@@ -610,6 +612,7 @@ void menu_and_manage_task(void *p_arg){
             case SCREENSAVER:
                 // Turn screen back on so we can see the screensaver!
                 backlight(G_sysData.backlight);
+                stop_screensaver = 0;
                 xReturned = xTaskCreate((TaskFunction_t) random_screen_saver,
                                         "exec_app",
                                         650u, //may want to increase?
@@ -629,8 +632,6 @@ void menu_and_manage_task(void *p_arg){
                         vTaskSuspend(xHandle);
                         vTaskDelete(xHandle);
                         xHandle = NULL;
-                        vTaskDelay(15 / portTICK_PERIOD_MS);
-                        FbClear();
                         // RETURN to low power
                         idle_state = ENTER_SLEEP;
                     }
@@ -638,20 +639,36 @@ void menu_and_manage_task(void *p_arg){
                 // Check if the user has provided any IO
                 else if(DOWN_BTN_AND_CONSUME || UP_BTN_AND_CONSUME 
                         || LEFT_BTN_AND_CONSUME || RIGHT_BTN_AND_CONSUME){
-                    vTaskSuspend(xHandle); 
-                    vTaskDelete(xHandle);
-                    xHandle = NULL;
-                    vTaskDelay(15 / portTICK_PERIOD_MS);
-                    FbClear();                    
+
+                    
+                    //vTaskDelay(15 / portTICK_PERIOD_MS);
+                    stop_screensaver = 1;
+                    // screensaver must end
+                    if (xTaskNotifyWait(0, 1u, &ulNotifiedValue, portMAX_DELAY)){
+                        if(ulNotifiedValue & 0x01){
+                            vTaskSuspend(xHandle);
+                            vTaskDelete(xHandle);
+                            xHandle = NULL;
+                            // RETURN to low power
+                            idle_state = ENTER_SLEEP;
+                        }
+                    }                    
+                    
                     idle_state = WAKEUP;
                 }
                 // Screen saver has been running long enough...KILL!
                 else if((timestamp - screensaver_timestamp) > TIME_BETWEEN_SCREENSAVER){
-                    vTaskSuspend(xHandle);
-                    vTaskDelete(xHandle);
-                    xHandle = NULL;
-                    vTaskDelay(15 / portTICK_PERIOD_MS);
-                    FbClear();                     
+                    stop_screensaver = 1;
+                    // screensaver must end
+                    if (xTaskNotifyWait(0, 1u, &ulNotifiedValue, portMAX_DELAY)){
+                        if(ulNotifiedValue & 0x01){
+                            vTaskSuspend(xHandle);
+                            vTaskDelete(xHandle);
+                            xHandle = NULL;
+                            // RETURN to low power
+                            idle_state = ENTER_SLEEP;
+                        }
+                    }       
 
                     // RETURN to low power
                     idle_state = ENTER_SLEEP;
@@ -666,6 +683,7 @@ void menu_and_manage_task(void *p_arg){
                 prev_selected_menu = G_selectedMenu;
                 FbSwapBuffers();                
                 setNote(90, 512);
+                
                 idle_state = AWAKE;
                 break;
           }

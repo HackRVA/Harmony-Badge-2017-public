@@ -11,12 +11,14 @@
 #include "utils.h"
 #include "assetList.h"
 
+unsigned char stop_screensaver = 0;
 void random_dots(void* p_arg){
     unsigned int cnt = 0, x, y;
     FbBackgroundColor(MAGENTA);
     FbClear();
 
-    for(;;)
+    //for(;;)
+    while(!stop_screensaver)
     {
         cnt++;
         if(cnt < 50)
@@ -60,7 +62,8 @@ void spirals_task(void* p_arg){
     FbBackgroundColor(GREY1);
     FbClear();    
     FbColor(GREEN);
-    for(;;)
+    //for(;;)
+    while(!stop_screensaver)
     {
         for(rad_scale=0.001; rad_scale < 0.05; rad_scale += 0.0001)
         {
@@ -82,7 +85,6 @@ void spirals_task(void* p_arg){
             if(BUTTON_PRESSED_AND_CONSUME)
                 return;            
         }
-
     }
 }
 
@@ -181,7 +183,8 @@ void game_of_life_task(void* p_arg)
 
     FbClear();
     
-    for(;;)
+    //for(;;)
+    while(!stop_screensaver)
     {
         if(redraw){
             FbColor(YELLOW);
@@ -236,7 +239,8 @@ void about_the_bird(void* p_arg){
     FbBackgroundColor(CYAN);
     FbClear();
     //while(!BUTTON_PRESSED_AND_CONSUME){
-    for(;;){
+    //for(;;)
+    while(!stop_screensaver){
         x = quick_rand(cnt++)%110;
         y = quick_rand(cnt++)%110;
         FbMove(x, y);
