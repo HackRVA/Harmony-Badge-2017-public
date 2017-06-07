@@ -616,6 +616,7 @@ void menu_and_manage_task(void *p_arg){
                                         NULL,
                                         1u,
                                         &xHandle);
+
                 screensaver_timestamp = timestamp;
 
                 idle_state = WAIT_FOR_SCREENSAVER;
@@ -628,7 +629,8 @@ void menu_and_manage_task(void *p_arg){
                         vTaskSuspend(xHandle);
                         vTaskDelete(xHandle);
                         xHandle = NULL;
-                        
+                        vTaskDelay(15 / portTICK_PERIOD_MS);
+                        FbClear();
                         // RETURN to low power
                         idle_state = ENTER_SLEEP;
                     }
@@ -639,7 +641,8 @@ void menu_and_manage_task(void *p_arg){
                     vTaskSuspend(xHandle); 
                     vTaskDelete(xHandle);
                     xHandle = NULL;
-                    
+                    vTaskDelay(15 / portTICK_PERIOD_MS);
+                    FbClear();                    
                     idle_state = WAKEUP;
                 }
                 // Screen saver has been running long enough...KILL!
@@ -647,6 +650,8 @@ void menu_and_manage_task(void *p_arg){
                     vTaskSuspend(xHandle);
                     vTaskDelete(xHandle);
                     xHandle = NULL;
+                    vTaskDelay(15 / portTICK_PERIOD_MS);
+                    FbClear();                     
 
                     // RETURN to low power
                     idle_state = ENTER_SLEEP;
