@@ -491,23 +491,23 @@ struct menu_t main_m[] = {
         {conductor_task}},
     {"blinkenlite", VERT_ITEM, TASK,
         {blinkenlights_task}},        
-//    {"dice roll", VERT_ITEM, TASK,
-//        {dice_roll_task}},        
+    {"dice roll", VERT_ITEM, TASK,
+        {dice_roll_task}},        
 
 
     {"Schedule", VERT_ITEM|DEFAULT_ITEM, MENU,
         {sch_main_m}},
-    {"tutorial", VERT_ITEM, TASK,
-        {(struct menu_t *)badge_tutorial_task}},        
+//    {"tutorial", VERT_ITEM, TASK,
+//        {(struct menu_t *)badge_tutorial_task}},        
     {"backlight", VERT_ITEM, MENU,
         {(struct menu_t *) backlight_m}},
 //    {"led", VERT_ITEM, MENU,
 //        {(struct menu_t *) LEDlight_m}}, /* coerce/cast to a menu_t data pointer */
-    {"buzzer", VERT_ITEM, MENU,
+    {"buzzer", VERT_ITEM|LAST_ITEM, MENU,
         {(struct menu_t *) buzzer_m}},        
 
-    {"", VERT_ITEM|LAST_ITEM|HIDDEN_ITEM, BACK,
-        {NULL}},
+//    {"", VERT_ITEM|LAST_ITEM|HIDDEN_ITEM, BACK,
+//        {NULL}},
 };
 
 
@@ -515,7 +515,7 @@ struct menu_t main_m[] = {
 #define TIME_BEFORE_SLEEP 30000
 //#define LAUNCH_APP groundwar_task
 #define LAUNCH_APP boot_splash_task
-#define LAUNCH_APP badge_tutorial_task
+//#define LAUNCH_APP badge_tutorial_task
 //#define RUN_TUTORIAL 
 //#define QC_FIRST
 //#define DO_BOOT_SPLASH
@@ -558,7 +558,7 @@ void menu_and_manage_task(void *p_arg){
     
     xReturned = xTaskCreate((TaskFunction_t) LAUNCH_APP,
                             "exec_app",
-                            450u, //may want to increase?
+                            250u, //may want to increase?
                             NULL,
                             1u,
                             &xHandle);
@@ -578,7 +578,7 @@ void menu_and_manage_task(void *p_arg){
     // Force tutorial
     xReturned = xTaskCreate((TaskFunction_t) badge_tutorial_task,
                             "exec_app",
-                            450u, //may want to increase?
+                            250u, //may want to increase?
                             NULL,
                             1u,
                             &xHandle);    
