@@ -29,7 +29,7 @@ enum type {
     BACK, /**< return to previous menu */
     MENU, /**< sub menu type */
     FUNCTION, /**< c function */
-    TASK // FreeRTOS Task
+    TASK, // FreeRTOS Task
 	SMENU // Special case for schedule movement
 };
 
