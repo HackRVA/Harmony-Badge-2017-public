@@ -65,7 +65,7 @@ void spirals_task(void* p_arg){
     //for(;;)
     while(!stop_screensaver)
     {
-        for(rad_scale=0.001; rad_scale < 0.05; rad_scale += 0.0001)
+        for(rad_scale=0.001; rad_scale < 0.05 && !stop_screensaver; rad_scale += 0.0001)
         {
             for(i=0; i<NUM_POLYS; i++){
 
