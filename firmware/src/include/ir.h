@@ -90,6 +90,7 @@ enum {
 	         handled by apps
 	   ================================
 	*/
+    IR_UDRAW,
 	IR_APP0,
 	IR_APP1,
 	IR_APP2,
@@ -127,6 +128,7 @@ void ir_ping(struct IRpacket_t p);
 void ir_liveaudio(struct IRpacket_t p);
 void ir_livetext(struct IRpacket_t p);
 void ir_liveled(struct IRpacket_t p);
+void ir_udraw(struct IRpacket_t p);
 void ir_app0(struct IRpacket_t p);
 void ir_app1(struct IRpacket_t p);
 void ir_app2(struct IRpacket_t p);
