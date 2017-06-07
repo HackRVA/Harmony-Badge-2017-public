@@ -86,7 +86,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // *****************************************************************************
 // *****************************************************************************
 
-#define APP_READ_BUFFER_SIZE 512
+#define APP_READ_BUFFER_SIZE 256
 
 #define APP_WRITE_BUFFER_SIZE 8
 

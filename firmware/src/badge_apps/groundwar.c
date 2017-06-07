@@ -61,11 +61,11 @@ enum groundwar_minion_type{
     UNUSED_MINION
 };
 
-unsigned char minion_speeds[] = {
+const unsigned char minion_speeds[] = {
         2, 4, 7, 15
 };
 
-unsigned char minion_hp[] = {
+const unsigned char minion_hp[] = {
         2,
         12,
         64,
@@ -90,13 +90,13 @@ enum groundwar_defense_type{
 
 
 short defense_cost[] = {10, 35, 55};
-unsigned char defense_damage[] = {
+const unsigned char defense_damage[] = {
         1,
         3,
         7
 };
 
-unsigned char defense_range[] = {
+const unsigned char defense_range[] = {
         23,
         30,
         60
