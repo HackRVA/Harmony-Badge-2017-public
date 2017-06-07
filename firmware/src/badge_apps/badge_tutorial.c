@@ -170,7 +170,8 @@ void badge_tutorial_task(void* p_arg)
                     FbWriteLine("B-Button");           
                     FbMove(15, 80);
                     FbWriteLine("to continue");   
-                    if(BUTTON_PRESSED_AND_CONSUME){
+                    if(BUTTON_PRESSED_AND_CONSUME)
+                    {
                         state=SLIDER_COMPLETE;
                     }
                 }
@@ -180,7 +181,8 @@ void badge_tutorial_task(void* p_arg)
                 FbSwapBuffers();               
                 break;
             case SLIDER_COMPLETE:
-                if(BUTTON_PRESSED_AND_CONSUME){
+                //if(BUTTON_PRESSED_AND_CONSUME)
+                {
                     FbColor(GREEN);
                     FbMove(3, 30);
                     FbWriteLine("Most impressive!");                  
