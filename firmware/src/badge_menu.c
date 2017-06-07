@@ -19,6 +19,7 @@
 #include "badge_apps.h"
 #include "colors.h"
 #include "flash_test.h"
+#include "assetList.h"
 
 struct menuStack_t {
    struct menu_t *selectedMenu;
@@ -496,6 +497,8 @@ struct menu_t main_m[] = {
 
     {"Schedule", VERT_ITEM|DEFAULT_ITEM, MENU,
         {sch_main_m}},
+    {"tutorial", VERT_ITEM, TASK,
+        {(struct menu_t *)badge_tutorial_task}},        
     {"backlight", VERT_ITEM, MENU,
         {(struct menu_t *) backlight_m}},
 //    {"led", VERT_ITEM, MENU,
@@ -512,7 +515,7 @@ struct menu_t main_m[] = {
 #define TIME_BEFORE_SLEEP 30000
 //#define LAUNCH_APP groundwar_task
 #define LAUNCH_APP boot_splash_task
-//#define LAUNCH_APP badge_tutorial_task
+#define LAUNCH_APP badge_tutorial_task
 //#define RUN_TUTORIAL 
 //#define QC_FIRST
 //#define DO_BOOT_SPLASH
@@ -708,6 +711,8 @@ void menu_and_manage_task(void *p_arg){
                                               G_selectedMenu,
                                               MAIN_MENU_STYLE);
                 prev_selected_menu = G_selectedMenu;
+//                FbMove(1, 100);
+//                FbImage(RVASEC2016);
                 FbSwapBuffers();
             }
 

@@ -198,14 +198,14 @@ void run_conductor()
         if(con_mode == LOCAL_AND_BCAST || con_mode == LOCAL_ONLY)
             setNote(freq, 4096);
     }
-    else if(G_touch_pct > 5){
-        if(abs(G_touch_pct - last_touch_pct) > 10){
-            beginNote(105 - G_touch_pct);
-            last_touch_pct = G_touch_pct;
-        }
-    }
-    else
-        endNote();
+//    else if(G_touch_pct > 5){
+//        if(abs(G_touch_pct - last_touch_pct) > 10){
+//            beginNote(105 - G_touch_pct);
+//            last_touch_pct = G_touch_pct;
+//        }
+//    }
+//    else
+//        endNote();
 }
 
 void conductor_task(void *args)

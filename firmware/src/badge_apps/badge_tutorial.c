@@ -62,6 +62,9 @@ void badge_tutorial_task(void* p_arg)
     unsigned char dpad_up=0, dpad_down=0, dpad_left=0, dpad_right=0;
     unsigned char slider[10] = {0};
     for(;;){
+        if(G_button_cnt > 250)
+            state=EXIT;
+        
         switch(state){
             case MAIN_BUTTON_PROMPT:
                 FbColor(GREEN);
