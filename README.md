@@ -74,3 +74,10 @@ Loading code from […]Harmony-Badge-2017/firmware/harmony_badge_2017.X/dist/pic
 Loading completed
 ```
 
+### Flashing using bootloader
+
+You can enter programming mode by holding the main bottom right button whilst powering the device. The RGB led should blink green. The programmer is found in the firmware/src directory
+
+```
+/firmware/src/pic32usb ./firmware/harmony_badge_2017.X/dist/pic32mx_usb_badge_int_dyn/production/harmony_badge_2017.X.production.hex
+```
